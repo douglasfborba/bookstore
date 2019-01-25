@@ -5,9 +5,9 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-	<changeSet author="douglas.borba" id="25012019161733" runAlways="true">
+	<changeSet author="douglas.borba" id="25012019161739">
 		<createTable tableName="dis_produto">
-			<column name="id" type="int" defaultValueComputed="dis_prod_seq.nextval">
+			<column name="id" type="int">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="codigo" type="varchar(10)">
@@ -23,7 +23,7 @@
 		</createTable>
 	</changeSet>
 
-	<changeSet author="douglas.borba" id="25012019164100" runAlways="true">
+	<changeSet author="douglas.borba" id="25012019164103" runAlways="true">
 		<insert tableName="dis_produto" schemaName="sdbanco">
 			<column name="codigo" value="LIV0112457" />
 			<column name="descricao" value="LIVRO O SENHOR DOS ANEIS" />
@@ -38,8 +38,31 @@
 		</insert>
 	</changeSet>
 
-	<changeSet author="douglas.borba" id="25012019164325" runAlways="true">
-		<createSequence sequenceName="dis_prod_seq" ordered="true" cycle="false" startValue="1" maxValue="100" />
+	<changeSet author="douglas.borba" id="25012019164327">
+		<createSequence sequenceName="dis_prod_seq"	ordered="true" cycle="false" startValue="1" maxValue="100" />
 	</changeSet>
-	
+
+	<changeSet author="douglas.borba" id="25012019174921">
+		<sql endDelimiter="/">
+			CREATE OR REPLACE TRIGGER dis_prod_nextid BEFORE
+			    INSERT ON dis_produto
+			    REFERENCING
+			            OLD AS old
+			            NEW AS new
+			    FOR EACH ROW
+			DECLARE
+			    v_id   NUMBER(38, 0);
+			BEGIN
+			    IF :new.id IS NULL THEN
+			        SELECT
+			            dis_prod_seq.NEXTVAL
+			        INTO v_id
+			        FROM
+			            dual;			
+			    END IF;	
+	    		:new.id := v_id;
+			END dis_prod_nextid;
+		</sql>
+	</changeSet>
+
 </databaseChangeLog>
