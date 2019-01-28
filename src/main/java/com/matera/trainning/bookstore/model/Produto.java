@@ -5,20 +5,25 @@ import static javax.persistence.GenerationType.SEQUENCE;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 @Entity
 @Table(name = "dis_produto")
-public class Product {
+@JsonIgnoreProperties(value = { "id" })
+public class Produto {
 
 	@Id
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
@@ -26,19 +31,23 @@ public class Product {
 	private Long id;
 
 	@EqualsAndHashCode.Exclude
-	@Column(name = "codigo")
-	private String code;
+	private String codigo;
 
 	@EqualsAndHashCode.Exclude
-	@Column(name = "descricao")
-	private String description;
+	private String descricao;
 
 	@EqualsAndHashCode.Exclude
-	@Column(name = "preco")
-	private BigDecimal price;
+	private BigDecimal preco;
 
 	@EqualsAndHashCode.Exclude
-	@Column(name = "data_cadastro")
-	private LocalDate creationDate;
+	@JsonFormat(pattern = "dd-MM-yyyy")
+	private LocalDate dataCadastro;
+
+	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
+		this.codigo = codigo;
+		this.descricao = descricao;
+		this.preco = preco;
+		this.dataCadastro = dataCadastro;
+	}
 
 }
