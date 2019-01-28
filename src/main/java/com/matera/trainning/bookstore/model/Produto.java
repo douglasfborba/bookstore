@@ -10,6 +10,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,20 +30,26 @@ public class Produto {
 
 	@Id
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
-	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq")
+	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq", allocationSize = 1)
 	private Long id;
 
 	@EqualsAndHashCode.Exclude
+	@NotNull(message = "Campo código não pode ser nulo")
+	@Size(min = 1, max = 10, message = "Campo código deve possuir entre 1 e 10 caracteres")
 	private String codigo;
 
 	@EqualsAndHashCode.Exclude
+	@NotEmpty(message = "Campo descrição não pode ser vazio")
+	@Size(min = 3, max = 50, message = "Campo código deve possuir entre 3 e 50 caracteres")
 	private String descricao;
 
 	@EqualsAndHashCode.Exclude
+	@NotNull(message = "Campo preço não pode ser nulo")
 	private BigDecimal preco;
 
 	@EqualsAndHashCode.Exclude
 	@JsonFormat(pattern = "dd-MM-yyyy")
+	@NotNull(message = "Campo data cadastro não pode ser nulo")
 	private LocalDate dataCadastro;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {

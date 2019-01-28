@@ -24,8 +24,9 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="25012019164327-1">
-		<createSequence sequenceName="dis_prod_seq" ordered="true" cycle="false" 
-			minValue="1" maxValue="100" startValue="1" incrementBy="1" />
+		<createSequence sequenceName="dis_prod_seq" 
+			ordered="true" cycle="false" minValue="1" maxValue="100" 
+			startValue="1" incrementBy="1" />
 	</changeSet>
 
 	<changeSet author="douglas.borba" id="25012019174921-1">
