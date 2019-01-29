@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
+import com.matera.trainning.bookstore.service.exceptions.ProdutoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.ProdutoNotFoundException;
 
 @Service
@@ -20,14 +21,20 @@ public class ProdutoService {
 		return repository.findAll();
 	}
 
-	public Produto insert(Produto produto) {
-		if (produto.getDataCadastro() == null)
-			produto.setDataCadastro(LocalDate.now());
+	public Produto insert(Produto produto) throws ProdutoAlreadyExistsException {
+		Produto produtoSalvo = repository.findByCodigo(produto.getCodigo());
 
-		return repository.save(produto);
+		if (produtoSalvo == null) {
+			if (produto.getDataCadastro() == null)
+				produto.setDataCadastro(LocalDate.now());
+			
+			return repository.save(produto);
+		}
+		
+		throw new ProdutoAlreadyExistsException("Produto já existente");
 	}
 
-	public Produto updateByCodigo(String codigo, Produto produto) throws ProdutoNotFoundException {
+	public void updateByCodigo(String codigo, Produto produto) throws ProdutoNotFoundException {
 		Produto produtoSalvo = repository.findByCodigo(codigo);
 
 		if (produtoSalvo == null)
@@ -38,7 +45,7 @@ public class ProdutoService {
 		produtoSalvo.setPreco(produto.getPreco());
 		produtoSalvo.setDataCadastro(produto.getDataCadastro());
 
-		return repository.save(produtoSalvo);
+		repository.save(produtoSalvo);
 	}
 
 	public void deleteByCodigo(String codigo) throws ProdutoNotFoundException {

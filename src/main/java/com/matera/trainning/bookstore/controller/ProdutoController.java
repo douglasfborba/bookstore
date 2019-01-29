@@ -1,5 +1,6 @@
 package com.matera.trainning.bookstore.controller;
 
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
@@ -26,6 +27,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.service.ProdutoService;
+import com.matera.trainning.bookstore.service.exceptions.ProdutoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.ProdutoNotFoundException;
 
 @RestController
@@ -37,31 +39,31 @@ public class ProdutoController {
 
 	@PostMapping
 	public ResponseEntity<Produto> insert(@Valid @RequestBody Produto produto, HttpServletResponse response) {
-		Produto produtoSalvo = service.insert(produto);
-
-		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
-				.buildAndExpand(produtoSalvo.getCodigo()).toUri();
-
-		return ResponseEntity.created(uri).body(produtoSalvo);
-	}
-
-	@PutMapping("/{codigo}")
-	public ResponseEntity<Produto> updateByCodigo(@Valid @PathVariable String codigo, @RequestBody Produto produto, HttpServletResponse response) {
 		Produto produtoSalvo = null;
 		try {
-			produtoSalvo = service.updateByCodigo(codigo, produto);
-
+			produtoSalvo = service.insert(produto);
+			
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
 					.buildAndExpand(produtoSalvo.getCodigo()).toUri();
 
 			return ResponseEntity.created(uri).body(produtoSalvo);
+		} catch (ProdutoAlreadyExistsException ex) {
+			throw new ResponseStatusException(CONFLICT, ex.getMessage(), ex);
+		}
+	}
+
+	@PutMapping("/{codigo}")
+	@ResponseStatus(code = NO_CONTENT)
+	public void updateByCodigo(@PathVariable String codigo, @Valid @RequestBody Produto produto, HttpServletResponse response) {
+		try {
+			service.updateByCodigo(codigo, produto);
 		} catch (ProdutoNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
 	}
 
 	@DeleteMapping("/{codigo}")
-	@ResponseStatus(NO_CONTENT)
+	@ResponseStatus(code = NO_CONTENT)
 	public void deleteByCodigo(@PathVariable String codigo) {
 		try {
 			service.deleteByCodigo(codigo);
