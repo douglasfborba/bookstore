@@ -49,7 +49,6 @@ public class Produto {
 
 	@EqualsAndHashCode.Exclude
 	@JsonFormat(pattern = "dd-MM-yyyy")
-	@NotNull(message = "Campo data cadastro não pode ser nulo")
 	private LocalDate dataCadastro;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
