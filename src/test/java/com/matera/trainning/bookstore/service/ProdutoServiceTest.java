@@ -40,7 +40,6 @@ public class ProdutoServiceTest {
 	@Test
 	public void tentaInserirProdutoNulo() {
 		Produto produto = null;
-		service.insert(livroTheHobbit);
 	}
 	
 //	@Test

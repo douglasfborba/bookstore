@@ -32,13 +32,17 @@ public class ProdutoRepositoryTest {
 
 	@Test
 	public void deleteByCodigo() {
-		assertThat(repository.findAll()).isEmpty();
-
 		repository.save(livroTheHobbit);
-		assertThat(repository.findAll()).contains(livroTheHobbit).hasSize(1);
+		assertThat(repository.findByCodigo(livroTheHobbit.getCodigo())).isNotNull().isEqualTo(livroTheHobbit);
+		
+		repository.deleteByCodigo(livroTheHobbit.getCodigo());
+		assertThat(repository.findByCodigo(livroTheHobbit.getCodigo())).isNull();
 
 		repository.save(livroIt);
-		assertThat(repository.findAll()).contains(livroTheHobbit, livroIt).hasSize(2);
+		assertThat(repository.findByCodigo(livroIt.getCodigo())).isNotNull().isEqualTo(livroIt);
+		
+		repository.deleteByCodigo(livroIt.getCodigo());
+		assertThat(repository.findByCodigo(livroIt.getCodigo())).isNull();
 	}
 
 	@Test
