@@ -34,7 +34,7 @@ public class ProdutoService {
 		throw new ProdutoAlreadyExistsException("Produto já existente");
 	}
 
-	public void updateByCodigo(String codigo, Produto produto) throws ProdutoNotFoundException {
+	public Produto updateByCodigo(String codigo, Produto produto) throws ProdutoNotFoundException {
 		Produto produtoSalvo = repository.findByCodigo(codigo);
 
 		if (produtoSalvo == null)
@@ -45,16 +45,18 @@ public class ProdutoService {
 		produtoSalvo.setPreco(produto.getPreco());
 		produtoSalvo.setDataCadastro(produto.getDataCadastro());
 
-		repository.save(produtoSalvo);
+		return repository.save(produtoSalvo);
 	}
 
-	public void deleteByCodigo(String codigo) throws ProdutoNotFoundException {
+	public Produto deleteByCodigo(String codigo) throws ProdutoNotFoundException {
 		Produto produto = repository.findByCodigo(codigo);
 
 		if (produto == null)
 			throw new ProdutoNotFoundException("Produto inexistente");
 
 		repository.deleteByCodigo(codigo);
+		
+		return produto;
 	}
 
 	public Produto findByCodigo(String codigo) throws ProdutoNotFoundException {
