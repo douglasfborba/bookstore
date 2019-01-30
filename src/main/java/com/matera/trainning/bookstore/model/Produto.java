@@ -2,7 +2,6 @@ package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -30,10 +29,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "dis_produto")
 @JsonIgnoreProperties(value = { "id" })
-public class Produto implements Serializable {
-
-	private static final long serialVersionUID = 6142470540449772044L;
-
+public class Produto {
+	
 	@Id
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
 	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq", allocationSize = 1)

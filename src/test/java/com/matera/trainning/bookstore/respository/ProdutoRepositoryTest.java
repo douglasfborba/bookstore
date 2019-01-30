@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -20,7 +21,10 @@ import com.matera.trainning.bookstore.model.Produto;
 @DataJpaTest
 @ActiveProfiles("test")
 public class ProdutoRepositoryTest {
-
+	
+	@Autowired
+	private TestEntityManager entityManager;
+	
 	@Autowired
 	private ProdutoRepository repository;
 
@@ -34,48 +38,60 @@ public class ProdutoRepositoryTest {
 	}
 
 	@Test
-	public void naoDeveListarProdutosEmBancoVazio() {
-		List<Produto> produtos = repository.findAll();
-		assertThat(produtos).isEmpty();
-	}
-
-	@Test
-	public void deveListarTodosOsProdutosNoBanco() {
-		repository.save(livroTheHobbit);
-		repository.save(livroIt);
-
+	public void listaProdutosEmBancoPopulado() {
+		entityManager.persist(livroTheHobbit);
+		entityManager.persist(livroIt);
+	
 		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
-
+	
 	@Test
-	public void deveSalvarProduto() {
+	public void listaProdutosEmBancoVazio() {
 		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).isEmpty();
+	}
+	
+	@Test
+	public void buscaProdutoPeloCodigo() {
+		entityManager.persist(livroTheHobbit);
 
+		Produto produto = repository.findByCodigo("LIVRO23040");
+		assertThat(produto).isNotNull().isEqualTo(livroTheHobbit);
+	}
+	
+	@Test
+	public void buscaProdutoInexistentePeloCodigo() {
+		Produto produto = repository.findByCodigo("LIVRO23040");
+		assertThat(produto).isNull();
+	}
+	
+	@Test
+	public void buscaProdutoPelaDescricao() {
+		entityManager.persist(livroTheHobbit);
+		entityManager.persist(livroIt);
+
+		List<Produto> produtos = repository.findByDescricao("LiVrO");
+		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
+	}
+	
+	@Test
+	public void buscaProdutoInexistentePelaDescricao() {
+		List<Produto> produtos = repository.findByDescricao("LiVrO");
+		assertThat(produtos).isEmpty();
+	}
+
+	@Test
+	public void persisteProduto() {
 		repository.save(livroTheHobbit);
 
-		produtos = repository.findAll();
+		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).hasSize(1).contains(livroTheHobbit);
 	}
 
 	@Test
-	public void naoDeveBuscarProdutoPeloCodigoEmBancoVazio() {
-		Produto produto = repository.findByCodigo(livroTheHobbit.getCodigo());
-		assertThat(produto).isNull();
-	}
-
-	@Test
-	public void deveBuscarProdutoPeloCodigo() {
-		repository.save(livroTheHobbit);
-
-		Produto produto = repository.findByCodigo(livroTheHobbit.getCodigo());
-		assertThat(produto).isNotNull().isEqualTo(livroTheHobbit);
-	}
-
-	@Test
-	public void deveAtualizarProdutoSalvo() {
-		repository.save(livroTheHobbit);
+	public void atualizaProduto() {
+		entityManager.persist(livroTheHobbit);
 
 		Produto produto = repository.findByCodigo(livroTheHobbit.getCodigo());
 		assertThat(produto).hasFieldOrPropertyWithValue("descricao", "Livro The Hobbit");
@@ -87,8 +103,8 @@ public class ProdutoRepositoryTest {
 	}
 
 	@Test
-	public void deveRemoverProdutoPeloCodigo() {
-		repository.save(livroTheHobbit);
+	public void removeProdutoPeloCodigo() {
+		entityManager.persist(livroTheHobbit);
 
 		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).hasSize(1).contains(livroTheHobbit);
@@ -97,18 +113,6 @@ public class ProdutoRepositoryTest {
 
 		produtos = repository.findAll();
 		assertThat(produtos).isEmpty();
-	}
-
-	@Test
-	public void deveBuscarProdutosPelaDescricao() {
-		repository.save(livroTheHobbit);
-		repository.save(livroIt);
-		
-		List<Produto> produtos = repository.findByDescricao("Hobbit");
-		assertThat(produtos).hasSize(1).contains(livroTheHobbit);
-		
-		produtos = repository.findByDescricao("LiVrO");
-		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
 
 }
