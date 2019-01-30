@@ -17,24 +17,20 @@ public class ProdutoService {
 	@Autowired
 	private ProdutoRepository repository;
 
-	public List<Produto> findAll() {
-		return repository.findAll();
-	}
-
 	public Produto insert(Produto produto) throws ProdutoAlreadyExistsException {
 		Produto produtoSalvo = repository.findByCodigo(produto.getCodigo());
 
 		if (produtoSalvo == null) {
 			if (produto.getDataCadastro() == null)
 				produto.setDataCadastro(LocalDate.now());
-			
+
 			return repository.save(produto);
 		}
-		
+
 		throw new ProdutoAlreadyExistsException("Produto já existente");
 	}
 
-	public Produto updateByCodigo(String codigo, Produto produto) throws ProdutoNotFoundException {
+	public void update(String codigo, Produto produto) throws ProdutoNotFoundException {
 		Produto produtoSalvo = repository.findByCodigo(codigo);
 
 		if (produtoSalvo == null)
@@ -45,18 +41,16 @@ public class ProdutoService {
 		produtoSalvo.setPreco(produto.getPreco());
 		produtoSalvo.setDataCadastro(produto.getDataCadastro());
 
-		return repository.save(produtoSalvo);
+		repository.save(produtoSalvo);
 	}
 
-	public Produto deleteByCodigo(String codigo) throws ProdutoNotFoundException {
+	public void delete(String codigo) throws ProdutoNotFoundException {
 		Produto produto = repository.findByCodigo(codigo);
 
 		if (produto == null)
 			throw new ProdutoNotFoundException("Produto inexistente");
 
-		repository.deleteByCodigo(codigo);
-		
-		return produto;
+		repository.deleteByCodigo(codigo);	
 	}
 
 	public Produto findByCodigo(String codigo) throws ProdutoNotFoundException {
@@ -70,6 +64,10 @@ public class ProdutoService {
 
 	public List<Produto> findByDescricao(String descricao) {
 		return repository.findByDescricao(descricao);
+	}
+
+	public List<Produto> findAll() {
+		return repository.findAll();
 	}
 
 }

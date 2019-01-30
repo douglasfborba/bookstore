@@ -2,6 +2,7 @@ package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -10,12 +11,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -26,7 +30,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "dis_produto")
 @JsonIgnoreProperties(value = { "id" })
-public class Produto {
+public class Produto implements Serializable {
+
+	private static final long serialVersionUID = 6142470540449772044L;
 
 	@Id
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
@@ -39,7 +45,7 @@ public class Produto {
 	private String codigo;
 
 	@EqualsAndHashCode.Exclude
-	@NotEmpty(message = "Campo descrição não pode ser vazio")
+	@NotNull(message = "Campo código não pode ser nulo")
 	@Size(min = 3, max = 50, message = "Campo código deve possuir entre 3 e 50 caracteres")
 	private String descricao;
 
@@ -49,6 +55,8 @@ public class Produto {
 
 	@EqualsAndHashCode.Exclude
 	@JsonFormat(pattern = "dd-MM-yyyy")
+	@JsonDeserialize(using = LocalDateDeserializer.class)
+	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate dataCadastro;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {

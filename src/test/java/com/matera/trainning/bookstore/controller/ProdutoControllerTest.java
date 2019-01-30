@@ -1,17 +1,24 @@
 package com.matera.trainning.bookstore.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.util.Lists.list;
-import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
+import static org.hamcrest.Matchers.isEmptyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,174 +27,188 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.service.ProdutoService;
 import com.matera.trainning.bookstore.service.exceptions.ProdutoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.ProdutoNotFoundException;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(value = ProdutoController.class, secure = false)
+@WebMvcTest(value = ProdutoController.class)
 public class ProdutoControllerTest {
-
-	private static final String JSON_TEMPLATE = "{" + "\"codigo\":\"LIVRO23040\","
-			+ "\"descricao\":\"Livro The Hobbit\"" + ",\"preco\":57.63," + "\"dataCadastro\":\"29-01-2019\"}";
 
 	@Autowired
 	private MockMvc mockMvc;
+	
+	@Autowired
+	private ObjectMapper jsonMapper;
 
 	@MockBean
 	private ProdutoService service;
 
 	private Produto livroTheHobbit;
+	private Produto livroIt;
 
 	@Before
-	public void setUp() {
-		livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63),
-				LocalDate.of(2019, 01, 29));
+	public void setUp() {	
+		jsonMapper = new ObjectMapper();
+		livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.of(2019, 01, 29));
+		livroIt = new Produto("LIVRO34536", "Livro IT - A coisa", new BigDecimal(74.90), LocalDate.of(2019, 01, 29));		
 	}
 
 	@Test
-	public void listaProdutosEmBanco() throws Exception {
-		String uri = "/produtos";
+	public void listaProdutosEmBancoPopulado() throws Exception {	
+		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));	
 
-		Mockito.when(service.findAll()).thenReturn(list(livroTheHobbit));
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertEquals("[" + JSON_TEMPLATE + "]", resultado.getResponse().getContentAsString(), false);
+		when(service.findAll()).thenReturn(list(livroTheHobbit, livroIt));
+		mockMvc.perform(get("/produtos")
+				.accept(APPLICATION_JSON_UTF8))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(2)))
+			.andExpect(content().json(jsonArray))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
 	public void listaProdutosEmBancoVazio() throws Exception {
-		String uri = "/produtos";
+		String jsonArray = jsonMapper.writeValueAsString(list());	
 
-		Mockito.when(service.findAll()).thenReturn(new ArrayList<Produto>());
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertEquals("[ ]", resultado.getResponse().getContentAsString(), false);
+		when(service.findAll()).thenReturn(list());
+		mockMvc.perform(get("/produtos")
+				.accept(APPLICATION_JSON_UTF8))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(0)))
+			.andExpect(content().json(jsonArray))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
-	public void buscaProdutoPeloCodigo() throws Exception {
-		String uri = "/produtos/LIVRO23040";
+	public void buscaProdutoPeloCodigo() throws Exception {		
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		Mockito.when(service.findByCodigo(Mockito.anyString())).thenReturn(livroTheHobbit);
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertEquals(JSON_TEMPLATE, resultado.getResponse().getContentAsString(), false);
+		when(service.findByCodigo(Mockito.anyString())).thenReturn(livroTheHobbit);
+		mockMvc.perform(get("/produtos/{codigo}", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8))
+			.andExpect(status().isOk())
+			.andExpect(content().json(jsonObject))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
-	public void buscaProdutoInexistentePeloCodigo() throws Exception {
-		String uri = "/produtos/LIVRO23040";
-
-		Mockito.when(service.findByCodigo(Mockito.anyString())).thenThrow(ProdutoNotFoundException.class);
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+	public void buscaProdutoInexistentePeloCodigo() throws Exception {		
+		when(service.findByCodigo(Mockito.anyString())).thenThrow(ProdutoNotFoundException.class);
+		mockMvc.perform(get("/produtos/{codigo}", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8))
+			.andExpect(status().isNotFound())
+			.andExpect(content().string(isEmptyString()));
 	}
 
 	@Test
 	public void buscaProdutoPelaDescricao() throws Exception {
-		String uri = "/produtos/search?descricao=HoBbiT";
+		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));	
 
-		Mockito.when(service.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit));
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertEquals("[" + JSON_TEMPLATE + "]", resultado.getResponse().getContentAsString(), false);
+		when(service.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit, livroIt));
+		mockMvc.perform(get("/produtos/search")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("descricao", "LiVrO"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(2)))
+			.andExpect(content().json(jsonArray))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
 	public void buscaProdutoInexistentePelaDescricao() throws Exception {
-		String uri = "/produtos/search?descricao=HoBbiT";
+		String jsonArray = jsonMapper.writeValueAsString(list());	
 
-		Mockito.when(service.findByDescricao(Mockito.anyString())).thenReturn(new ArrayList<Produto>());
-		MvcResult resultado = mockMvc.perform(get(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.OK.value());
-		assertEquals("[ ]", resultado.getResponse().getContentAsString(), false);
+		when(service.findByDescricao(Mockito.anyString())).thenReturn(list());
+		mockMvc.perform(get("/produtos/search")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("descricao", "LiVrO"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$", hasSize(0)))
+			.andExpect(content().json(jsonArray))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
-	public void salvaProduto() throws Exception {
-		String uri = "/produtos";
+	public void persisteProduto() throws Exception {		
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		Mockito.when(service.insert(Mockito.any(Produto.class))).thenReturn(livroTheHobbit);
-		MvcResult resultado = mockMvc
-				.perform(post(uri).accept(APPLICATION_JSON).content(JSON_TEMPLATE).contentType(APPLICATION_JSON))
-				.andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.CREATED.value());
-		assertEquals(JSON_TEMPLATE, resultado.getResponse().getContentAsString(), false);
+		when(service.insert(Mockito.any(Produto.class))).thenReturn(livroTheHobbit);
+		mockMvc.perform(post("/produtos")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isCreated())
+			.andExpect(content().json(jsonObject))
+            .andExpect(header().string("location", containsString("http://localhost/produtos/")))
+			.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
-	public void salvaProdutoDuplicado() throws Exception {
-		String uri = "/produtos";
+	public void persisteProdutoDuplicado() throws Exception {
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		Mockito.when(service.insert(Mockito.any(Produto.class))).thenThrow(ProdutoAlreadyExistsException.class);
-		MvcResult resultado = mockMvc
-				.perform(post(uri).accept(APPLICATION_JSON).content(JSON_TEMPLATE).contentType(APPLICATION_JSON))
-				.andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.CONFLICT.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+		when(service.insert(Mockito.any(Produto.class))).thenThrow(ProdutoAlreadyExistsException.class);
+		mockMvc.perform(post("/produtos")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isConflict())
+            .andExpect(header().string("location", isEmptyOrNullString()))
+			.andExpect(content().string(isEmptyString()));
 	}
 
 	@Test
 	public void atualizaProduto() throws Exception {
-		String uri = "/produtos/LIVRO23040";
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		String template = JSON_TEMPLATE.replace("Livro The Hobbit", "Livro The Hobbit 2");
-		MvcResult resultado = mockMvc
-				.perform(put(uri).accept(APPLICATION_JSON).content(template).contentType(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+		mockMvc.perform(put("/produtos/{codigo}", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isNoContent())
+			.andExpect(content().string(isEmptyString()));
 	}
 
 	@Test
 	public void atualizaProdutoInexistente() throws Exception {
-		String uri = "/produtos/LIVRO23040";
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		Mockito.when(service.updateByCodigo(Mockito.anyString(), Mockito.any(Produto.class)))
-				.thenThrow(ProdutoNotFoundException.class);
-		String template = JSON_TEMPLATE.replace("Livro The Hobbit", "Livro The Hobbit 2");
-		MvcResult resultado = mockMvc
-				.perform(put(uri).accept(APPLICATION_JSON).content(template).contentType(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+		doThrow(new ProdutoNotFoundException("Produto inexistente")).when(service)
+			.update(Mockito.anyString(), Mockito.any(Produto.class));
+		
+		mockMvc.perform(put("/produtos/{codigo}", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isNotFound())
+			.andExpect(content().string(isEmptyString()));
 	}
 
 	@Test
-	public void deletaProduto() throws Exception {
-		String uri = "/produtos/LIVRO23040";
+	public void excluirProduto() throws Exception {		
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		MvcResult resultado = mockMvc.perform(delete(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.NO_CONTENT.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+		mockMvc.perform(delete("/produtos/{codigo}", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isNoContent())
+			.andExpect(content().string(isEmptyString()));
 	}
 
 	@Test
 	public void deletaProdutoInexistente() throws Exception {
-		String uri = "/produtos/LIVRO23040";
+		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);	
 
-		Mockito.when(service.deleteByCodigo(Mockito.anyString())).thenThrow(ProdutoNotFoundException.class);
-		MvcResult resultado = mockMvc.perform(delete(uri).accept(APPLICATION_JSON)).andReturn();
-
-		assertThat(resultado.getResponse().getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
-		assertThat(resultado.getResponse().getContentAsString()).isEmpty();
+		doThrow(new ProdutoNotFoundException("Produto inexistente")).when(service)
+			.delete(Mockito.anyString());
+		
+		mockMvc.perform(delete("/produtos/{codigo}", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+			.andExpect(status().isNotFound())
+			.andExpect(content().string(isEmptyString()));
 	}
 
 }

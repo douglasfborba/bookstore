@@ -41,8 +41,7 @@ public class ProdutoController {
 	public ResponseEntity<Produto> insert(@Valid @RequestBody Produto produto, HttpServletResponse response) {
 		Produto produtoSalvo = null;
 		try {
-			produtoSalvo = service.insert(produto);
-			
+			produtoSalvo = service.insert(produto);		
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
 					.buildAndExpand(produtoSalvo.getCodigo()).toUri();
 
@@ -54,9 +53,9 @@ public class ProdutoController {
 
 	@PutMapping("/{codigo}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void updateByCodigo(@PathVariable String codigo, @Valid @RequestBody Produto produto, HttpServletResponse response) {
+	public void update(@PathVariable String codigo, @Valid @RequestBody Produto produto, HttpServletResponse response) {
 		try {
-			service.updateByCodigo(codigo, produto);
+			service.update(codigo, produto);
 		} catch (ProdutoNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
@@ -64,9 +63,9 @@ public class ProdutoController {
 
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void deleteByCodigo(@PathVariable String codigo) {
+	public void delete(@PathVariable String codigo) {
 		try {
-			service.deleteByCodigo(codigo);
+			service.delete(codigo);
 		} catch (ProdutoNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
