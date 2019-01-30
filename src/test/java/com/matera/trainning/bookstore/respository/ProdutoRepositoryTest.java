@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,10 +22,12 @@ import com.matera.trainning.bookstore.model.Produto;
 @DataJpaTest
 @ActiveProfiles("test")
 public class ProdutoRepositoryTest {
-	
+
+	private static final String COD_LIVRO_HOBBIT = "LIVRO23040";
+
 	@Autowired
 	private TestEntityManager entityManager;
-	
+
 	@Autowired
 	private ProdutoRepository repository;
 
@@ -33,39 +36,39 @@ public class ProdutoRepositoryTest {
 
 	@Before
 	public void setUp() {
-		livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.of(2019, 01, 29));
-		livroIt = new Produto("LIVRO34536", "Livro IT - A coisa", new BigDecimal(74.90), LocalDate.of(2019, 01, 29));
+		livroTheHobbit = new Produto(COD_LIVRO_HOBBIT, "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		livroIt = new Produto("LIVRO34536", "Livro IT - A coisa", new BigDecimal(74.90), LocalDate.now());
 	}
 
 	@Test
 	public void listaProdutosEmBancoPopulado() {
 		entityManager.persist(livroTheHobbit);
 		entityManager.persist(livroIt);
-	
+
 		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
-	
+
 	@Test
 	public void listaProdutosEmBancoVazio() {
 		List<Produto> produtos = repository.findAll();
 		assertThat(produtos).isEmpty();
 	}
-	
+
 	@Test
 	public void buscaProdutoPeloCodigo() {
 		entityManager.persist(livroTheHobbit);
 
-		Produto produto = repository.findByCodigo("LIVRO23040");
-		assertThat(produto).isNotNull().isEqualTo(livroTheHobbit);
+		Optional<Produto> opcional = repository.findByCodigo(COD_LIVRO_HOBBIT);
+		assertThat(opcional.get()).isNotNull().isEqualTo(livroTheHobbit);
 	}
-	
+
 	@Test
 	public void buscaProdutoInexistentePeloCodigo() {
-		Produto produto = repository.findByCodigo("LIVRO23040");
-		assertThat(produto).isNull();
+		Optional<Produto> opcional = repository.findByCodigo(COD_LIVRO_HOBBIT);
+		assertThat(opcional.isPresent()).isFalse();
 	}
-	
+
 	@Test
 	public void buscaProdutoPelaDescricao() {
 		entityManager.persist(livroTheHobbit);
@@ -74,7 +77,7 @@ public class ProdutoRepositoryTest {
 		List<Produto> produtos = repository.findByDescricao("LiVrO");
 		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
-	
+
 	@Test
 	public void buscaProdutoInexistentePelaDescricao() {
 		List<Produto> produtos = repository.findByDescricao("LiVrO");
@@ -93,12 +96,16 @@ public class ProdutoRepositoryTest {
 	public void atualizaProduto() {
 		entityManager.persist(livroTheHobbit);
 
-		Produto produto = repository.findByCodigo(livroTheHobbit.getCodigo());
+		Optional<Produto> opcional = repository.findByCodigo(livroTheHobbit.getCodigo());
+		Produto produto = opcional.get();
+
 		assertThat(produto).hasFieldOrPropertyWithValue("descricao", "Livro The Hobbit");
 
 		produto.setDescricao("Livro The Hobbit 2");
 
-		produto = repository.findByCodigo(livroTheHobbit.getCodigo());
+		opcional = repository.findByCodigo(livroTheHobbit.getCodigo());
+		produto = opcional.get();
+
 		assertThat(produto).hasFieldOrPropertyWithValue("descricao", "Livro The Hobbit 2");
 	}
 

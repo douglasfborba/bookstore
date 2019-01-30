@@ -5,9 +5,11 @@
 	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
 
-<changeSet author="douglas.borba" id="25012019161739-1">
+	<property name="now" value="SYSDATE" dbms="oracle" />
+
+	<changeSet author="douglas.borba" id="25012019161739-1">
 		<createTable tableName="dis_produto">
-			<column name="id" type="int">
+			<column name="id" type="bigint">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
 			<column name="codigo" type="varchar(10)">
@@ -25,7 +27,7 @@
 	
 	<changeSet author="douglas.borba" id="25012019164327-1">
 		<createSequence sequenceName="dis_prod_seq" 
-			ordered="true" cycle="false" minValue="1" maxValue="100" 
+			ordered="true" cycle="false" minValue="1" maxValue="2000" 
 			startValue="1" incrementBy="1" />
 	</changeSet>
 
@@ -60,5 +62,74 @@
 			<column name="data_cadastro" valueDate="2007-06-15" />
 		</insert>
 	</changeSet>
+
+
+	
+	<changeSet author="douglas.borba" id="30012019115901-1">
+		<createTable tableName="dis_comentario">
+			<column name="id" type="bigint">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="codigo" type="varchar(100)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="descricao" type="varchar(250)">
+				<constraints nullable="false" />
+			</column>
+			<column name="usuario" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="data_hora_criacao" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="produto_id" type="int">
+				<constraints nullable="false" foreignKeyName="fk_prod_cmtr"/>
+			</column>			
+		</createTable>
+		<addForeignKeyConstraint baseColumnNames="produto_id" baseTableName="dis_comentario"
+	            constraintName="fk_cmtr_prod" deferrable="true" initiallyDeferred="true"
+	            onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
+	            referencedTableName="dis_produto"/>
+	</changeSet>
+		
+	<changeSet author="douglas.borba" id="30012019120147-1">
+		<createSequence sequenceName="dis_cmtr_seq" 
+			ordered="true" cycle="false" minValue="1" maxValue="2000" 
+			startValue="1" incrementBy="1" />
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="30012019142420-1">
+		<sql endDelimiter="/">
+			CREATE OR REPLACE TRIGGER dis_cmtr_nextid 
+				BEFORE INSERT ON dis_comentario
+				REFERENCING	OLD AS old NEW AS new
+				FOR EACH ROW
+			DECLARE
+				v_id NUMBER(38, 0);
+			BEGIN
+				IF :new.id IS NULL THEN
+					SELECT dis_cmtr_seq.NEXTVAL INTO v_id FROM dual;
+					:new.id := v_id;
+				END IF;
+			END dis_cmtr_nextid;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="30012019142430-1">
+		<insert tableName="dis_comentario" schemaName="sdbanco">
+			<column name="codigo" value="MDFKVUwtMTEgMTY6MzE6NDA=" />
+			<column name="descricao" value="Bom." />			
+			<column name="usuario" value="fulano.teste" />
+			<column name="data_hora_criacao" valueComputed="${now}" />
+			<column name="produto_id" valueNumeric="1" />		
+		</insert>
+		<insert tableName="dis_comentario" schemaName="sdbanco">
+			<column name="codigo" value="MDJKVUwtMTEgMTY6MzM6MTA=" />
+			<column name="descricao" value="Ótimo livro, recomento a todos." />
+			<column name="usuario" value="beltrano.teste" />
+			<column name="data_hora_criacao" valueComputed="${now}" />
+			<column name="produto_id" valueNumeric="1" />			
+		</insert>
+	</changeSet>	
 
 </databaseChangeLog>
