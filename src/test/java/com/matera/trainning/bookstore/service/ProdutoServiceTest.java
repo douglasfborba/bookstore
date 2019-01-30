@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
+import com.matera.trainning.bookstore.service.exceptions.ProdutoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.ProdutoNotFoundException;
 
 @RunWith(SpringRunner.class)
@@ -97,7 +98,7 @@ public class ProdutoServiceTest {
 		when(repository.save(Mockito.any(Produto.class))).thenReturn(livroTheHobbit);
 		
 		Produto produto = service.insert(livroTheHobbit);
-		assertThat(produto).isNotNull().isEqualTo(livroTheHobbit);
+		assertThat(produto).isNotNull().hasFieldOrPropertyWithValue("dataCadastro", livroTheHobbit.getDataCadastro());
 	}
 	
 	@Test
@@ -109,6 +110,39 @@ public class ProdutoServiceTest {
 		
 		Produto produto = service.insert(livroTheHobbit);
 		assertThat(produto).isNotNull().hasFieldOrPropertyWithValue("dataCadastro", LocalDate.now());
+	}
+	
+	@Test
+	public void persisteProdutoDuplicado() throws Exception {				
+		when(repository.findByCodigo("LIVRO23040")).thenReturn(livroTheHobbit);
+		try {
+			service.insert(livroTheHobbit);
+			fail();
+		} catch (ProdutoAlreadyExistsException ex) {
+			assertEquals("Produto já existente", ex.getMessage());
+		}	
+	}
+	
+	@Test
+	public void atualizaProdutoInexistente() throws Exception {
+		when(repository.findByCodigo("LIVRO23040")).thenReturn(null);
+		try {
+			service.update("LIVRO23040", livroTheHobbit);
+			fail();
+		} catch (ProdutoNotFoundException ex) {
+			assertEquals("Produto inexistente", ex.getMessage());
+		}		
+	}
+	
+	@Test
+	public void excluiProdutoInexistente() throws Exception {
+		when(repository.findByCodigo("LIVRO23040")).thenReturn(null);
+		try {
+			service.delete("LIVRO23040");
+			fail();
+		} catch (ProdutoNotFoundException ex) {
+			assertEquals("Produto inexistente", ex.getMessage());
+		}		
 	}
 
 }
