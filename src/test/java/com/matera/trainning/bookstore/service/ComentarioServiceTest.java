@@ -29,10 +29,12 @@ import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundExcepti
 public class ComentarioServiceTest {
 
 	private static final String COD_USU_HATER = "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1";
-	private static final String CONT_DESC_BUSCA = "LiVrO";
 
 	@Mock
 	private ComentarioRepository repository;
+	
+	@Mock
+	private ProdutoService produtoServiceo;
 
 	@InjectMocks
 	private ComentarioService service;
@@ -87,66 +89,69 @@ public class ComentarioServiceTest {
 		}
 	}
 	
-	@Test
-	public void buscaComentarioPeloCodigoDoProduto() throws Exception {
-		when(repository.findByProdutoCodigo("LIVRO23040")).thenReturn(list(hater));
+	public void buscaComentarioPeloCodigoDoProdutoAndCodigoDoComentario() throws Exception {
+		when(repository.findByProdutoCodigoAndCodigo("LIVRO23040", COD_USU_HATER)).thenReturn(Optional.of(hater));
 
-		List<Comentario> comentarios = service.findByProdutoCodigo("LIVRO23040");
-		assertThat(comentarios).hasSize(1).contains(hater);
+		Comentario comentario = service.findByProdutoCodigoAndCodigo("LIVRO23040", COD_USU_HATER);
+		assertThat(comentario).isNotNull().isEqualTo(hater);
 	}
 
 	@Test
-	public void buscaComentarioInexistentePeloCodigoDoProduto() throws Exception {
-		when(repository.findByDescricao(Mockito.anyString())).thenReturn(list());
-
-		List<Comentario> comentarios = service.findByDescricao("LIVRO23040");
-		assertThat(comentarios).isEmpty();
+	public void buscaComentarioInexistentePeloCodigoDoProdutoAndCodigoDoComentario() throws Exception {
+		when(repository.findByProdutoCodigoAndCodigo("LIVRO23040", COD_USU_HATER)).thenReturn(Optional.empty());
+		try {
+			service.findByProdutoCodigoAndCodigo("LIVRO23040", COD_USU_HATER);
+			fail();
+		} catch (RegistroNotFoundException ex) {
+			assertEquals("Comentário inexistente para o produto informado", ex.getMessage());
+		}
 	}
 
 	@Test
 	public void buscaComentarioPelaDescricao() throws Exception {
-		when(repository.findByDescricao(Mockito.anyString())).thenReturn(list(hater, lover));
+		when(repository.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list(hater, lover));
 
-		List<Comentario> comentarios = service.findByDescricao(CONT_DESC_BUSCA);
+		List<Comentario> comentarios = service.findByProdutoCodigoAndDescricao("LIVRO23040", "LiVrO");
 		assertThat(comentarios).hasSize(2).contains(hater, lover);
 	}
 
 	@Test
 	public void buscaComentarioInexistentePelaDescricao() throws Exception {
-		when(repository.findByDescricao(Mockito.anyString())).thenReturn(list());
+		when(repository.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list());
 
-		List<Comentario> comentarios = service.findByDescricao(CONT_DESC_BUSCA);
+		List<Comentario> comentarios = service.findByProdutoCodigoAndDescricao("LIVRO23040", "LiVrO");
 		assertThat(comentarios).isEmpty();
 	}
 
 	@Test
-	public void persisteComentarioComDataCadastroPreenchida() throws Exception {
+	public void persisteComentarioComDataHoraCriacaoPreenchida() throws Exception {		
+		when(produtoServiceo.findByCodigo("LIVRO23040")).thenReturn(hater.getProduto());
 		when(repository.findByCodigo(COD_USU_HATER)).thenReturn(Optional.empty());
 		when(repository.save(Mockito.any(Comentario.class))).thenReturn(hater);
 
-		Comentario comentario = service.insert(hater);
+		Comentario comentario = service.insert("LIVRO23040", hater);
 		assertThat(comentario).isNotNull().hasFieldOrPropertyWithValue("dataHoraCriacao", hater.getDataHoraCriacao());
 	}
 
 	@Test
-	public void persisteComentarioComDataCadastroNula() throws Exception {
+	public void persisteComentarioComDataHoraCriacaoNula() throws Exception {
 		hater.setDataHoraCriacao(null);
 
 		when(repository.findByCodigo(COD_USU_HATER)).thenReturn(Optional.empty());
 		when(repository.save(Mockito.any(Comentario.class))).thenReturn(hater);
 
-		Comentario comentario = service.insert(hater);
-		assertThat(comentario).isNotNull().hasFieldOrPropertyWithValue("dataHoraCriacao", comentario.getDataHoraCriacao());
+		Comentario comentario = service.insert("LIVRO23040", hater);
+		assertThat(comentario).isNotNull().hasFieldOrPropertyWithValue("dataHoraCriacao", hater.getDataHoraCriacao());
 	}
 
 	@Test
 	public void atualizaComentarioInexistente() throws Exception {
 		when(repository.findByCodigo(COD_USU_HATER)).thenReturn(Optional.empty());
 		try {
-			service.update(COD_USU_HATER, hater);
+			service.update("LIVRO23040", COD_USU_HATER, hater);
 			fail();
 		} catch (RegistroNotFoundException ex) {
-			assertEquals("Comentário inexistente", ex.getMessage());
+			assertEquals("Comentário inexistente para o produto informado", ex.getMessage());
 		}
 	}
 
@@ -154,10 +159,10 @@ public class ComentarioServiceTest {
 	public void excluiComentarioInexistente() throws Exception {
 		when(repository.findByCodigo(COD_USU_HATER)).thenReturn(Optional.empty());
 		try {
-			service.delete(COD_USU_HATER);
+			service.delete("LIVRO23040", COD_USU_HATER);
 			fail();
 		} catch (RegistroNotFoundException ex) {
-			assertEquals("Comentário inexistente", ex.getMessage());
+			assertEquals("Comentário inexistente para o produto informado", ex.getMessage());
 		}
 	}
 

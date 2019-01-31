@@ -31,70 +31,62 @@ import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsEx
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @RestController
-@RequestMapping("/comentarios")
+@RequestMapping("/produtos/{codigoProduto}")
 public class ComentarioController {
 
 	@Autowired
 	private ComentarioService service;
 
-	@PostMapping
-	public ResponseEntity<Comentario> insert(@Valid @RequestBody Comentario comentario, HttpServletResponse response) {
+	@PostMapping("/comentarios")
+	public ResponseEntity<Comentario> insert(@PathVariable String codigoProduto, @Valid @RequestBody Comentario comentario, HttpServletResponse response) {
 		Comentario comentarioSalvo = null;
 		try {
-			comentarioSalvo = service.insert(comentario);
+			comentarioSalvo = service.insert(codigoProduto, comentario);
 			URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{codigo}")
 					.buildAndExpand(comentarioSalvo.getCodigo()).toUri();
-
+			
 			return ResponseEntity.created(uri).body(comentarioSalvo);
 		} catch (RegistroAlreadyExistsException ex) {
 			throw new ResponseStatusException(CONFLICT, ex.getMessage(), ex);
-		}
-	}
-	
-	@PutMapping("/{codigo}")
-	@ResponseStatus(code = NO_CONTENT)
-	public void update(@PathVariable String codigo, @Valid @RequestBody Comentario comentario, HttpServletResponse response) {
-		try {
-			service.update(codigo, comentario);
 		} catch (RegistroNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
 	}
 	
-	@DeleteMapping("/{codigo}")
+	@PutMapping("/comentarios/{codigoComentario}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void delete(@PathVariable String codigo) {
+	public void update(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody Comentario comentario, HttpServletResponse response) {
 		try {
-			service.delete(codigo);
+			service.update(codigoProduto, codigoComentario, comentario);
+		} catch (RegistroNotFoundException ex) {
+			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
+		}
+	}
+	
+	@DeleteMapping("/comentarios/{codigoComentario}")
+	@ResponseStatus(code = NO_CONTENT)
+	public void delete(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
+		try {
+			service.delete(codigoProduto, codigoComentario);
 		} catch (RegistroNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
 	}
 
-	@GetMapping("/{codigo}")
-	public ResponseEntity<Comentario> findByCodigo(@PathVariable String codigo) {
+	@GetMapping("/comentarios/{codigoComentario}")
+	public ResponseEntity<Comentario> findByProdutoCodigoAndCodigo(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
 		Comentario comentarioSalvo = null;
 		try {
-			comentarioSalvo = service.findByCodigo(codigo);
+			comentarioSalvo = service.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
 			return ResponseEntity.ok(comentarioSalvo);
 		} catch (RegistroNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
 		}
 	}
 
-	@GetMapping(path = "/search", params = "descricao")
-	public List<Comentario> findByDescricao(@RequestParam("descricao") String descricao) {
-		return service.findByDescricao(descricao);
+	@GetMapping("/comentarios/search")
+	public List<Comentario> findByProdutoCodigoAndDescricao(@PathVariable String codigoProduto, @RequestParam("descricao") String descricao) {
+		return service.findByProdutoCodigoAndDescricao(codigoProduto, descricao);
 	}
-
-	@GetMapping(path = "/search", params = "codigoProduto")
-	public List<Comentario> findByProdutoCodigo(@RequestParam("codigoProduto") String codigo) {
-		return service.findByProdutoCodigo(codigo);
-	}
-
-	@GetMapping
-	public List<Comentario> findAll() {
-		return service.findAll();
-	}
-
+		
 }

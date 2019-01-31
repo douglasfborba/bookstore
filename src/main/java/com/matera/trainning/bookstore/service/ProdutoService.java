@@ -42,7 +42,6 @@ public class ProdutoService {
 		produtoSalvo.setCodigo(produto.getCodigo());
 		produtoSalvo.setDescricao(produto.getDescricao());
 		produtoSalvo.setPreco(produto.getPreco());
-		produtoSalvo.setDataCadastro(produto.getDataCadastro());
 
 		repository.save(produtoSalvo);
 	}

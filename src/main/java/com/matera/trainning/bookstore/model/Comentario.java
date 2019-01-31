@@ -1,11 +1,13 @@
 package com.matera.trainning.bookstore.model;
 
-import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.SEQUENCE;
 
 import java.time.LocalDateTime;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -16,11 +18,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -34,8 +33,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "dis_comentario")
-@JsonIgnoreProperties(value = { "id" })
-public class Comentario implements Comparable<Comentario> {
+@JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer", "handler" })
+public class Comentario {
 
 	@Id
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_cmtr_sequence")
@@ -43,8 +42,9 @@ public class Comentario implements Comparable<Comentario> {
 	private Long id;
 
 	@EqualsAndHashCode.Exclude
+	@Column(nullable = false)
 	private String codigo;
-	
+
 	@EqualsAndHashCode.Exclude
 	@NotNull(message = "Campo descrição não pode ser nulo")
 	@Size(min = 3, max = 250, message = "Campo descrição deve possuir entre 3 e 250 caracteres")
@@ -56,17 +56,15 @@ public class Comentario implements Comparable<Comentario> {
 	private String usuario;
 
 	@EqualsAndHashCode.Exclude
-	@JsonFormat(pattern = "dd-MM-yyyy@HH:mm")
+	@JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	private LocalDateTime dataHoraCriacao;
 
 	@EqualsAndHashCode.Exclude
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "produto_id", nullable = false)
-	@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "codigo")
-	@JsonIdentityReference(alwaysAsId = true)
-	@JsonProperty("codigoProduto")
+	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "produto_id", nullable = false)
+    @JsonIgnore
 	private Produto produto;
 
 	public Comentario(String descricao, String codigo, String usuario, LocalDateTime dataHoraCriacao, Produto produto) {
@@ -75,11 +73,6 @@ public class Comentario implements Comparable<Comentario> {
 		this.usuario = usuario;
 		this.dataHoraCriacao = dataHoraCriacao;
 		this.produto = produto;
-	}
-
-	@Override
-	public int compareTo(Comentario outroComentario) {
-		return this.getDataHoraCriacao().compareTo(outroComentario.getDataHoraCriacao());
 	}
 
 }

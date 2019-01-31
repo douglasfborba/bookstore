@@ -1,8 +1,7 @@
 package com.matera.trainning.bookstore.service;
 
-import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
-
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.ComentarioRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
@@ -19,42 +19,42 @@ public class ComentarioService {
 
 	@Autowired
 	private ComentarioRepository repository;
+	
+	@Autowired
+	private ProdutoService produtoService;
 
-	public Comentario insert(Comentario comentario) throws RegistroAlreadyExistsException {
-		LocalDateTime dataHoraAtual = LocalDateTime.now();
+	public Comentario insert(String codigoProduto, Comentario comentario) throws RegistroAlreadyExistsException, RegistroNotFoundException {	
+		Produto produto = produtoService.findByCodigo(codigoProduto);
+		
+		comentario.setProduto(produto);
+		comentario.setDataHoraCriacao(LocalDateTime.now());
 
-		String codigoBase64 = geraCodigoEmBase64(comentario, dataHoraAtual);
+		String codigoBase64 = geraCodigoEmBase64(comentario, comentario.getDataHoraCriacao());
 		comentario.setCodigo(codigoBase64);
-
-		if (comentario.getDataHoraCriacao() == null)
-			comentario.setDataHoraCriacao(dataHoraAtual);
-
+		
 		return repository.save(comentario);
 	}
 
-	public void update(String codigo, Comentario comentario) throws RegistroNotFoundException {
-		Optional<Comentario> optional = repository.findByCodigo(codigo);
+	public void update(String codigoProduto, String codigoComentario, Comentario comentario) throws RegistroNotFoundException {
+		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
+		
+		if (!opcional.isPresent())
+			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
 
-		if (!optional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente");
-
-		Comentario comentarioSalvo = optional.get();
-
-		comentarioSalvo.setCodigo(comentario.getCodigo());
+		Comentario comentarioSalvo = opcional.get();
 		comentarioSalvo.setDescricao(comentario.getDescricao());
 		comentarioSalvo.setUsuario(comentario.getUsuario());
-		comentarioSalvo.setDataHoraCriacao(comentario.getDataHoraCriacao());
 
 		repository.save(comentarioSalvo);
 	}
 
-	public void delete(String codigo) throws RegistroNotFoundException {
-		Optional<Comentario> opcional = repository.findByCodigo(codigo);
+	public void delete(String codigoProduto, String codigoComentario) throws RegistroNotFoundException {
+		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
 
 		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente");
+			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
 
-		repository.deleteByCodigo(codigo);
+		repository.deleteByCodigo(codigoComentario);
 	}
 
 	public Comentario findByCodigo(String codigo) throws RegistroNotFoundException {
@@ -66,12 +66,21 @@ public class ComentarioService {
 		return opcional.get();
 	}
 
-	public List<Comentario> findByProdutoCodigo(String codigo) {
-		return repository.findByProdutoCodigo(codigo);
+	public Comentario findByProdutoCodigoAndCodigo(String codigoProduto, String codigoComentario) throws RegistroNotFoundException {
+		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
+		
+		if (!opcional.isPresent())
+			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
+		
+		return opcional.get();
 	}
 
-	public List<Comentario> findByDescricao(String descricao) {
-		return repository.findByDescricao(descricao);
+	public List<Comentario> findByProdutoCodigoAndDescricao(String codigoProduto, String descricao) {
+		return repository.findByProdutoCodigoAndDescricao(codigoProduto, descricao);
+	}
+
+	public List<Comentario> findByProdutoCodigo(String codigoProduto) {
+		return repository.findByProdutoCodigo(codigoProduto);
 	}
 
 	public List<Comentario> findAll() {
@@ -79,7 +88,8 @@ public class ComentarioService {
 	}
 
 	private String geraCodigoEmBase64(Comentario comentario, LocalDateTime dataHoraAtual) {
-		return new String(parseBase64Binary(comentario.getUsuario() + dataHoraAtual.toString()));
+		String identificador = comentario.getUsuario() + dataHoraAtual;
+		return new String(Base64.getEncoder().encode(identificador.getBytes()));
 	}
 
 }

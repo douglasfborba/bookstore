@@ -1,18 +1,13 @@
 package com.matera.trainning.bookstore.model;
 
-import static javax.persistence.CascadeType.ALL;
-import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.SEQUENCE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -33,7 +28,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 @Table(name = "dis_produto")
-@JsonIgnoreProperties(value = { "id", "comentarios" })
+@JsonIgnoreProperties(value = { "id", "comentarios", "hibernateLazyInitializer", "handler" })
 public class Produto {
 
 	@Id
@@ -60,11 +55,6 @@ public class Produto {
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate dataCadastro;
-
-	@EqualsAndHashCode.Exclude
-	@OrderBy("dataHoraCriacao ASC")
-	@OneToMany(mappedBy = "produto", cascade = ALL, fetch = LAZY)
-	private Set<Comentario> comentarios;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
 		this.codigo = codigo;
