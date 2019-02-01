@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.matera.trainning.bookstore.model.Produto;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;

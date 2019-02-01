@@ -8,7 +8,7 @@ import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.domain.Comentario;
 
 public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
 

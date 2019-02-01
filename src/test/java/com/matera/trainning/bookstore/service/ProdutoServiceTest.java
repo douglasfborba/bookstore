@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.matera.trainning.bookstore.model.Produto;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;

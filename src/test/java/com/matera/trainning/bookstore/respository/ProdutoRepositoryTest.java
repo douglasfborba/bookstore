@@ -16,7 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.matera.trainning.bookstore.model.Produto;
+import com.matera.trainning.bookstore.domain.Produto;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest

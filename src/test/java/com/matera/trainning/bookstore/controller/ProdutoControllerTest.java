@@ -31,8 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.matera.trainning.bookstore.model.Produto;
-import com.matera.trainning.bookstore.service.ProdutoService;
+import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
+import com.matera.trainning.bookstore.controller.facade.ProdutoFacade;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
@@ -47,25 +47,35 @@ public class ProdutoControllerTest {
 
 	@Autowired
 	private ObjectMapper jsonMapper;
-
+	
 	@MockBean
-	private ProdutoService service;
+	private ProdutoFacade facade;
 
-	private Produto livroTheHobbit;
-	private Produto livroIt;
+	private ProdutoDTO livroIt;
+	private ProdutoDTO livroTheHobbit;
 
 	@Before
 	public void setUp() {
 		jsonMapper = new ObjectMapper();
-		livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
-		livroIt = new Produto("LIVRO34536", "Livro IT - A coisa", new BigDecimal(74.90), LocalDate.now());
+		
+		livroIt = new ProdutoDTO();
+		livroIt.setCodigo("LIVRO34536");
+		livroIt.setDescricao("Livro IT - A coisa");
+		livroIt.setPreco(new BigDecimal(74.90));
+		livroIt.setDataCadastro(LocalDate.now());
+		
+		livroTheHobbit = new ProdutoDTO();
+		livroTheHobbit.setCodigo("LIVRO23040");
+		livroTheHobbit.setDescricao("Livro The Hobbit");
+		livroTheHobbit.setPreco(new BigDecimal(57.63));
+		livroTheHobbit.setDataCadastro(LocalDate.now());
 	}
 
 	@Test
 	public void listaProdutosEmBancoPopulado() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));
 
-		when(service.findAll()).thenReturn(list(livroTheHobbit, livroIt));
+		when(facade.findAll()).thenReturn(list(livroTheHobbit, livroIt));
 		mockMvc.perform(get("/produtos")
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -78,7 +88,7 @@ public class ProdutoControllerTest {
 	public void listaProdutosEmBancoVazio() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
-		when(service.findAll()).thenReturn(list());
+		when(facade.findAll()).thenReturn(list());
 		mockMvc.perform(get("/produtos")
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -91,7 +101,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPeloCodigo() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
 
-		when(service.findByCodigo(Mockito.anyString())).thenReturn(livroTheHobbit);
+		when(facade.findByCodigo(Mockito.anyString())).thenReturn(livroTheHobbit);
 		mockMvc.perform(get("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -101,7 +111,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void buscaProdutoInexistentePeloCodigo() throws Exception {
-		when(service.findByCodigo(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
+		when(facade.findByCodigo(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
 		mockMvc.perform(get("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
@@ -112,7 +122,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPelaDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));
 
-		when(service.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit, livroIt));
+		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit, livroIt));
 		mockMvc.perform(get("/produtos/search")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -126,7 +136,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoInexistentePelaDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
-		when(service.findByDescricao(Mockito.anyString())).thenReturn(list());		
+		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list());		
 		mockMvc.perform(get("/produtos/search")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -140,7 +150,7 @@ public class ProdutoControllerTest {
 	public void persisteProduto() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
 
-		when(service.insert(Mockito.any(Produto.class))).thenReturn(livroTheHobbit);		
+		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenReturn(livroTheHobbit);		
 		mockMvc.perform(post("/produtos")
 					.contentType(APPLICATION_JSON_UTF8)
 					.content(jsonObject))
@@ -154,7 +164,7 @@ public class ProdutoControllerTest {
 	public void persisteProdutoDuplicado() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
 
-		when(service.insert(Mockito.any(Produto.class))).thenThrow(RegistroAlreadyExistsException.class);		
+		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenThrow(RegistroAlreadyExistsException.class);		
 		mockMvc.perform(post("/produtos")
 					.contentType(APPLICATION_JSON_UTF8)
 					.content(jsonObject))
@@ -178,8 +188,8 @@ public class ProdutoControllerTest {
 	public void atualizaProdutoInexistente() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
 
-		doThrow(new RegistroNotFoundException("Produto inexistente")).when(service)
-			.update(Mockito.anyString(), Mockito.any(Produto.class));
+		doThrow(new RegistroNotFoundException("Produto inexistente")).when(facade)
+			.update(Mockito.anyString(), Mockito.any(ProdutoDTO.class));
 		
 		mockMvc.perform(put("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.contentType(APPLICATION_JSON_UTF8)
@@ -198,7 +208,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void excluiProdutoInexistente() throws Exception {
-		doThrow(new RegistroNotFoundException("Produto inexistente")).when(service)
+		doThrow(new RegistroNotFoundException("Produto inexistente")).when(facade)
 			.delete(Mockito.anyString());
 
 		mockMvc.perform(delete("/produtos/{codigo}", COD_LIVRO_HOBBIT)

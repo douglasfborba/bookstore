@@ -20,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.matera.trainning.bookstore.model.Comentario;
-import com.matera.trainning.bookstore.model.Produto;
+import com.matera.trainning.bookstore.domain.Comentario;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ComentarioRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 

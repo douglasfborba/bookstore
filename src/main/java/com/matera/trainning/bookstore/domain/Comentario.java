@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.model;
+package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
@@ -14,57 +14,43 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
 @Entity
 @Table(name = "dis_comentario")
-@JsonIgnoreProperties(value = { "id", "hibernateLazyInitializer", "handler" })
+
+@Data
+@NoArgsConstructor
 public class Comentario {
 
 	@Id
+	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_cmtr_sequence")
 	@SequenceGenerator(name = "dis_cmtr_sequence", sequenceName = "dis_cmtr_seq", allocationSize = 1)
 	private Long id;
 
 	@EqualsAndHashCode.Exclude
-	@Column(nullable = false)
+	@Column(name = "codigo", nullable = false)
 	private String codigo;
 
 	@EqualsAndHashCode.Exclude
-	@NotNull(message = "Campo descrição não pode ser nulo")
-	@Size(min = 3, max = 250, message = "Campo descrição deve possuir entre 3 e 250 caracteres")
+	@Column(name = "descricao", nullable = false)
 	private String descricao;
 
 	@EqualsAndHashCode.Exclude
-	@NotNull(message = "Campo usuário não pode ser nulo")
-	@Size(min = 3, max = 50, message = "Campo usuário deve possuir entre 3 e 50 caracteres")
+	@Column(name = "usuario", nullable = false)
 	private String usuario;
 
 	@EqualsAndHashCode.Exclude
-	@JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
-	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
-	@JsonSerialize(using = LocalDateTimeSerializer.class)
+	@Column(name = "data_hora_criacao", nullable = false)
 	private LocalDateTime dataHoraCriacao;
 
 	@EqualsAndHashCode.Exclude
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
-    @JoinColumn(name = "produto_id", nullable = false)
-    @JsonIgnore
+	@JoinColumn(name = "produto_id", nullable = false)
 	private Produto produto;
 
 	public Comentario(String descricao, String codigo, String usuario, LocalDateTime dataHoraCriacao, Produto produto) {

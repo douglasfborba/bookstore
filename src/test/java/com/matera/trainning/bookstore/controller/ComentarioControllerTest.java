@@ -31,9 +31,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.matera.trainning.bookstore.model.Comentario;
-import com.matera.trainning.bookstore.model.Produto;
-import com.matera.trainning.bookstore.service.ComentarioService;
+import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
+import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
+import com.matera.trainning.bookstore.controller.facade.ComentarioFacade;
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @RunWith(SpringRunner.class)
@@ -49,26 +49,37 @@ public class ComentarioControllerTest {
 	private ObjectMapper jsonMapper;
 
 	@MockBean
-	private ComentarioService service;
+	private ComentarioFacade facade;
 
-	private Comentario hater;
-	private Comentario lover;
+	private ComentarioDTO hater;
+	private ComentarioDTO lover;
 
 	@Before
-	public void setUp() {
-		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63),
-				LocalDate.now());
+	public void setUp() {		
+		ProdutoDTO livroTheHobbit = new ProdutoDTO();
+		livroTheHobbit.setCodigo("LIVRO23040");
+		livroTheHobbit.setDescricao("Livro The Hobbit");
+		livroTheHobbit.setPreco(new BigDecimal(57.63));
+		livroTheHobbit.setDataCadastro(LocalDate.now());
 
-		hater = new Comentario("Odiei, este é o pior livro do mundo!", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1",
-				"usuario.hater", LocalDateTime.now(), livroTheHobbit);
-
-		lover = new Comentario("Amei, melhor livro do mundo :D", "dXN1YXJpby5sb3ZlcjMwMDEyMDE5MTcyNTAw",
-				"usuario.lover", LocalDateTime.now(), livroTheHobbit);
+		hater = new ComentarioDTO();
+		hater.setCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
+		hater.setDescricao("Odiei, este é o pior livro do mundo!");
+		hater.setUsuario("usuario.hater");
+		hater.setProduto(livroTheHobbit);
+		hater.setDataHoraCriacao(LocalDateTime.now());
+		
+		lover = new ComentarioDTO();
+		lover.setCodigo("dXN1YXJpby5sb3ZlcjMwMDEyMDE5MTcyNTAw");
+		lover.setDescricao("Amei, melhor livro do mundo :D");
+		lover.setUsuario("usuario.lover");
+		lover.setProduto(livroTheHobbit);
+		lover.setDataHoraCriacao(LocalDateTime.now());
 	}
 
 	@Test
 	public void buscaComentarioInexistentePeloCodigo() throws Exception {
-		when(service.findByCodigo(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
+		when(facade.findByCodigo(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
 		mockMvc.perform(get("/comentarios/{codigo}", COD_USU_HATER)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
@@ -79,7 +90,7 @@ public class ComentarioControllerTest {
 	public void buscaComentarioPeloAndProdutoCodigoAndDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(hater, lover));
 
-		when(service.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list(hater, lover));
+		when(facade.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list(hater, lover));
 		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/search", "LIVRO23040", COD_USU_HATER)
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -93,7 +104,7 @@ public class ComentarioControllerTest {
 	public void buscaComentarioInexistentePeloAndProdutoCodigoAndDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
-		when(service.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list());
+		when(facade.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list());
 		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/search","LIVRO23040")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -107,7 +118,7 @@ public class ComentarioControllerTest {
 	public void buscaComentarioPeloProdutoCodigoAndCodigo() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(hater);
 
-		when(service.findByProdutoCodigoAndCodigo(Mockito.anyString(),Mockito.anyString())).thenReturn(hater);
+		when(facade.findByProdutoCodigoAndCodigo(Mockito.anyString(),Mockito.anyString())).thenReturn(hater);
 		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/{codigoComentario}", "LIVRO23040", COD_USU_HATER)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -117,7 +128,7 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void buscaComentarioInexistentePeloProdutoCodigoAndCodigo() throws Exception {
-		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(service)
+		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(facade)
 			.findByProdutoCodigoAndCodigo(Mockito.anyString(), Mockito.anyString());
 
 		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/{codigoComentario}", "LIVRO23040", COD_USU_HATER)
@@ -130,7 +141,7 @@ public class ComentarioControllerTest {
 	public void persisteComentario() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(hater);
 
-		when(service.insert(Mockito.anyString(), Mockito.any(Comentario.class))).thenReturn(hater);
+		when(facade.insert(Mockito.anyString(), Mockito.any(ComentarioDTO.class))).thenReturn(hater);
 		mockMvc.perform(post("/produtos/{codigoProduto}/comentarios", "LIVRO23040")
 					.contentType(APPLICATION_JSON_UTF8)
 					.content(jsonObject))
@@ -155,8 +166,8 @@ public class ComentarioControllerTest {
 	public void atualizaComentarioInexistente() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(hater);
 
-		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(service)
-			.update(Mockito.anyString(), Mockito.anyString(), Mockito.any(Comentario.class));
+		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(facade)
+			.update(Mockito.anyString(), Mockito.anyString(), Mockito.any(ComentarioDTO.class));
 
 		mockMvc.perform(put("/produtos/{codigoProduto}/comentarios/{codigoComentario}", "LIVRO23040", COD_USU_HATER)
 					.contentType(APPLICATION_JSON_UTF8)
@@ -175,7 +186,7 @@ public class ComentarioControllerTest {
 
 	@Test
 	public void excluirComentarioInexistente() throws Exception {
-		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(service)
+		doThrow(new RegistroNotFoundException("Comentário inexistente para o produto informado")).when(facade)
 			.delete(Mockito.anyString(), Mockito.anyString());
 
 		mockMvc.perform(delete("/produtos/{codigoProduto}/comentarios/{codigoComentario}", "LIVRO23040", COD_USU_HATER)
