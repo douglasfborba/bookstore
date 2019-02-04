@@ -31,13 +31,13 @@ import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsEx
 import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @RestController
-@RequestMapping("/produtos/{codigoProduto}")
+@RequestMapping("/produtos/{codigoProduto}/comentarios")
 public class ComentarioController {
 
 	@Autowired
 	private ComentarioFacade facade;
 	
-	@PostMapping("/comentarios")
+	@PostMapping
 	public ResponseEntity<ComentarioDTO> insert(@PathVariable String codigoProduto, @Valid @RequestBody ComentarioDTO comentarioDto, HttpServletResponse response) {
 		try {
 			ComentarioDTO dto = facade.insert(codigoProduto, comentarioDto);
@@ -52,7 +52,7 @@ public class ComentarioController {
 		}
 	}
 	
-	@PutMapping("/comentarios/{codigoComentario}")
+	@PutMapping("/{codigoComentario}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void update(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO comentarioDto, HttpServletResponse response) {
 		try {
@@ -62,7 +62,7 @@ public class ComentarioController {
 		}
 	}
 	
-	@DeleteMapping("/comentarios/{codigoComentario}")
+	@DeleteMapping("/{codigoComentario}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void delete(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
 		try {
@@ -72,7 +72,7 @@ public class ComentarioController {
 		}
 	}
 
-	@GetMapping("/comentarios/{codigoComentario}")
+	@GetMapping("/{codigoComentario}")
 	public ResponseEntity<ComentarioDTO> findByProdutoCodigoAndCodigo(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
 		try {
 			ComentarioDTO dto = facade.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
@@ -82,12 +82,12 @@ public class ComentarioController {
 		}
 	}
 
-	@GetMapping("/comentarios/search")
+	@GetMapping("/search")
 	public List<ComentarioDTO> findByProdutoCodigoAndDescricao(@PathVariable String codigoProduto, @RequestParam("descricao") String descricao) {
 		return facade.findByProdutoCodigoAndDescricao(codigoProduto, descricao);
 	}
 	
-	@GetMapping("/comentarios")
+	@GetMapping
 	public List<ComentarioDTO> findByProdutoCodigo(@PathVariable String codigoProduto) {
 		return facade.findByProdutoCodigo(codigoProduto);
 	}	

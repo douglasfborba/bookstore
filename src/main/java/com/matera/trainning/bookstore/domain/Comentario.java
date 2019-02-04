@@ -2,6 +2,7 @@ package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import javax.persistence.CascadeType;
@@ -24,7 +25,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Comentario {
+public class Comentario implements Serializable {
+
+	private static final long serialVersionUID = 2383009242216933216L;
 
 	@Id
 	@Column(name = "id", nullable = false)

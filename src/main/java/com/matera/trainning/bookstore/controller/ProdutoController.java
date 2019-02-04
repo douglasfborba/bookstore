@@ -56,6 +56,8 @@ public class ProdutoController {
 			facade.update(codigo, produtoDto);
 		} catch (RegistroNotFoundException ex) {
 			throw new ResponseStatusException(NOT_FOUND, ex.getMessage(), ex);
+		} catch (RegistroAlreadyExistsException ex) {
+			throw new ResponseStatusException(CONFLICT, ex.getMessage(), ex);
 		}
 	}
 

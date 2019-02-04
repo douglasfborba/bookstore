@@ -51,31 +51,31 @@ public class ProdutoControllerTest {
 	@MockBean
 	private ProdutoFacade facade;
 
-	private ProdutoDTO livroIt;
-	private ProdutoDTO livroTheHobbit;
+	private ProdutoDTO dtoIt;
+	private ProdutoDTO dtoTheHobbit;
 
 	@Before
 	public void setUp() {
 		jsonMapper = new ObjectMapper();
 		
-		livroIt = new ProdutoDTO();
-		livroIt.setCodigo("LIVRO34536");
-		livroIt.setDescricao("Livro IT - A coisa");
-		livroIt.setPreco(new BigDecimal(74.90));
-		livroIt.setDataCadastro(LocalDate.now());
+		dtoIt = new ProdutoDTO();
+		dtoIt.setCodigo("LIVRO34536");
+		dtoIt.setDescricao("Livro IT - A coisa");
+		dtoIt.setPreco(new BigDecimal(74.90));
+		dtoIt.setDataCadastro(LocalDate.now());
 		
-		livroTheHobbit = new ProdutoDTO();
-		livroTheHobbit.setCodigo("LIVRO23040");
-		livroTheHobbit.setDescricao("Livro The Hobbit");
-		livroTheHobbit.setPreco(new BigDecimal(57.63));
-		livroTheHobbit.setDataCadastro(LocalDate.now());
+		dtoTheHobbit = new ProdutoDTO();
+		dtoTheHobbit.setCodigo("LIVRO23040");
+		dtoTheHobbit.setDescricao("Livro The Hobbit");
+		dtoTheHobbit.setPreco(new BigDecimal(57.63));
+		dtoTheHobbit.setDataCadastro(LocalDate.now());
 	}
 
 	@Test
 	public void listaProdutosEmBancoPopulado() throws Exception {
-		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));
+		String jsonArray = jsonMapper.writeValueAsString(list(dtoTheHobbit, dtoIt));
 
-		when(facade.findAll()).thenReturn(list(livroTheHobbit, livroIt));
+		when(facade.findAll()).thenReturn(list(dtoTheHobbit, dtoIt));
 		mockMvc.perform(get("/produtos")
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -99,9 +99,9 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void buscaProdutoPeloCodigo() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
-		when(facade.findByCodigo(Mockito.anyString())).thenReturn(livroTheHobbit);
+		when(facade.findByCodigo(Mockito.anyString())).thenReturn(dtoTheHobbit);
 		mockMvc.perform(get("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -120,9 +120,9 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void buscaProdutoPelaDescricao() throws Exception {
-		String jsonArray = jsonMapper.writeValueAsString(list(livroTheHobbit, livroIt));
+		String jsonArray = jsonMapper.writeValueAsString(list(dtoTheHobbit, dtoIt));
 
-		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit, livroIt));
+		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list(dtoTheHobbit, dtoIt));
 		mockMvc.perform(get("/produtos/search")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -148,9 +148,9 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void persisteProduto() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
-		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenReturn(livroTheHobbit);		
+		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenReturn(dtoTheHobbit);		
 		mockMvc.perform(post("/produtos")
 					.contentType(APPLICATION_JSON_UTF8)
 					.content(jsonObject))
@@ -162,7 +162,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void persisteProdutoDuplicado() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
 		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenThrow(RegistroAlreadyExistsException.class);		
 		mockMvc.perform(post("/produtos")
@@ -175,7 +175,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void atualizaProduto() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
 		mockMvc.perform(put("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.contentType(APPLICATION_JSON_UTF8)
@@ -186,7 +186,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void atualizaProdutoInexistente() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
 		doThrow(new RegistroNotFoundException("Produto inexistente")).when(facade)
 			.update(Mockito.anyString(), Mockito.any(ProdutoDTO.class));

@@ -27,7 +27,7 @@ public class ProdutoFacade {
 		return modelMapper.map(service.insert(produto), ProdutoDTO.class);
 	}
 
-	public void update(String codigo, ProdutoDTO produtoDto) throws RegistroNotFoundException {
+	public void update(String codigo, ProdutoDTO produtoDto) throws RegistroNotFoundException, RegistroAlreadyExistsException {
 		Produto produto = modelMapper.map(produtoDto, Produto.class);
 		service.update(codigo, produto);
 	}

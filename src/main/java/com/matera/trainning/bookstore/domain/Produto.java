@@ -2,6 +2,7 @@ package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -21,7 +22,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Produto {
+public class Produto implements Serializable {
+	
+	private static final long serialVersionUID = -7730345806639716076L;
 
 	@Id
 	@Column(name = "id", nullable = false)
