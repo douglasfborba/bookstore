@@ -8,8 +8,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.matera.trainning.bookstore.domain.Historico;
-import com.matera.trainning.bookstore.domain.HistoricoPK;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
+import com.matera.trainning.bookstore.domain.HistoricoDePrecoPK;
 import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
@@ -22,7 +22,7 @@ public class ProdutoService {
 	private ProdutoRepository repository;
 	
 	@Autowired
-	private HistoricoService historicoService;
+	private HistoricoDePrecoService historicoService;
 
 	public Produto insert(Produto produto) throws RegistroAlreadyExistsException {
 		Optional<Produto> opcional = repository.findByCodigo(produto.getCodigo());
@@ -51,10 +51,10 @@ public class ProdutoService {
 		produto.setId(produtoSalvo.getId());
 		produto.setDataCadastro(produtoSalvo.getDataCadastro());
 				
-		repository.save(produto);
-		
 		if (produtoSalvo.getPreco().compareTo(produto.getPreco()) != 0)
 			historizaPreco(produto);
+		
+		repository.save(produto);
 	}
 	
 	public void delete(String codigo) throws RegistroNotFoundException {
@@ -84,9 +84,9 @@ public class ProdutoService {
 	}
 	
 	private void historizaPreco(Produto produto) throws RegistroAlreadyExistsException {
-		Historico historico = new Historico();
+		HistoricoDePreco historico = new HistoricoDePreco();
 		
-		historico.setPk(new HistoricoPK(produto, LocalDateTime.now()));
+		historico.setPk(new HistoricoDePrecoPK(produto, LocalDateTime.now()));
 		historico.setPreco(produto.getPreco());
 		
 		historicoService.insert(historico);

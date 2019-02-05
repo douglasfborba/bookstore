@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class HistoricoPK implements Serializable {
+public class HistoricoDePrecoPK implements Serializable {
 
 	private static final long serialVersionUID = -3544478716843638749L;
 
@@ -26,7 +26,7 @@ public class HistoricoPK implements Serializable {
 	@Column(name = "data_alteracao", nullable = false)
 	private LocalDateTime dataHoraAlteracao;
 
-	public HistoricoPK(Produto produto, LocalDateTime dataHoraAlteracao) {
+	public HistoricoDePrecoPK(Produto produto, LocalDateTime dataHoraAlteracao) {
 		this.produto = produto;
 		this.dataHoraAlteracao = dataHoraAlteracao;
 	}

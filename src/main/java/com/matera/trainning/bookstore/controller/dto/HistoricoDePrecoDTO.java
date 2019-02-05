@@ -13,14 +13,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
-import com.matera.trainning.bookstore.domain.Historico;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @NoArgsConstructor
-public class HistoricoDTO {
+public class HistoricoDePrecoDTO {
 	
 	@Getter @Setter
     @JsonView @JsonFormat(pattern = "dd-MM-yyyy HH:mm:ss")
@@ -36,14 +36,14 @@ public class HistoricoDTO {
 	@JsonView
 	private ProdutoDTO produto;	
 
-	public static final Converter<Historico, HistoricoDTO> getConverter() {
-		Converter<Historico, HistoricoDTO> conversor = new Converter<Historico, HistoricoDTO>() {
+	public static final Converter<HistoricoDePreco, HistoricoDePrecoDTO> getConverter() {
+		Converter<HistoricoDePreco, HistoricoDePrecoDTO> conversor = new Converter<HistoricoDePreco, HistoricoDePrecoDTO>() {
 			
 			@Override
-			public HistoricoDTO convert(MappingContext<Historico, HistoricoDTO> contexto) {
-				Historico historico = contexto.getSource();
+			public HistoricoDePrecoDTO convert(MappingContext<HistoricoDePreco, HistoricoDePrecoDTO> contexto) {
+				HistoricoDePreco historico = contexto.getSource();
 								
-				HistoricoDTO dtoHistorico = new HistoricoDTO();
+				HistoricoDePrecoDTO dtoHistorico = new HistoricoDePrecoDTO();
 				ModelMapper modelMapper = new ModelMapper();
 				
 				dtoHistorico.setProduto(modelMapper.map(historico.getPk().getProduto(), ProdutoDTO.class));

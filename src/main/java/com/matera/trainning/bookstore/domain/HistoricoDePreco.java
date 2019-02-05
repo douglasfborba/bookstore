@@ -15,12 +15,12 @@ import lombok.EqualsAndHashCode;
 @Table(name = "dis_historico")
 
 @Data
-public class Historico implements Serializable {
+public class HistoricoDePreco implements Serializable {
 	
 	private static final long serialVersionUID = 4956821838720223133L;
 
 	@EmbeddedId
-	private HistoricoPK pk;
+	private HistoricoDePrecoPK pk;
 	
 	@EqualsAndHashCode.Exclude
 	@Column(name = "preco", nullable = false)
