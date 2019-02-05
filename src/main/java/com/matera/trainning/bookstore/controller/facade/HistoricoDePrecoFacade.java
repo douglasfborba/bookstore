@@ -23,26 +23,28 @@ public class HistoricoDePrecoFacade {
 
 	@Autowired
 	private HistoricoDePrecoService service;
-
-	public HistoricoDePrecoFacade() {
-		modelMapper.addConverter(getConverter());
-	}
 	
-	public HistoricoDePrecoDTO findByProdutoCodigoAndDataHoraAlteracao(String codigoProduto, LocalDateTime dataHoraAlteracao) throws RegistroNotFoundException {
+	public HistoricoDePrecoDTO findByProdutoCodigoAndDataHoraAlteracao(String codigoProduto, LocalDateTime dataHoraAlteracao) throws RegistroNotFoundException {		
+		modelMapper.addConverter(getConverter());
+
 		HistoricoDePreco historicoDePreco = service.findByProdutoCodigoAndDataHoraAlteracao(codigoProduto, dataHoraAlteracao);
 		return modelMapper.map(historicoDePreco, HistoricoDePrecoDTO.class);
 	}
 	
 	public List<HistoricoDePrecoDTO> findAllByProdutoCodigo(String codigoProduto) {
 		return service.findAllByProdutoCodigo(codigoProduto).stream()
-				.map(historico -> modelMapper.map(historico, HistoricoDePrecoDTO.class))
-				.collect(Collectors.toList());
+				.map(historico -> {
+					modelMapper.addConverter(getConverter());
+					return modelMapper.map(historico, HistoricoDePrecoDTO.class);
+				}).collect(Collectors.toList());
 	}
 	
 	public List<HistoricoDePrecoDTO> findAllByProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim) {
 		return service.findAllByProdutoCodigoWithDataHoraAlteracaoBetween(codigoProduto, inicio, fim).stream()
-				.map(historico -> modelMapper.map(historico, HistoricoDePrecoDTO.class))
-				.collect(Collectors.toList());
+				.map(historico -> {
+					modelMapper.addConverter(getConverter());
+					return modelMapper.map(historico, HistoricoDePrecoDTO.class);	
+				}).collect(Collectors.toList());
 	}
 
 }
