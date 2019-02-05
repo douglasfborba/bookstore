@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.domain.HistoricoDePreco;
-import com.matera.trainning.bookstore.domain.HistoricoDePrecoPK;
 import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
@@ -86,7 +85,8 @@ public class ProdutoService {
 	private void historizaPreco(Produto produto) throws RegistroAlreadyExistsException {
 		HistoricoDePreco historico = new HistoricoDePreco();
 		
-		historico.setPk(new HistoricoDePrecoPK(produto, LocalDateTime.now()));
+		historico.setProduto(produto);
+		historico.setDataHoraAlteracao(LocalDateTime.now());
 		historico.setPreco(produto.getPreco());
 		
 		historicoService.insert(historico);

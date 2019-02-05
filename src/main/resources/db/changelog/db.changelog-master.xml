@@ -131,5 +131,59 @@
 			<column name="produto_id" valueNumeric="1" />			
 		</insert>
 	</changeSet>	
+	
+	
+	
+	<changeSet author="douglas.borba" id="05022019105423-1">
+		<createTable tableName="dis_historico">
+			<column name="id" type="bigint">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="data_hora_alteracao" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="produto_id" type="int">
+				<constraints nullable="false" foreignKeyName="fk_prod_hist"/>
+			</column>			
+		</createTable>
+		<addForeignKeyConstraint baseColumnNames="produto_id" baseTableName="dis_historico"
+	            constraintName="fk_hist_prod" deferrable="true" initiallyDeferred="true"
+	            onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
+	            referencedTableName="dis_produto"/>
+	</changeSet>
+		
+	<changeSet author="douglas.borba" id="05022019105747-1">
+		<createSequence sequenceName="dis_hist_seq" 
+			ordered="true" cycle="false" minValue="1" maxValue="2000" 
+			startValue="1" incrementBy="1" />
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="05022019105800-1">
+		<sql endDelimiter="/">
+			CREATE OR REPLACE TRIGGER dis_hist_nextid 
+				BEFORE INSERT ON dis_historico
+				REFERENCING	OLD AS old NEW AS new
+				FOR EACH ROW
+			DECLARE
+				v_id NUMBER(38, 0);
+			BEGIN
+				IF :new.id IS NULL THEN
+					SELECT dis_hist_seq.NEXTVAL INTO v_id FROM dual;
+					:new.id := v_id;
+				END IF;
+			END dis_hist_nextid;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="05022019105850-1">
+		<insert tableName="dis_historico" schemaName="sdbanco">
+			<column name="data_hora_alteracao" valueComputed="${now}" />
+			<column name="produto_id" valueNumeric="1" />		
+		</insert>
+		<insert tableName="dis_historico" schemaName="sdbanco">
+			<column name="data_hora_alteracao" valueComputed="${now}" />
+			<column name="produto_id" valueNumeric="1" />			
+		</insert>
+	</changeSet>	
 
 </databaseChangeLog>

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
@@ -31,6 +33,9 @@ public class ProdutoServiceTest {
 
 	@Mock
 	private ProdutoRepository repository;
+	
+	@Mock
+	private HistoricoDePrecoService historicoService;
 
 	@InjectMocks
 	private ProdutoService service;
@@ -107,9 +112,12 @@ public class ProdutoServiceTest {
 	@Test
 	public void persisteProdutoComDataCadastroNula() throws Exception {
 		livroTheHobbit.setDataCadastro(null);
+		
+		HistoricoDePreco itemHistorico = new HistoricoDePreco(livroTheHobbit, LocalDateTime.now(), new BigDecimal(72.90));
 
 		when(repository.findByCodigo(COD_LIVRO_HOBBIT)).thenReturn(Optional.empty());
 		when(repository.save(Mockito.any(Produto.class))).thenReturn(livroTheHobbit);
+		when(historicoService.insert(Mockito.any(HistoricoDePreco.class))).thenReturn(itemHistorico);
 
 		Produto produto = service.insert(livroTheHobbit);
 		assertThat(produto).isNotNull().hasFieldOrPropertyWithValue("dataCadastro", LocalDate.now());

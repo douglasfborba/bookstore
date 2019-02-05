@@ -1,15 +1,17 @@
 package com.matera.trainning.bookstore.domain;
 
+import static javax.persistence.CascadeType.REMOVE;
 import static javax.persistence.GenerationType.SEQUENCE;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -22,10 +24,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Produto implements Serializable {
+public class Produto {
 	
-	private static final long serialVersionUID = -7730345806639716076L;
-
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
@@ -47,6 +47,12 @@ public class Produto implements Serializable {
 	@EqualsAndHashCode.Exclude
 	@Column(name = "dataCadastro", nullable = false)
 	private LocalDate dataCadastro;
+	
+	@OneToMany(mappedBy = "produto", cascade = REMOVE, orphanRemoval = true)
+	private Set<Comentario> comentarios;
+	
+	@OneToMany(mappedBy = "produto", cascade = REMOVE, orphanRemoval = true)
+	private Set<HistoricoDePreco> precos;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
 		this.codigo = codigo;

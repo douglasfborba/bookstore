@@ -34,7 +34,7 @@ public class ComentarioServiceTest {
 	private ComentarioRepository repository;
 	
 	@Mock
-	private ProdutoService produtoServiceo;
+	private ProdutoService produtoService;
 
 	@InjectMocks
 	private ComentarioService service;
@@ -125,7 +125,7 @@ public class ComentarioServiceTest {
 
 	@Test
 	public void persisteComentarioComDataHoraCriacaoPreenchida() throws Exception {		
-		when(produtoServiceo.findByCodigo("LIVRO23040")).thenReturn(hater.getProduto());
+		when(produtoService.findByCodigo("LIVRO23040")).thenReturn(hater.getProduto());
 		when(repository.findByCodigo(COD_USU_HATER)).thenReturn(Optional.empty());
 		when(repository.save(Mockito.any(Comentario.class))).thenReturn(hater);
 

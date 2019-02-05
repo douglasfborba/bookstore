@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
-import com.matera.trainning.bookstore.respository.HistoricoDePrecoRepository;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
+import com.matera.trainning.bookstore.service.HistoricoDePrecoService;
+import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @Component
 public class HistoricoDePrecoFacade {
@@ -20,22 +22,27 @@ public class HistoricoDePrecoFacade {
 	private ModelMapper modelMapper;
 
 	@Autowired
-	private HistoricoDePrecoRepository respository;
+	private HistoricoDePrecoService service;
 
-	public List<HistoricoDePrecoDTO> findAllByPkProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim) {
-		return respository.findAllByPkProdutoCodigoWithDataHoraAlteracaoBetween(codigoProduto, inicio, fim).stream()
-				.map(historico ->  { 
-						modelMapper.addConverter(getConverter());
-						return modelMapper.map(historico, HistoricoDePrecoDTO.class);
-					}).collect(Collectors.toList());
+	public HistoricoDePrecoFacade() {
+		modelMapper.addConverter(getConverter());
 	}
-
-	public List<HistoricoDePrecoDTO> findAllByPkProdutoCodigo(String codigoProduto) {
-		return respository.findAllByPkProdutoCodigo(codigoProduto).stream()
-				.map(historico ->  { 
-						modelMapper.addConverter(getConverter());
-						return modelMapper.map(historico, HistoricoDePrecoDTO.class);
-					}).collect(Collectors.toList());
+	
+	public HistoricoDePrecoDTO findByProdutoCodigoAndDataHoraAlteracao(String codigoProduto, LocalDateTime dataHoraAlteracao) throws RegistroNotFoundException {
+		HistoricoDePreco historicoDePreco = service.findByProdutoCodigoAndDataHoraAlteracao(codigoProduto, dataHoraAlteracao);
+		return modelMapper.map(historicoDePreco, HistoricoDePrecoDTO.class);
+	}
+	
+	public List<HistoricoDePrecoDTO> findAllByProdutoCodigo(String codigoProduto) {
+		return service.findAllByProdutoCodigo(codigoProduto).stream()
+				.map(historico -> modelMapper.map(historico, HistoricoDePrecoDTO.class))
+				.collect(Collectors.toList());
+	}
+	
+	public List<HistoricoDePrecoDTO> findAllByProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim) {
+		return service.findAllByProdutoCodigoWithDataHoraAlteracaoBetween(codigoProduto, inicio, fim).stream()
+				.map(historico -> modelMapper.map(historico, HistoricoDePrecoDTO.class))
+				.collect(Collectors.toList());
 	}
 
 }

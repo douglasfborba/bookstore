@@ -11,5 +11,5 @@ public class BookStoreConfiguration {
 	public ModelMapper modelMapper() {
 		return new ModelMapper();
 	}
-		
+			
 }

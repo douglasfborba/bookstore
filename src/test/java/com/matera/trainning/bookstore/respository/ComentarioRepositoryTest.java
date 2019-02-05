@@ -49,8 +49,15 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void listaComentariosEmBancoPopulado() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
+		
+		lover.setProduto(livroTheHobbit);
 		entityManager.persist(lover);
+
 
 		List<Comentario> comentarios = repository.findAll();
 		assertThat(comentarios).hasSize(2).contains(hater, lover);
@@ -64,6 +71,10 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void buscaComentarioPeloCodigo() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
 
 		Optional<Comentario> opcional = repository.findByCodigo(COD_USU_HATER);
@@ -78,6 +89,10 @@ public class ComentarioRepositoryTest {
 	
 	@Test
 	public void buscaComentarioPeloCodigoDoProduto() throws Exception {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
 
 		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo("LIVRO23040", COD_USU_HATER);
@@ -92,7 +107,13 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void buscaComentarioPeloProdutoCodigoAndDescricao() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
+		
+		lover.setProduto(livroTheHobbit);
 		entityManager.persist(lover);
 
 		List<Comentario> comentarios = repository.findByProdutoCodigoAndDescricao("LIVRO23040", "LiVrO");
@@ -107,6 +128,10 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void persisteComentario() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		repository.save(hater);
 
 		List<Comentario> comentarios = repository.findAll();
@@ -115,6 +140,10 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void atualizaComentario() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
 
 		Optional<Comentario> opcional = repository.findByCodigo(hater.getCodigo());
@@ -132,6 +161,10 @@ public class ComentarioRepositoryTest {
 
 	@Test
 	public void removeComentarioPeloCodigo() {
+		Produto livroTheHobbit = new Produto("LIVRO23040", "Livro The Hobbit", new BigDecimal(57.63), LocalDate.now());
+		entityManager.persist(livroTheHobbit);
+		
+		hater.setProduto(livroTheHobbit);
 		entityManager.persist(hater);
 
 		List<Comentario> comentarios = repository.findAll();

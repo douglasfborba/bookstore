@@ -2,10 +2,8 @@ package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.GenerationType.SEQUENCE;
 
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -25,9 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class Comentario implements Serializable {
-
-	private static final long serialVersionUID = 2383009242216933216L;
+public class Comentario {
 
 	@Id
 	@Column(name = "id", nullable = false)
@@ -52,7 +48,7 @@ public class Comentario implements Serializable {
 	private LocalDateTime dataHoraCriacao;
 
 	@EqualsAndHashCode.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "produto_id", nullable = false)
 	private Produto produto;
 

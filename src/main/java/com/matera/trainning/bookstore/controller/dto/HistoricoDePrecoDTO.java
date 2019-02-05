@@ -46,9 +46,9 @@ public class HistoricoDePrecoDTO {
 				HistoricoDePrecoDTO dtoHistorico = new HistoricoDePrecoDTO();
 				ModelMapper modelMapper = new ModelMapper();
 				
-				dtoHistorico.setProduto(modelMapper.map(historico.getPk().getProduto(), ProdutoDTO.class));
+				dtoHistorico.setProduto(modelMapper.map(historico.getProduto(), ProdutoDTO.class));
 				dtoHistorico.setPreco(historico.getPreco());
-				dtoHistorico.setDataHoraAlteracao(historico.getPk().getDataHoraAlteracao());
+				dtoHistorico.setDataHoraAlteracao(historico.getDataHoraAlteracao());
 				
 				return dtoHistorico;
 			}

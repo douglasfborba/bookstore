@@ -8,15 +8,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import com.matera.trainning.bookstore.domain.HistoricoDePreco;
-import com.matera.trainning.bookstore.domain.HistoricoDePrecoPK;
 
-public interface HistoricoDePrecoRepository extends JpaRepository<HistoricoDePreco, HistoricoDePrecoPK> {
+public interface HistoricoDePrecoRepository extends JpaRepository<HistoricoDePreco, Long> {
 	
-	public Optional<HistoricoDePreco> findByPkProdutoCodigoAndPkDataHoraAlteracao(String codigoProduto, LocalDateTime dataHoraAlteracao);
+	public Optional<HistoricoDePreco> findByProdutoCodigoAndDataHoraAlteracao(String codigoProduto, LocalDateTime dataHoraAlteracao);
 
-	@Query("SELECT h FROM HistoricoDePreco h WHERE h.pk.produto.codigo = ?1 AND h.pk.dataHoraAlteracao >= ?2 AND h.pk.dataHoraAlteracao <= ?3")
-	public List<HistoricoDePreco> findAllByPkProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim);
+	@Query("SELECT h FROM HistoricoDePreco h WHERE h.produto.codigo = ?1 AND h.dataHoraAlteracao >= ?2 AND h.dataHoraAlteracao <= ?3")
+	public List<HistoricoDePreco> findAllByProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim);
 	
-	public List<HistoricoDePreco> findAllByPkProdutoCodigo(String codigoProduto);
+	public List<HistoricoDePreco> findAllByProdutoCodigo(String codigoProduto);
 	
 }

@@ -19,10 +19,10 @@ public class HistoricoDePrecoService {
 	private HistoricoDePrecoRepository repository;
 
 	public HistoricoDePreco insert(HistoricoDePreco historico) throws RegistroAlreadyExistsException {
-		String codigo = historico.getPk().getProduto().getCodigo();
-		LocalDateTime dataHoraAlteracao = historico.getPk().getDataHoraAlteracao();
+		String codigo = historico.getProduto().getCodigo();
+		LocalDateTime dataHoraAlteracao = historico.getDataHoraAlteracao();
 
-		Optional<HistoricoDePreco> opcional = repository.findByPkProdutoCodigoAndPkDataHoraAlteracao(codigo, dataHoraAlteracao);
+		Optional<HistoricoDePreco> opcional = repository.findByProdutoCodigoAndDataHoraAlteracao(codigo, dataHoraAlteracao);
 
 		if (!opcional.isPresent())
 			return repository.save(historico);
@@ -30,16 +30,8 @@ public class HistoricoDePrecoService {
 		throw new RegistroAlreadyExistsException("Histórico já existente");
 	}
 
-	public void update(String codigo, HistoricoDePreco historico) {
-		throw new UnsupportedOperationException();
-	}
-
-	public void delete(String codigo) {
-		throw new UnsupportedOperationException();
-	}
-
-	public HistoricoDePreco findByPkProdutoCodigoAndDataHoraAlteracao(String codigo, LocalDateTime dataHoraAlteracao) throws RegistroNotFoundException {
-		Optional<HistoricoDePreco> opcional = repository.findByPkProdutoCodigoAndPkDataHoraAlteracao(codigo, dataHoraAlteracao);
+	public HistoricoDePreco findByProdutoCodigoAndDataHoraAlteracao(String codigo, LocalDateTime dataHoraAlteracao) throws RegistroNotFoundException {
+		Optional<HistoricoDePreco> opcional = repository.findByProdutoCodigoAndDataHoraAlteracao(codigo, dataHoraAlteracao);
 
 		if (!opcional.isPresent())
 			throw new RegistroNotFoundException("Histórico inexistente");
@@ -47,12 +39,12 @@ public class HistoricoDePrecoService {
 		return opcional.get();
 	}
 	
-	public List<HistoricoDePreco> findByPkProdutoCodigoAndDataHoraAlteracao(String codigoProduto, LocalDateTime inicio, LocalDateTime fim) {
-		return repository.findAllByPkProdutoCodigoWithDataHoraAlteracaoBetween(codigoProduto, inicio, fim);
-	}
+	public List<HistoricoDePreco> findAllByProdutoCodigo(String codigoProduto) {
+		return repository.findAllByProdutoCodigo(codigoProduto);
+	}	
 	
-	public List<HistoricoDePreco> findAll() {
-		return repository.findAll();
+	public List<HistoricoDePreco> findAllByProdutoCodigoWithDataHoraAlteracaoBetween(String codigoProduto, LocalDateTime inicio, LocalDateTime fim) {
+		return repository.findAllByProdutoCodigoWithDataHoraAlteracaoBetween(codigoProduto, inicio, fim);
 	}
 
 }

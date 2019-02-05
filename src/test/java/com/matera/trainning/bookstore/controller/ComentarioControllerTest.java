@@ -87,11 +87,11 @@ public class ComentarioControllerTest {
 	}
 
 	@Test
-	public void buscaComentarioPeloAndProdutoCodigoAndDescricao() throws Exception {
+	public void buscaComentarioPeloProdutoCodigoAndDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(hater, lover));
 
 		when(facade.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list(hater, lover));
-		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/search", "LIVRO23040", COD_USU_HATER)
+		mockMvc.perform(get("/produtos/{codigoProduto}/comentarios/search", "LIVRO23040")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
 				.andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class ComentarioControllerTest {
 	}
 
 	@Test
-	public void buscaComentarioInexistentePeloAndProdutoCodigoAndDescricao() throws Exception {
+	public void buscaComentarioInexistentePeloProdutoCodigoAndDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
 		when(facade.findByProdutoCodigoAndDescricao(Mockito.anyString(), Mockito.anyString())).thenReturn(list());
