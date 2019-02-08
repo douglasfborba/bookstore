@@ -38,9 +38,5 @@ public class ComentarioDTO {
 	@JsonDeserialize(using = LocalDateTimeDeserializer.class)
 	@JsonSerialize(using = LocalDateTimeSerializer.class)
 	private LocalDateTime dataHoraCriacao;
-	
-	@Getter @Setter 
-	@JsonView
-	private ProdutoDTO produto;
-    
+	    
 }

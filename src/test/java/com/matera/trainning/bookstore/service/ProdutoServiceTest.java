@@ -22,9 +22,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
+import com.matera.trainning.bookstore.exception.RegistroNotFoundException;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
-import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
-import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @RunWith(SpringRunner.class)
 public class ProdutoServiceTest {
@@ -53,7 +53,7 @@ public class ProdutoServiceTest {
 	public void listaProdutosEmBancoPopulado() {
 		when(repository.findAll()).thenReturn(list(livroTheHobbit, livroIt));
 
-		List<Produto> produtos = service.findAll();
+		List<Produto> produtos = service.listarTodosOsProdutos();
 		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
 
@@ -61,7 +61,7 @@ public class ProdutoServiceTest {
 	public void listaProdutosEmBancoVazio() throws Exception {
 		when(repository.findAll()).thenReturn(list());
 
-		List<Produto> produtos = service.findAll();
+		List<Produto> produtos = service.listarTodosOsProdutos();
 		assertThat(produtos).isEmpty();
 	}
 
@@ -69,7 +69,7 @@ public class ProdutoServiceTest {
 	public void buscaProdutoPeloCodigo() throws Exception {
 		when(repository.findByCodigo(COD_LIVRO_HOBBIT)).thenReturn(Optional.of(livroTheHobbit));
 
-		Produto produto = service.findByCodigo(COD_LIVRO_HOBBIT);
+		Produto produto = service.buscarDadoCodigoDoProduto(COD_LIVRO_HOBBIT);
 		assertThat(produto).isNotNull().isEqualTo(livroTheHobbit);
 	}
 
@@ -77,7 +77,7 @@ public class ProdutoServiceTest {
 	public void buscaProdutoInexistentePeloCodigo() throws Exception {
 		when(repository.findByCodigo(COD_LIVRO_HOBBIT)).thenReturn(Optional.empty());
 		try {
-			service.findByCodigo(COD_LIVRO_HOBBIT);
+			service.buscarDadoCodigoDoProduto(COD_LIVRO_HOBBIT);
 			fail();
 		} catch (RegistroNotFoundException ex) {
 			assertEquals("Produto inexistente", ex.getMessage());
@@ -88,7 +88,7 @@ public class ProdutoServiceTest {
 	public void buscaProdutoPelaDescricao() throws Exception {
 		when(repository.findByDescricao(Mockito.anyString())).thenReturn(list(livroTheHobbit, livroIt));
 
-		List<Produto> produtos = service.findByDescricao("LiVrO");
+		List<Produto> produtos = service.buscarDadaDescricaoDoProduto("LiVrO");
 		assertThat(produtos).hasSize(2).contains(livroTheHobbit, livroIt);
 	}
 
@@ -96,7 +96,7 @@ public class ProdutoServiceTest {
 	public void buscaProdutoInexistentePelaDescricao() throws Exception {
 		when(repository.findByDescricao(Mockito.anyString())).thenReturn(list());
 
-		List<Produto> produtos = service.findByDescricao("LiVrO");
+		List<Produto> produtos = service.buscarDadaDescricaoDoProduto("LiVrO");
 		assertThat(produtos).isEmpty();
 	}
 
@@ -129,7 +129,7 @@ public class ProdutoServiceTest {
 		try {
 			service.insert(livroTheHobbit);
 			fail();
-		} catch (RegistroAlreadyExistsException ex) {
+		} catch (ResourceAlreadyExistsException ex) {
 			assertEquals("Produto já existente", ex.getMessage());
 		}
 	}
@@ -138,7 +138,7 @@ public class ProdutoServiceTest {
 	public void atualizaProdutoInexistente() throws Exception {
 		when(repository.findByCodigo(COD_LIVRO_HOBBIT)).thenReturn(Optional.empty());
 		try {
-			service.update(COD_LIVRO_HOBBIT, livroTheHobbit);
+			service.atualizar(COD_LIVRO_HOBBIT, livroTheHobbit);
 			fail();
 		} catch (RegistroNotFoundException ex) {
 			assertEquals("Produto inexistente", ex.getMessage());
@@ -149,7 +149,7 @@ public class ProdutoServiceTest {
 	public void excluiProdutoInexistente() throws Exception {
 		when(repository.findByCodigo(COD_LIVRO_HOBBIT)).thenReturn(Optional.empty());
 		try {
-			service.delete(COD_LIVRO_HOBBIT);
+			service.remover(COD_LIVRO_HOBBIT);
 			fail();
 		} catch (RegistroNotFoundException ex) {
 			assertEquals("Produto inexistente", ex.getMessage());

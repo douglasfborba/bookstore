@@ -1,95 +1,54 @@
 package com.matera.trainning.bookstore.service;
 
-import java.time.LocalDateTime;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.domain.Comentario;
-import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.ComentarioRepository;
-import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
-import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @Service
 public class ComentarioService {
 
 	@Autowired
-	private ComentarioRepository repository;
+	private ModelMapper modelMapper;
 	
 	@Autowired
-	private ProdutoService produtoService;
-
-	public Comentario insert(String codigoProduto, Comentario comentario) throws RegistroAlreadyExistsException, RegistroNotFoundException {	
-		Produto produto = produtoService.findByCodigo(codigoProduto);
+	private ComentarioRepository repository;
+	
+	public void atualizar(String codigoComentario, ComentarioDTO dtoComentario) {
+		Comentario comentarioSalvo = repository.findByCodigo(codigoComentario)
+				.orElseThrow(() -> new ResourceNotFoundException());
 		
-		comentario.setProduto(produto);
-		comentario.setDataHoraCriacao(LocalDateTime.now());
-
-		String codigoBase64 = geraCodigoEmBase64(comentario, comentario.getDataHoraCriacao());
-		comentario.setCodigo(codigoBase64);
-		
-		return repository.save(comentario);
-	}
-
-	public void update(String codigoProduto, String codigoComentario, Comentario comentario) throws RegistroNotFoundException {
-		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
-		
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
-
-		Comentario comentarioSalvo = opcional.get();
-		comentarioSalvo.setDescricao(comentario.getDescricao());
-		comentarioSalvo.setUsuario(comentario.getUsuario());
+		comentarioSalvo.setUsuario(dtoComentario.getUsuario());
+		comentarioSalvo.setDescricao(dtoComentario.getDescricao());
 
 		repository.save(comentarioSalvo);
 	}
 
-	public void delete(String codigoProduto, String codigoComentario) throws RegistroNotFoundException {
-		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
-
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
+	public void remover(String codigoComentario) {
+		repository.findByCodigo(codigoComentario)
+				.orElseThrow(() -> new ResourceNotFoundException());
 
 		repository.deleteByCodigo(codigoComentario);
 	}
 
-	public Comentario findByCodigo(String codigo) throws RegistroNotFoundException {
-		Optional<Comentario> opcional = repository.findByCodigo(codigo);
+	public ComentarioDTO buscarDadoCodigoDoComentario(String codigoComentario) {
+		Comentario comentario = repository.findByCodigo(codigoComentario)
+				.orElseThrow(() -> new ResourceNotFoundException());
 
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente");
-
-		return opcional.get();
+		return modelMapper.map(comentario, ComentarioDTO.class);
 	}
 
-	public Comentario findByProdutoCodigoAndCodigo(String codigoProduto, String codigoComentario) throws RegistroNotFoundException {
-		Optional<Comentario> opcional = repository.findByProdutoCodigoAndCodigo(codigoProduto, codigoComentario);
-		
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Comentário inexistente para o produto informado");
-		
-		return opcional.get();
-	}
-
-	public List<Comentario> findByProdutoCodigoAndDescricao(String codigoProduto, String descricao) {
-		return repository.findByProdutoCodigoAndDescricao(codigoProduto, descricao);
-	}
-
-	public List<Comentario> findByProdutoCodigo(String codigoProduto) {
-		return repository.findByProdutoCodigo(codigoProduto);
-	}
-
-	public List<Comentario> findAll() {
-		return repository.findAll();
-	}
-
-	private String geraCodigoEmBase64(Comentario comentario, LocalDateTime dataHoraAtual) {
-		String identificador = comentario.getUsuario() + dataHoraAtual;
-		return new String(Base64.getEncoder().encode(identificador.getBytes()));
+	public Collection<ComentarioDTO> listarTodosOsComentarios() {
+		return repository.findAll().stream()
+				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class))
+				.collect(Collectors.toList());
 	}
 
 }

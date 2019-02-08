@@ -1,12 +1,12 @@
 package com.matera.trainning.bookstore.domain;
 
+import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.SEQUENCE;
 
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -48,7 +48,7 @@ public class Comentario {
 	private LocalDateTime dataHoraCriacao;
 
 	@EqualsAndHashCode.Exclude
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@ManyToOne(fetch = LAZY, optional = false)
 	@JoinColumn(name = "produto_id", nullable = false)
 	private Produto produto;
 

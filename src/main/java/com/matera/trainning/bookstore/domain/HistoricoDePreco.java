@@ -49,7 +49,7 @@ public class HistoricoDePreco {
 		this.produto = produto;
 		this.dataHoraAlteracao = dataHoraAlteracao;
 		this.preco = preco;
-	}	
+	}
 		
 }
 

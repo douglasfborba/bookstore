@@ -33,8 +33,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.controller.facade.ProdutoFacade;
-import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
-import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
+import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
+import com.matera.trainning.bookstore.exception.RegistroNotFoundException;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(value = ProdutoController.class)
@@ -75,7 +75,7 @@ public class ProdutoControllerTest {
 	public void listaProdutosEmBancoPopulado() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(dtoTheHobbit, dtoIt));
 
-		when(facade.findAll()).thenReturn(list(dtoTheHobbit, dtoIt));
+		when(facade.listarTodosOsProdutos()).thenReturn(list(dtoTheHobbit, dtoIt));
 		mockMvc.perform(get("/produtos")
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -88,7 +88,7 @@ public class ProdutoControllerTest {
 	public void listaProdutosEmBancoVazio() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
-		when(facade.findAll()).thenReturn(list());
+		when(facade.listarTodosOsProdutos()).thenReturn(list());
 		mockMvc.perform(get("/produtos")
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -101,7 +101,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPeloCodigo() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
-		when(facade.findByCodigo(Mockito.anyString())).thenReturn(dtoTheHobbit);
+		when(facade.buscarDadoCodigoDoProduto(Mockito.anyString())).thenReturn(dtoTheHobbit);
 		mockMvc.perform(get("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -111,7 +111,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void buscaProdutoInexistentePeloCodigo() throws Exception {
-		when(facade.findByCodigo(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
+		when(facade.buscarDadoCodigoDoProduto(Mockito.anyString())).thenThrow(RegistroNotFoundException.class);
 		mockMvc.perform(get("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
@@ -122,7 +122,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPelaDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list(dtoTheHobbit, dtoIt));
 
-		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list(dtoTheHobbit, dtoIt));
+		when(facade.buscarDadaDescricaoDoProduto(Mockito.anyString())).thenReturn(list(dtoTheHobbit, dtoIt));
 		mockMvc.perform(get("/produtos/search")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -136,7 +136,7 @@ public class ProdutoControllerTest {
 	public void buscaProdutoInexistentePelaDescricao() throws Exception {
 		String jsonArray = jsonMapper.writeValueAsString(list());
 
-		when(facade.findByDescricao(Mockito.anyString())).thenReturn(list());		
+		when(facade.buscarDadaDescricaoDoProduto(Mockito.anyString())).thenReturn(list());		
 		mockMvc.perform(get("/produtos/search")
 					.accept(APPLICATION_JSON_UTF8)
 					.param("descricao", "LiVrO"))
@@ -164,7 +164,7 @@ public class ProdutoControllerTest {
 	public void persisteProdutoDuplicado() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
-		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenThrow(RegistroAlreadyExistsException.class);		
+		when(facade.insert(Mockito.any(ProdutoDTO.class))).thenThrow(ResourceAlreadyExistsException.class);		
 		mockMvc.perform(post("/produtos")
 					.contentType(APPLICATION_JSON_UTF8)
 					.content(jsonObject))
@@ -189,7 +189,7 @@ public class ProdutoControllerTest {
 		String jsonObject = jsonMapper.writeValueAsString(dtoTheHobbit);
 
 		doThrow(new RegistroNotFoundException("Produto inexistente")).when(facade)
-			.update(Mockito.anyString(), Mockito.any(ProdutoDTO.class));
+			.atualizar(Mockito.anyString(), Mockito.any(ProdutoDTO.class));
 		
 		mockMvc.perform(put("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.contentType(APPLICATION_JSON_UTF8)
@@ -209,7 +209,7 @@ public class ProdutoControllerTest {
 	@Test
 	public void excluiProdutoInexistente() throws Exception {
 		doThrow(new RegistroNotFoundException("Produto inexistente")).when(facade)
-			.delete(Mockito.anyString());
+			.remover(Mockito.anyString());
 
 		mockMvc.perform(delete("/produtos/{codigo}", COD_LIVRO_HOBBIT)
 					.accept(APPLICATION_JSON_UTF8))

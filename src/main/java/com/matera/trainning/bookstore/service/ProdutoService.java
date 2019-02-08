@@ -1,95 +1,180 @@
 package com.matera.trainning.bookstore.service;
 
+import static java.util.Base64.getEncoder;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.matera.trainning.bookstore.domain.HistoricoDePreco;
+import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
+import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
+import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
+import com.matera.trainning.bookstore.domain.Comentario;
 import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
+import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
-import com.matera.trainning.bookstore.service.exceptions.RegistroAlreadyExistsException;
-import com.matera.trainning.bookstore.service.exceptions.RegistroNotFoundException;
 
 @Service
 public class ProdutoService {
 
 	@Autowired
-	private ProdutoRepository repository;
+	private ModelMapper modelMapper;
 	
 	@Autowired
-	private HistoricoDePrecoService historicoService;
-
-	public Produto insert(Produto produto) throws RegistroAlreadyExistsException {
-		Optional<Produto> opcional = repository.findByCodigo(produto.getCodigo());
-
-		if (!opcional.isPresent()) {
-			if (produto.getDataCadastro() == null)
-				produto.setDataCadastro(LocalDate.now());
+	private ProdutoRepository repository;
+	
+	public ProdutoDTO inserir(ProdutoDTO dtoProduto)  {	
+		repository.findByCodigo(dtoProduto.getCodigo())
+				.ifPresent(produto -> {
+					throw new ResourceAlreadyExistsException(); 
+				});
+				
+		Produto produto = modelMapper.map(dtoProduto, Produto.class);
+		if (produto.getDataCadastro() == null)
+			produto.setDataCadastro(LocalDate.now());
 			
-			Produto produtoSalvo = repository.save(produto);
-			historizaPreco(produtoSalvo);
+		Produto produtoSalvo = repository.save(produto);
+//		historizaPreco(produtoSalvo);
 			
-			return produtoSalvo;			
-		}
-
-		throw new RegistroAlreadyExistsException("Produto já existente");
+		return modelMapper.map(produtoSalvo, ProdutoDTO.class);	
 	}
 		
-	public void update(String codigo, Produto produto) throws RegistroNotFoundException, RegistroAlreadyExistsException {
-		Optional<Produto> opcional = repository.findByCodigo(codigo);
-
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Produto inexistente");
-
-		Produto produtoSalvo = opcional.get();
-	
+	public void atualizar(String codigoProduto, ProdutoDTO dtoProduto) {		
+		Produto produtoSalvo = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		Produto produto = modelMapper.map(dtoProduto, Produto.class);			
 		produto.setId(produtoSalvo.getId());
 		produto.setDataCadastro(produtoSalvo.getDataCadastro());
-				
-		if (produtoSalvo.getPreco().compareTo(produto.getPreco()) != 0)
-			historizaPreco(produto);
+		produto.setComentarios(produtoSalvo.getComentarios());
+		produto.setPrecos(produtoSalvo.getPrecos());
+		
+//		if (produtoSalvo.getPreco().compareTo(dtoProduto.getPreco()) != 0)
+//			historizaPreco(produto);
 		
 		repository.save(produto);
 	}
 	
-	public void delete(String codigo) throws RegistroNotFoundException {
-		Optional<Produto> opcional = repository.findByCodigo(codigo);
+	public void remover(String codigoProduto) {
+		repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
 
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Produto inexistente");
-
-		repository.deleteByCodigo(codigo);
+		repository.deleteByCodigo(codigoProduto);
 	}
 
-	public Produto findByCodigo(String codigo) throws RegistroNotFoundException {
-		Optional<Produto> opcional = repository.findByCodigo(codigo);
+	public ProdutoDTO buscarDadoCodigoDoProduto(String codigoProduto) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
 
-		if (!opcional.isPresent())
-			throw new RegistroNotFoundException("Produto inexistente");
-
-		return opcional.get();
+		return modelMapper.map(produto, ProdutoDTO.class);
 	}
 
-	public List<Produto> findByDescricao(String descricao) {
-		return repository.findByDescricao(descricao);
+	public Collection<ProdutoDTO> buscarProdutosDadoDescricao(String descricao) {
+		return repository.findByDescricao(descricao).stream()
+				.map(produto -> modelMapper.map(produto, ProdutoDTO.class))
+				.collect(Collectors.toList());
 	}
 
-	public List<Produto> findAll() {
-		return repository.findAll();
+	public Collection<ProdutoDTO> listarTodosOsProdutos() {
+		return repository.findAll().stream()
+				.map(produto -> modelMapper.map(produto, ProdutoDTO.class))
+				.collect(Collectors.toList());
 	}
 	
-	private void historizaPreco(Produto produto) throws RegistroAlreadyExistsException {
-		HistoricoDePreco historico = new HistoricoDePreco();
-		
-		historico.setProduto(produto);
-		historico.setDataHoraAlteracao(LocalDateTime.now());
-		historico.setPreco(produto.getPreco());
-		
-		historicoService.insert(historico);
+	public Collection<ComentarioDTO> listarComentariosDadoCodigoDoProduto(String codigoProduto) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+
+		return produto.getComentarios().stream()
+				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class))
+				.collect(Collectors.toList());
 	}
+	
+	public ComentarioDTO buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(String codigoProduto, String codigoComentario) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+				
+		return produto.getComentarios().stream()
+				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class))		
+				.filter(dto -> dto.getCodigo().equals(codigoComentario))
+				.findFirst()
+					.orElseThrow(() -> new RecursoNotFoundException());
+	}
+	
+	public ComentarioDTO inserirNovoComentario(String codigoProduto, ComentarioDTO dtoComentario) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		Comentario comentario = modelMapper.map(dtoComentario, Comentario.class);	
+		LocalDateTime dataHoraAtual = LocalDateTime.now();
+
+		comentario.setCodigo(geraCodigoEmBase64(comentario, dataHoraAtual));
+		comentario.setDataHoraCriacao(dataHoraAtual);
+		comentario.setProduto(produto);
+		
+		produto.addComentario(comentario);
+		repository.save(produto);
+		
+		return modelMapper.map(comentario, ComentarioDTO.class);
+	}
+	
+	public void atualizarComentario(String codigoProduto, String codigoComentario, ComentarioDTO dtoComentario) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		Comentario comentario = produto.getComentarios().stream()
+				.filter(dto -> dto.getCodigo().equals(codigoComentario))
+				.findFirst()
+					.orElseThrow(() -> new RecursoNotFoundException());
+		
+		comentario.setUsuario(comentario.getUsuario());
+		comentario.setDescricao(dtoComentario.getDescricao());
+				
+		repository.save(produto);
+	}
+	
+	public void removerComentario(String codigoProduto, String codigoComentario) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		Comentario comentario = produto.getComentarios().stream()
+			.filter(dto -> dto.getCodigo().equals(codigoComentario))
+			.findFirst()
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		produto.removeComentario(comentario);
+		
+		repository.save(produto);
+	}
+	
+	public Collection<HistoricoDePrecoDTO> listarPrecosDadoCodigoDoProduto(String codigoProduto) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		return produto.getPrecos().stream()
+				.map(preco -> modelMapper.map(preco, HistoricoDePrecoDTO.class))
+				.collect(Collectors.toList());		
+	}
+	
+	private String geraCodigoEmBase64(Comentario comentario, LocalDateTime dataHoraAtual) {
+		String identificador = comentario.getUsuario() + dataHoraAtual;
+		return new String(getEncoder().encode(identificador.getBytes()));
+	}
+
+//	private void historizaPreco(Produto produto) {
+//		HistoricoDePreco historico = new HistoricoDePreco();
+//		
+//		historico.setProduto(produto);
+//		historico.setDataHoraAlteracao(LocalDateTime.now());
+//		historico.setPreco(produto.getPreco());
+//		
+//		historicoService.insert(historico);
+//	}
 
 }
