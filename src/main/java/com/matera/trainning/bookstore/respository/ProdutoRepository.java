@@ -1,6 +1,6 @@
 package com.matera.trainning.bookstore.respository;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import javax.transaction.Transactional;
@@ -18,6 +18,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 	public void deleteByCodigo(String codigo);
 
 	@Query("SELECT p FROM Produto p WHERE LOWER(p.descricao) LIKE CONCAT('%', LOWER(?1), '%')")
-	public List<Produto> findByDescricao(String descricao);
+	public Collection<Produto> findByDescricao(String descricao);
 	
 }

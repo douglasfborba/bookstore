@@ -1,12 +1,11 @@
 package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.CascadeType.ALL;
-import static javax.persistence.CascadeType.REMOVE;
 import static javax.persistence.GenerationType.SEQUENCE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -50,10 +49,10 @@ public class Produto {
 	private LocalDate dataCadastro;
 	
 	@OneToMany(mappedBy = "produto", cascade = ALL, orphanRemoval = true)
-	private List<Comentario> comentarios;
+	private Set<Comentario> comentarios;
 	
-	@OneToMany(mappedBy = "produto", cascade = REMOVE, orphanRemoval = true)
-	private List<HistoricoDePreco> precos;
+	@OneToMany(mappedBy = "produto", cascade = ALL, orphanRemoval = true)
+	private Set<HistoricoDePreco> precos;
 
 	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
 		this.codigo = codigo;
@@ -68,6 +67,14 @@ public class Produto {
 	
 	public void removeComentario(Comentario comentario) {
 		comentarios.remove(comentario);
+	}
+	
+	public void addHistoricoDePreco(HistoricoDePreco preco) {
+		this.precos.add(preco);
+	}
+	
+	public void removeHistoricoDePreco(HistoricoDePreco preco) {
+		precos.remove(preco);
 	}
 	
 }

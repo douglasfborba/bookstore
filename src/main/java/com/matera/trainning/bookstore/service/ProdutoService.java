@@ -15,6 +15,7 @@ import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.domain.Comentario;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
 import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
@@ -38,13 +39,23 @@ public class ProdutoService {
 		Produto produto = modelMapper.map(dtoProduto, Produto.class);
 		if (produto.getDataCadastro() == null)
 			produto.setDataCadastro(LocalDate.now());
-			
+				
+		produto.addHistoricoDePreco(getHistoricoDePreco(produto));
 		Produto produtoSalvo = repository.save(produto);
-//		historizaPreco(produtoSalvo);
 			
 		return modelMapper.map(produtoSalvo, ProdutoDTO.class);	
 	}
 		
+	private HistoricoDePreco getHistoricoDePreco(Produto produto) {
+		HistoricoDePreco historico = new HistoricoDePreco();
+		
+		historico.setProduto(produto);
+		historico.setDataHoraAlteracao(LocalDateTime.now());
+		historico.setPreco(produto.getPreco());		
+
+		return historico;
+	}
+
 	public void atualizar(String codigoProduto, ProdutoDTO dtoProduto) {		
 		Produto produtoSalvo = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException());
@@ -55,8 +66,8 @@ public class ProdutoService {
 		produto.setComentarios(produtoSalvo.getComentarios());
 		produto.setPrecos(produtoSalvo.getPrecos());
 		
-//		if (produtoSalvo.getPreco().compareTo(dtoProduto.getPreco()) != 0)
-//			historizaPreco(produto);
+		if (produtoSalvo.getPreco().compareTo(dtoProduto.getPreco()) != 0)
+			produto.addHistoricoDePreco(getHistoricoDePreco(produto));
 		
 		repository.save(produto);
 	}
@@ -167,14 +178,22 @@ public class ProdutoService {
 		return new String(getEncoder().encode(identificador.getBytes()));
 	}
 
-//	private void historizaPreco(Produto produto) {
-//		HistoricoDePreco historico = new HistoricoDePreco();
-//		
-//		historico.setProduto(produto);
-//		historico.setDataHoraAlteracao(LocalDateTime.now());
-//		historico.setPreco(produto.getPreco());
-//		
-//		historicoService.insert(historico);
-//	}
+	public Collection<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal) {		
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException());
+		
+		return produto.getPrecos().stream()
+				.map(preco -> modelMapper.map(preco, HistoricoDePrecoDTO.class))
+				.filter(preco -> 
+					{ 
+						LocalDate dataAlteracao = preco.getDataHoraAlteracao().toLocalDate();
+						
+						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dataInicial) || dataAlteracao.isEqual(dataInicial);
+						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dataFinal) || dataAlteracao.isEqual(dataFinal);
+						
+						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
+					})
+				.collect(Collectors.toList());
+	}
 
 }

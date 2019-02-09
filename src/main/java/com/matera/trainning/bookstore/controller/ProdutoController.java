@@ -5,12 +5,14 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -107,6 +109,11 @@ public class ProdutoController {
 	@GetMapping("v1/produtos/{codigoProduto}/precos")
 	public Collection<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codigoProduto) {
 		return service.listarPrecosDadoCodigoDoProduto(codigoProduto);
+	}
+	
+	@GetMapping(value = "v1/produtos/{codigoProduto}/precos", params = { "dataInicial", "dataFinal" })
+	public Collection<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(@PathVariable String codigoProduto, @RequestParam("dataInicial") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial, @RequestParam("") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal) {
+		return service.listasPrecosEntreDataInicialAndDataFinal(codigoProduto, dataInicial, dataFinal);
 	}
 	
 	private URI getUriDadoCodigoRecurso(String codigo) {
