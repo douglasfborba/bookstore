@@ -9,12 +9,15 @@ public class RecursoNotFoundException extends RuntimeException {
 
 	private static final long serialVersionUID = -241024142683980912L;
 
+	private String codigo;
+	
 	public RecursoNotFoundException() {
 		super("Recurso inexistente");
 	}
 
-	public RecursoNotFoundException(String mensagem) {
-		super(mensagem);
+	public RecursoNotFoundException(String codigo) {
+		super("Recurso " + codigo + " inexistente");
+		this.codigo = codigo;
 	}
 
 	public RecursoNotFoundException(Throwable causa) {
@@ -23,6 +26,10 @@ public class RecursoNotFoundException extends RuntimeException {
 
 	public RecursoNotFoundException(String mensagem, Throwable causa) {
 		super(mensagem, causa);
+	}
+	
+	public String getCodigo() {
+		return codigo;
 	}
 
 }

@@ -6,12 +6,12 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.Collection;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +39,7 @@ public class ProdutoController {
 	private ProdutoService service;
 	
 	@PostMapping("v1/produtos")
-	public ResponseEntity<ProdutoDTO> inserir(@Valid @RequestBody ProdutoDTO dtoProduto, HttpServletResponse response) {
+	public ResponseEntity<ProdutoDTO> inserir(@Valid @RequestBody ProdutoDTO dtoProduto) {
 		ProdutoDTO dto = service.inserir(dtoProduto);
 		
 		HttpHeaders headers = new HttpHeaders();
@@ -50,7 +50,7 @@ public class ProdutoController {
 	
 	@PutMapping("v1/produtos/{codigoProduto}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void atualizar(@PathVariable String codigoProduto, @Valid @RequestBody ProdutoDTO dtoProduto, HttpServletResponse response) {
+	public void atualizar(@PathVariable String codigoProduto, @Valid @RequestBody ProdutoDTO dtoProduto) {
 		service.atualizar(codigoProduto, dtoProduto);
 	}
 	
@@ -67,13 +67,13 @@ public class ProdutoController {
 	}
 	
 	@GetMapping(value = "v1/produtos", params = { "descricao" })
-	public Collection<ProdutoDTO> buscarProdutosDadoDescricao(@RequestParam("descricao") String descricao) {
-		return service.buscarProdutosDadoDescricao(descricao);
+	public Page<ProdutoDTO> buscarProdutosDadoDescricao(@RequestParam("descricao") String descricao, Pageable pageable) {
+		return service.buscarProdutosDadoDescricao(descricao, pageable);
 	}
 	
 	@GetMapping("v1/produtos")
-	public Collection<ProdutoDTO> listarProdutos() {
-		return service.listarTodosOsProdutos();
+	public Page<ProdutoDTO> listarProdutos(Pageable pageable) {
+		return service.listarTodosOsProdutos(pageable);
 	}
 	
 	@PostMapping("v1/produtos/{codigoProduto}/comentarios")
@@ -102,21 +102,21 @@ public class ProdutoController {
 	}
 	
 	@GetMapping("v1/produtos/{codigoProduto}/comentarios")
-	public Collection<ComentarioDTO> listarComentarios(@PathVariable String codigoProduto) {
-		return service.listarComentariosDadoCodigoDoProduto(codigoProduto);
+	public Page<ComentarioDTO> listarComentarios(@PathVariable String codigoProduto, Pageable pageable) {
+		return service.listarComentariosDadoCodigoDoProduto(codigoProduto, pageable);
 	}
 	
 	@GetMapping("v1/produtos/{codigoProduto}/precos")
-	public Collection<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codigoProduto) {
-		return service.listarPrecosDadoCodigoDoProduto(codigoProduto);
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codigoProduto, Pageable pageable) {
+		return service.listarPrecosDadoCodigoDoProduto(codigoProduto, pageable);
 	}
 	
 	@GetMapping(value = "v1/produtos/{codigoProduto}/precos", params = { "dataInicial", "dataFinal" })
-	public Collection<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(@PathVariable String codigoProduto, @RequestParam("dataInicial") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial, @RequestParam("") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal) {
-		return service.listasPrecosEntreDataInicialAndDataFinal(codigoProduto, dataInicial, dataFinal);
+	public Page<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(@PathVariable String codigoProduto, @RequestParam("dataInicial") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial, @RequestParam("") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal, Pageable pageable) {
+		return service.listasPrecosEntreDataInicialAndDataFinal(codigoProduto, dataInicial, dataFinal, pageable);
 	}
 	
-	private URI getUriDadoCodigoRecurso(String codigo) {
+	public static final URI getUriDadoCodigoRecurso(String codigo) {
 		return fromCurrentRequestUri().path("/{codigo}").buildAndExpand(codigo).toUri();
 	}
 	

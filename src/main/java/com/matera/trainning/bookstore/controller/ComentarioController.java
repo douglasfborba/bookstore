@@ -2,12 +2,11 @@ package com.matera.trainning.bookstore.controller;
 
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +29,7 @@ public class ComentarioController {
 	
 	@PutMapping("v1/comentarios/{codigoComentario}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void atualizar(@PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO dtoComentario, HttpServletResponse response) {
+	public void atualizar(@PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO dtoComentario) {
 		service.atualizar(codigoComentario, dtoComentario);
 	}
 	
@@ -47,8 +46,8 @@ public class ComentarioController {
 	}
 	
 	@GetMapping("v1/comentarios")
-	public Collection<ComentarioDTO> listarComentarios() {
-		return service.listarTodosOsComentarios();
+	public Page<ComentarioDTO> listarComentarios(Pageable pageable) {
+		return service.listarTodosOsComentarios(pageable);
 	}	
 		
 }

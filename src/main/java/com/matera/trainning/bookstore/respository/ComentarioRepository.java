@@ -2,17 +2,18 @@ package com.matera.trainning.bookstore.respository;
 
 import java.util.Optional;
 
-import javax.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.matera.trainning.bookstore.domain.impl.Comentario;
 
-import com.matera.trainning.bookstore.domain.Comentario;
-
-public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
+public interface ComentarioRepository extends PagingAndSortingRepository<Comentario, Long> {
 
 	public Optional<Comentario> findByCodigo(String codigo);
 
-	@Transactional
 	public void deleteByCodigo(String codigo);	
-
+	
+	public Page<Comentario> findAllByProdutoCodigo(String codigoProduto, Pageable pageable);
+	
 }

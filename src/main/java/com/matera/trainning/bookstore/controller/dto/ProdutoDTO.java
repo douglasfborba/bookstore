@@ -12,12 +12,14 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @NoArgsConstructor
+@ValidaDescricaoAndPreco(baseField = "descricao", matchField = "preco", message = "Preço deve ser superior a 10.0")
 public class ProdutoDTO {
 
 	@Getter @Setter
