@@ -39,7 +39,18 @@ public class ProdutoController {
 	
 	@Autowired
 	private ProdutoService produtoService;
-		
+	
+	@GetMapping("v1/produtos")
+	public Page<ProdutoDTO> listarTodos(Pageable pageable) {
+		System.out.println("listarTodos");
+		return produtoService.listarTodos(pageable);
+	}
+	
+	@GetMapping(value = "v1/produtos", params = { "descricao" })
+	public Page<ProdutoDTO> buscarDadoDescricao(@RequestParam("descricao") String descricao, Pageable pageable) {
+		return produtoService.buscarDadoDescricao(descricao, pageable);
+	}
+	
 	@PostMapping("v1/produtos")
 	public ResponseEntity<ProdutoDTO> inserir(@Valid @RequestBody ProdutoDTO dtoProduto, HttpServletResponse response) {
 		System.out.println("inserir");
@@ -49,6 +60,12 @@ public class ProdutoController {
 		headers.setLocation(getUriDadoCodigoRecurso(dto.getCodigo()));
 		
 		return new ResponseEntity<ProdutoDTO>(dto, headers, CREATED);
+	}	
+	
+	@GetMapping("v1/produtos/{codigoProduto}")
+	public ResponseEntity<ProdutoDTO> buscarDadoCodigo(@PathVariable String codigoProduto) {
+		ProdutoDTO dtoProduto = produtoService.buscarDadoCodigo(codigoProduto);
+		return ResponseEntity.ok(dtoProduto);	
 	}
 	
 	@PutMapping("v1/produtos/{codigoProduto}")
@@ -63,21 +80,9 @@ public class ProdutoController {
 		produtoService.remover(codigoProduto);
 	}
 	
-	@GetMapping("v1/produtos/{codigoProduto}")
-	public ResponseEntity<ProdutoDTO> buscarDadoCodigo(@PathVariable String codigoProduto) {
-		ProdutoDTO dtoProduto = produtoService.buscarDadoCodigo(codigoProduto);
-		return ResponseEntity.ok(dtoProduto);	
-	}
-	
-	@GetMapping(value = "v1/produtos", params = { "descricao" })
-	public Page<ProdutoDTO> buscarDadoDescricao(@RequestParam("descricao") String descricao, Pageable pageable) {
-		return produtoService.buscarDadoDescricao(descricao, pageable);
-	}
-	
-	@GetMapping("v1/produtos")
-	public Page<ProdutoDTO> listarTodos(Pageable pageable) {
-		System.out.println("listarTodos");
-		return produtoService.listarTodos(pageable);
+	@GetMapping("v1/produtos/{codigoProduto}/comentarios")
+	public Page<ComentarioDTO> listarComentarios(@PathVariable String codigoProduto, Pageable pageable) {
+		return produtoService.listarComentariosDadoCodigoDoProduto(codigoProduto, pageable);
 	}
 	
 	@PostMapping("v1/produtos/{codigoProduto}/comentarios")
@@ -90,6 +95,11 @@ public class ProdutoController {
 		return new ResponseEntity<ComentarioDTO>(dto, headers, CREATED);		
 	}
 	
+	@GetMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
+	public ComentarioDTO buscarComentarioDadoCodigoProdutoAndCodigoComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
+		return produtoService.buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(codigoProduto, codigoComentario);
+	}
+	
 	@PutMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
 	public void atualizarComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO dtoComentario) {
 		produtoService.atualizarComentario(codigoProduto, codigoComentario, dtoComentario);
@@ -99,17 +109,7 @@ public class ProdutoController {
 	public void removerComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
 		produtoService.removerComentario(codigoProduto, codigoComentario);
 	}
-	
-	@GetMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
-	public ComentarioDTO buscarComentarioDadoCodigoProdutoAndCodigoComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
-		return produtoService.buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(codigoProduto, codigoComentario);
-	}
-	
-	@GetMapping("v1/produtos/{codigoProduto}/comentarios")
-	public Page<ComentarioDTO> listarComentarios(@PathVariable String codigoProduto, Pageable pageable) {
-		return produtoService.listarComentariosDadoCodigoDoProduto(codigoProduto, pageable);
-	}
-	
+			
 	@GetMapping("v1/produtos/{codigoProduto}/precos")
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codigoProduto, Pageable pageable) {
 		return produtoService.listarPrecosDadoCodigoDoProduto(codigoProduto, pageable);
