@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
@@ -114,6 +115,11 @@ public class ProdutoController {
 	@GetMapping(value = "v1/produtos/{codigoProduto}/precos", params = { "dataInicial", "dataFinal" })
 	public Page<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(@PathVariable String codigoProduto, @RequestParam("dataInicial") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial, @RequestParam("") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal, Pageable pageable) {
 		return service.listasPrecosEntreDataInicialAndDataFinal(codigoProduto, dataInicial, dataFinal, pageable);
+	}
+	
+	@GetMapping("v1/produtos/{codigoProduto}/avaliacoes")
+	public Page<AvaliacaoDTO> listarAvaliacoes(@PathVariable String codigoProduto, Pageable pageable) {
+		return service.listarAvaliacoesDadoCodigoDoProduto(codigoProduto, pageable);
 	}
 	
 	public static final URI getUriDadoCodigoRecurso(String codigo) {

@@ -6,6 +6,7 @@ import static javax.persistence.GenerationType.SEQUENCE;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -16,9 +17,13 @@ import javax.persistence.Table;
 
 import com.matera.trainning.bookstore.domain.Avaliado;
 
+import lombok.Data;
+
+@Data
 @Entity
+@DiscriminatorValue("COM")
 @Table(name = "dis_comentario")
-public class Comentario extends Avaliado {
+public class Comentario implements Avaliado {
 
 	@Id
 	@Column(name = "id", nullable = false)
@@ -26,6 +31,12 @@ public class Comentario extends Avaliado {
 	@SequenceGenerator(name = "dis_cmtr_sequence", sequenceName = "dis_cmtr_seq", allocationSize = 1)
 	private Long id;
 
+	@Column(name = "codigo", nullable = false)
+	private String codigo;
+
+	@Column(name = "descricao", nullable = false)
+	private String descricao;
+	
 	@Column(name = "usuario", nullable = false)
 	private String usuario;
 
@@ -36,46 +47,16 @@ public class Comentario extends Avaliado {
 	@JoinColumn(name = "produto_id", nullable = false)
 	private Produto produto;
 
-	public Comentario() { }
-	
-	public Comentario(String descricao, String codigo, String usuario, LocalDateTime dataHoraCriacao, Produto produto) {
-		super.setCodigo(codigo);
-		super.setDescricao(descricao);
-		this.usuario = usuario;
-		this.dataHoraCriacao = dataHoraCriacao;
-		this.produto = produto;
+	@Override
+	public void setCodigo() {
+		// TODO Auto-generated method stub
+		
 	}
 
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getUsuario() {
-		return usuario;
-	}
-
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
-	}
-
-	public LocalDateTime getDataHoraCriacao() {
-		return dataHoraCriacao;
-	}
-
-	public void setDataHoraCriacao(LocalDateTime dataHoraCriacao) {
-		this.dataHoraCriacao = dataHoraCriacao;
-	}
-
-	public Produto getProduto() {
-		return produto;
-	}
-
-	public void setProduto(Produto produto) {
-		this.produto = produto;
+	@Override
+	public void setDescricao() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

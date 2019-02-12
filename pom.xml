@@ -94,9 +94,9 @@
 				<configuration>
 					<changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
 					<driver>oracle.jdbc.driver.OracleDriver</driver>
-					<url>jdbc:oracle:thin:@localhost:1521:bctst11g</url>
-					<username>sdbanco</username>
-					<password>sdbanco</password>
+					<url>jdbc:oracle:thin:@localhost:1521:xe</url>
+					<username>system</username>
+					<password>oracle</password>
 				</configuration>
 				<executions>
 					<execution>

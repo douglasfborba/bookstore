@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
@@ -40,6 +41,9 @@ public class ProdutoService {
 	
 	@Autowired
 	private HistoricoDePrecoService historicoService;
+	
+	@Autowired
+	private AvaliacaoService avaliacaoService;
 			
 	public ProdutoDTO inserir(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
@@ -189,6 +193,14 @@ public class ProdutoService {
 				.collect(Collectors.toList());
 	
 		return new PageImpl<>(precoes, pageable, precoes.size());
+	}
+	
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
+		repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+		
+		return avaliacaoService.findAllByAvaliadoCodigo(codigoProduto, pageable)
+				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
 	
 	private ProdutoDTO historizarPreco(Produto produtoSalvo) {
