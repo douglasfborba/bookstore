@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.domain.impl;
+package com.matera.trainning.bookstore.domain;
 
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.LAZY;
@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Column;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -18,15 +17,13 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-import com.matera.trainning.bookstore.domain.Avaliado;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@DiscriminatorValue("PROD")
 @Table(name = "dis_produto")
-public class Produto implements Avaliado {
+public class Produto {
 
 	@Id
 	@Column(name = "id", nullable = false)
@@ -34,24 +31,43 @@ public class Produto implements Avaliado {
 	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq", allocationSize = 1)
 	private Long id;
 
+	@EqualsAndHashCode.Exclude
 	@Column(name = "codigo", nullable = false)
 	private String codigo;
 
+	@EqualsAndHashCode.Exclude
 	@Column(name = "descricao", nullable = false)
 	private String descricao;
 
+	@EqualsAndHashCode.Exclude
 	@Column(name = "preco", nullable = false)
 	private BigDecimal preco;
 
+	@EqualsAndHashCode.Exclude
 	@Column(name = "dataCadastro", nullable = false)
 	private LocalDate dataCadastro;
 
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL, orphanRemoval = true)
 	private Set<Comentario> comentarios = new HashSet<>();
 
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL, orphanRemoval = true)
 	private Set<HistoricoDePreco> precos = new HashSet<>();
 
+	@EqualsAndHashCode.Exclude
+	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL)
+	private Set<Avaliacao> avaliacoes = new HashSet<>();
+	
+	public Produto() { }
+	
+	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
+		this.codigo = codigo;
+		this.descricao = descricao;
+		this.preco = preco;
+		this.dataCadastro = dataCadastro;
+	}
+	
 	public void addComentario(Comentario comentario) {
 		this.comentarios.add(comentario);
 	}
@@ -67,17 +83,13 @@ public class Produto implements Avaliado {
 	public void removeHistoricoDePreco(HistoricoDePreco itemHistorico) {
 		this.precos.remove(itemHistorico);
 	}
-
-	@Override
-	public void setCodigo() {
-		// TODO Auto-generated method stub
-		
+	
+	public void addAvaliacao(Avaliacao avaliacao) {
+		this.avaliacoes.add(avaliacao);
 	}
-
-	@Override
-	public void setDescricao() {
-		// TODO Auto-generated method stub
-		
-	}
+	
+	public void removeHistoricoDePreco(Avaliacao avaliacao) {
+		this.avaliacoes.remove(avaliacao);
+	}	
 
 }

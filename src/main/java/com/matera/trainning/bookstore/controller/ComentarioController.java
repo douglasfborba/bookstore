@@ -40,14 +40,14 @@ public class ComentarioController {
 	}
 
 	@GetMapping("v1/comentarios/{codigoComentario}")
-	public ResponseEntity<ComentarioDTO> buscarDadoCodigoDoComentario(@PathVariable String codigoComentario) {
-		ComentarioDTO dtoComentario = service.buscarDadoCodigoDoComentario(codigoComentario);
+	public ResponseEntity<ComentarioDTO> buscarDadoCodigo(@PathVariable String codigoComentario) {
+		ComentarioDTO dtoComentario = service.buscarDadoCodigo(codigoComentario);
 		return ResponseEntity.ok(dtoComentario);	
 	}
 	
 	@GetMapping("v1/comentarios")
-	public Page<ComentarioDTO> listarComentarios(Pageable pageable) {
-		return service.listarTodosOsComentarios(pageable);
+	public Page<ComentarioDTO> listarTodos(Pageable pageable) {
+		return service.listarTodos(pageable);
 	}	
 		
 }

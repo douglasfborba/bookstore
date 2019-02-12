@@ -1,5 +1,6 @@
 package com.matera.trainning.bookstore.service;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
@@ -9,7 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
-import com.matera.trainning.bookstore.domain.impl.Comentario;
+import com.matera.trainning.bookstore.domain.Comentario;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
 import com.matera.trainning.bookstore.respository.ComentarioRepository;
 
@@ -18,43 +20,47 @@ public class ComentarioService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
+
 	@Autowired
 	private ComentarioRepository repository;
+
+	@PostConstruct
+	public void configuraMapper() {
+		modelMapper.addConverter(ComentarioDTO.getConverter());
+	}
 	
 	public void atualizar(String codigoComentario, ComentarioDTO dtoComentario) {
-		Comentario comentarioSalvo = repository.findByCodigo(codigoComentario)
+		Comentario comentario = repository.findByCodigo(codigoComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
-		
-		comentarioSalvo.setUsuario(dtoComentario.getUsuario());
-		comentarioSalvo.setDescricao(dtoComentario.getDescricao());
 
-		repository.save(comentarioSalvo);
+		comentario.setUsuario(dtoComentario.getUsuario());
+		comentario.setDescricao(dtoComentario.getDescricao());
+
+		repository.save(comentario);
 	}
 
 	@Transactional
 	public void remover(String codigoComentario) {
-		repository.findByCodigo(codigoComentario)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
-
-		repository.deleteByCodigo(codigoComentario);
-	}
-
-	public ComentarioDTO buscarDadoCodigoDoComentario(String codigoComentario) {
 		Comentario comentario = repository.findByCodigo(codigoComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
 
+		repository.delete(comentario);
+	}
+
+	public ComentarioDTO buscarDadoCodigo(String codigoComentario) {
+		Comentario comentario = repository.findByCodigo(codigoComentario)
+				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
+		
 		return modelMapper.map(comentario, ComentarioDTO.class);
 	}
 
-	public Page<ComentarioDTO> findAllByProdutoCodigo(String codigoProduto, Pageable pageable) {
-		return repository.findAllByProdutoCodigo(codigoProduto, pageable)
+	public Page<ComentarioDTO> findAllByProduto(Produto produto, Pageable pageable) {
+		return repository.findAllByProduto(produto, pageable)
 				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
 	}
-	
-	public Page<ComentarioDTO> listarTodosOsComentarios(Pageable pageable) {
-		return repository.findAll(pageable)
-				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
-	}	
+
+	public Page<ComentarioDTO> listarTodos(Pageable pageable) {
+		return repository.findAll(pageable).map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
+	}
 
 }

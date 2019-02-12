@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.respository.HistoricoDePrecoRepository;
 
 @Service
@@ -18,8 +19,8 @@ public class HistoricoDePrecoService {
 	@Autowired
 	private HistoricoDePrecoRepository repository;
 	
-	public Page<HistoricoDePrecoDTO> findAllByProdutoCodigo(String codigoProduto, Pageable pageable) {
-		return repository.findAllByProdutoCodigo(codigoProduto, pageable)
+	public Page<HistoricoDePrecoDTO> findAllByProduto(Produto produto, Pageable pageable) {
+		return repository.findAllByProduto(produto, pageable)
 				.map(itemHistorico -> modelMapper.map(itemHistorico, HistoricoDePrecoDTO.class));
 	}
 	

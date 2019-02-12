@@ -49,13 +49,13 @@
 	</changeSet>
 
 	<changeSet author="douglas.borba" id="25012019164103-1">
-		<insert tableName="dis_produto" schemaName="system">
+		<insert tableName="dis_produto" schemaName="sdbanco">
 			<column name="codigo" value="LIV0112457" />
 			<column name="descricao" value="LIVRO O SENHOR DOS ANEIS" />
 			<column name="preco" valueNumeric="82.50" />
 			<column name="data_cadastro" valueDate="2000-02-01" />
 		</insert>
-		<insert tableName="dis_produto" schemaName="system">
+		<insert tableName="dis_produto" schemaName="sdbanco">
 			<column name="codigo" value="LIV0181246" />
 			<column name="descricao" value="LIVRO VIAGEM A LUA" />
 			<column name="preco" valueNumeric="35.00" />
@@ -116,14 +116,14 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="30012019142430-1">
-		<insert tableName="dis_comentario" schemaName="system">
+		<insert tableName="dis_comentario" schemaName="sdbanco">
 			<column name="codigo" value="MDFKVUwtMTEgMTY6MzE6NDA=" />
 			<column name="descricao" value="Bom." />			
 			<column name="usuario" value="fulano.teste" />
 			<column name="data_hora_criacao" valueComputed="${now}" />
 			<column name="produto_id" valueNumeric="1" />		
 		</insert>
-		<insert tableName="dis_comentario" schemaName="system">
+		<insert tableName="dis_comentario" schemaName="sdbanco">
 			<column name="codigo" value="MDJKVUwtMTEgMTY6MzM6MTA=" />
 			<column name="descricao" value="Ótimo livro, recomento a todos." />
 			<column name="usuario" value="beltrano.teste" />
@@ -177,12 +177,12 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="05022019105850-1">
-		<insert tableName="dis_historico" schemaName="system">
+		<insert tableName="dis_historico" schemaName="sdbanco">
 			<column name="data_hora_alteracao" valueComputed="${now}" />
 			<column name="preco" valueNumeric="35.00" />			
 			<column name="produto_id" valueNumeric="1" />		
 		</insert>
-		<insert tableName="dis_historico" schemaName="system">
+		<insert tableName="dis_historico" schemaName="sdbanco">
 			<column name="data_hora_alteracao" valueComputed="${now}" />
 			<column name="preco" valueNumeric="42.90" />			
 			<column name="produto_id" valueNumeric="2" />			

@@ -4,10 +4,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.matera.trainning.bookstore.domain.impl.HistoricoDePreco;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
+import com.matera.trainning.bookstore.domain.Produto;
 
 public interface HistoricoDePrecoRepository extends PagingAndSortingRepository<HistoricoDePreco, Long> {
 
-	public Page<HistoricoDePreco> findAllByProdutoCodigo(String codigoProduto, Pageable pageable);
+	public Page<HistoricoDePreco> findAllByProduto(Produto produto, Pageable pageable);
 
 }

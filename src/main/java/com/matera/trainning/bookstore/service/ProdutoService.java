@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
@@ -20,9 +21,10 @@ import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
-import com.matera.trainning.bookstore.domain.impl.Comentario;
-import com.matera.trainning.bookstore.domain.impl.HistoricoDePreco;
-import com.matera.trainning.bookstore.domain.impl.Produto;
+import com.matera.trainning.bookstore.domain.Avaliacao;
+import com.matera.trainning.bookstore.domain.Comentario;
+import com.matera.trainning.bookstore.domain.HistoricoDePreco;
+import com.matera.trainning.bookstore.domain.Produto;
 import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
 import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
@@ -45,6 +47,12 @@ public class ProdutoService {
 	@Autowired
 	private AvaliacaoService avaliacaoService;
 			
+	@PostConstruct
+	public void configuraMapper() {
+		modelMapper.addConverter(ProdutoDTO.getConverter());
+		modelMapper.addConverter(AvaliacaoDTO.getConverter());
+	}
+	
 	public ProdutoDTO inserir(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
 				.ifPresent(produto -> {
@@ -79,35 +87,34 @@ public class ProdutoService {
 	
 	@Transactional
 	public void remover(String codigoProduto) {
-		repository.findByCodigo(codigoProduto)
+		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 
-		repository.deleteByCodigo(codigoProduto);
+		repository.delete(produto);
 	}
 
-	public ProdutoDTO buscarDadoCodigoDoProduto(String codigoProduto) {
+	public ProdutoDTO buscarDadoCodigo(String codigoProduto) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 
 		return modelMapper.map(produto, ProdutoDTO.class);
 	}
 
-	public Page<ProdutoDTO> buscarProdutosDadoDescricao(String descricao, Pageable pageable) {
+	public Page<ProdutoDTO> buscarDadoDescricao(String descricao, Pageable pageable) {
 		return repository.findByDescricao(descricao, pageable)
 				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
 	}
 
-	public Page<ProdutoDTO> listarTodosOsProdutos(Pageable pageable) {
+	public Page<ProdutoDTO> listarTodos(Pageable pageable) {
 		return repository.findAll(pageable)
 				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
 	}
 	
 	public Page<ComentarioDTO> listarComentariosDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
-		repository.findByCodigo(codigoProduto)
+		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 
-		return comentarioService.findAllByProdutoCodigo(codigoProduto, pageable)
-			.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
+		return comentarioService.findAllByProduto(produto, pageable);
 	}	
 	
 	public ComentarioDTO buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(String codigoProduto, String codigoComentario) {
@@ -121,7 +128,7 @@ public class ProdutoService {
 					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 	}
 	
-	public ComentarioDTO inserirNovoComentario(String codigoProduto, ComentarioDTO dtoComentario) {
+	public ComentarioDTO comentarProduto(String codigoProduto, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
@@ -168,11 +175,10 @@ public class ProdutoService {
 	}
 	
 	public Page<HistoricoDePrecoDTO> listarPrecosDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
-		repository.findByCodigo(codigoProduto)
+		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
-		return historicoService.findAllByProdutoCodigo(codigoProduto, pageable)
-				.map(itemHistorico -> modelMapper.map(itemHistorico, HistoricoDePrecoDTO.class));
+		return historicoService.findAllByProduto(produto, pageable);
 	}
 	
 	public Page<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {		
@@ -196,13 +202,65 @@ public class ProdutoService {
 	}
 	
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
-		repository.findByCodigo(codigoProduto)
+		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
-		return avaliacaoService.findAllByAvaliadoCodigo(codigoProduto, pageable)
-				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
+		return avaliacaoService.findAllByProduto(produto, pageable);
 	}
 	
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoProdutoAndComentario(String codigoProduto, String codigoComentario, Pageable pageable) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				
+		Comentario comentario = produto.getComentarios().stream()
+				.filter(dto -> dto.getCodigo().equals(codigoComentario))
+				.findFirst()
+					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+		
+		return avaliacaoService.findAllByComentario(comentario, pageable);
+	}
+	
+	public AvaliacaoDTO avaliarProduto(String codigoProduto, AvaliacaoDTO dtoAvaliacao) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+		
+		Avaliacao avaliacao = modelMapper.map(dtoAvaliacao, Avaliacao.class);	
+
+		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao, LocalDateTime.now()));
+		avaliacao.setComentario(null);
+		avaliacao.setUsuario(avaliacao.getUsuario());
+		avaliacao.setProduto(produto);
+		avaliacao.setRating(dtoAvaliacao.getRating());
+
+		produto.addAvaliacao(avaliacao);		
+		repository.save(produto);
+		
+		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
+	}
+	
+	public AvaliacaoDTO avaliarComentario(String codigoProduto, String codigoComentario, AvaliacaoDTO dtoAvaliacao) {
+		Produto produto = repository.findByCodigo(codigoProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+		
+		Comentario comentario = produto.getComentarios().stream()
+			.filter(dto -> dto.getCodigo().equals(codigoComentario))
+			.findFirst()
+				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+		
+		Avaliacao avaliacao = modelMapper.map(dtoAvaliacao, Avaliacao.class);	
+
+		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao, LocalDateTime.now()));
+		avaliacao.setComentario(comentario);
+		avaliacao.setUsuario(avaliacao.getUsuario());
+		avaliacao.setProduto(null);
+		avaliacao.setRating(dtoAvaliacao.getRating());
+
+		produto.addAvaliacao(avaliacao);		
+		repository.save(produto);
+		
+		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
+	}	
+		
 	private ProdutoDTO historizarPreco(Produto produtoSalvo) {
 		produtoSalvo.addHistoricoDePreco(getHistoricoDePreco(produtoSalvo));
 		
@@ -226,5 +284,10 @@ public class ProdutoService {
 		String identificador = comentario.getUsuario() + dataHoraAtual;
 		return new String(getEncoder().encode(identificador.getBytes()));
 	}
+	
+	private String geraCodigoEmBase64(Avaliacao avaliacao, LocalDateTime dataHoraAtual) {
+		String identificador = avaliacao.getUsuario() + dataHoraAtual;
+		return new String(getEncoder().encode(identificador.getBytes()));
+	}	
 
 }

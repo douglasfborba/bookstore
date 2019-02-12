@@ -2,9 +2,13 @@ package com.matera.trainning.bookstore.controller.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.OptionalDouble;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+
+import org.modelmapper.Converter;
+import org.modelmapper.spi.MappingContext;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -13,6 +17,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
+import com.matera.trainning.bookstore.domain.Produto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,5 +46,37 @@ public class ProdutoDTO {
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate dataCadastro;
+	
+	@Getter @Setter @JsonView
+	private Double rating;
 
+	public static final Converter<Produto, ProdutoDTO> getConverter() {
+		Converter<Produto, ProdutoDTO> conversor = new Converter<Produto, ProdutoDTO>() {
+			
+			@Override
+			public ProdutoDTO convert(MappingContext<Produto, ProdutoDTO> contexto) {
+				Produto produto = contexto.getSource();
+	
+				ProdutoDTO dtoProduto = new ProdutoDTO();				
+				dtoProduto.setCodigo(produto.getCodigo());
+				dtoProduto.setDescricao(produto.getDescricao());
+				dtoProduto.setPreco(produto.getPreco());
+				dtoProduto.setDataCadastro(produto.getDataCadastro());
+				
+				OptionalDouble optional = produto.getAvaliacoes().stream()
+						.mapToDouble(avaliacao -> avaliacao.getRating().doubleValue())
+						.average();
+				
+				if (optional.isPresent())				
+					dtoProduto.setRating(optional.getAsDouble());
+				else
+					dtoProduto.setRating(0.0);
+				
+				return dtoProduto;
+			}
+		};
+		
+		return conversor;
+	}
+	
 }
