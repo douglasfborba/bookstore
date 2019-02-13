@@ -1,6 +1,7 @@
 package com.matera.trainning.bookstore.service;
 
 import static java.util.Base64.getEncoder;
+import static java.util.Comparator.comparing;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.transaction.Transactional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +25,8 @@ import com.matera.trainning.bookstore.domain.Avaliacao;
 import com.matera.trainning.bookstore.domain.Comentario;
 import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.exception.RecursoAlreadyExistsException;
 import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
-import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 
 @Service
@@ -46,17 +46,18 @@ public class ProdutoService {
 	
 	@Autowired
 	private AvaliacaoService avaliacaoService;
-			
+	
 	@PostConstruct
 	public void configuraMapper() {
 		modelMapper.addConverter(ProdutoDTO.getConverter());
 		modelMapper.addConverter(AvaliacaoDTO.getConverter());
+		modelMapper.addConverter(ComentarioDTO.getConverter());
 	}
 	
 	public ProdutoDTO inserirProduto(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
 				.ifPresent(produto -> {
-					throw new ResourceAlreadyExistsException(produto.getCodigo()); 
+					throw new RecursoAlreadyExistsException(produto.getCodigo()); 
 				});
 				
 		Produto produto = modelMapper.map(dtoProduto, Produto.class);
@@ -85,7 +86,6 @@ public class ProdutoService {
 		repository.save(produto);
 	}
 	
-	@Transactional
 	public void removerProduto(String codigoProduto) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -135,7 +135,7 @@ public class ProdutoService {
 		Comentario comentario = modelMapper.map(dtoComentario, Comentario.class);	
 		LocalDateTime dataHoraAtual = LocalDateTime.now();
 
-		comentario.setCodigo(geraCodigoEmBase64(comentario, dataHoraAtual));
+		comentario.setCodigo(geraCodigoEmBase64(comentario.getUsuario(), dataHoraAtual));
 		comentario.setDataHoraCriacao(dataHoraAtual);
 		comentario.setProduto(produto);
 		
@@ -186,10 +186,10 @@ public class ProdutoService {
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
 		List<HistoricoDePrecoDTO> precoes = produto.getPrecos().stream()
-				.map(preco -> modelMapper.map(preco, HistoricoDePrecoDTO.class))
-				.filter(preco -> 
+				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.filter(histPrecoItem -> 
 					{ 
-						LocalDate dataAlteracao = preco.getDataHoraAlteracao().toLocalDate();
+						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
 						
 						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dataInicial) || dataAlteracao.isEqual(dataInicial);
 						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dataFinal) || dataAlteracao.isEqual(dataFinal);
@@ -200,14 +200,65 @@ public class ProdutoService {
 	
 		return new PageImpl<HistoricoDePrecoDTO>(precoes, pageable, precoes.size());
 	}
-//	
-//	public HistoricoDePrecoDTO buscarPrecoMaximoDadoCodigoProduto(String codProduto) {
-//		Produto produto = repository.findByCodigo(codProduto)
-//				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
-//		
-//		return historicoService.findAllByProduto(produto, n);
-//	}	
-//	
+	
+	public HistoricoDePrecoDTO buscarPrecoMaximoDadoCodigoProduto(String codProduto) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+		
+		return produto.getPrecos().stream()
+			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+			.max(comparing(HistoricoDePrecoDTO::getPreco))
+			.orElseThrow(() -> new RecursoNotFoundException("max(preco)"));
+	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(String codProduto) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+		
+		return produto.getPrecos().stream()
+			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+			.min(comparing(HistoricoDePrecoDTO::getPreco))
+			.orElseThrow(() -> new RecursoNotFoundException("min(preco)"));
+	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+		
+		return produto.getPrecos().stream()
+				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.filter(histPrecoItem -> 
+					{ 
+						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
+						
+						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dtInicial) || dataAlteracao.isEqual(dtInicial);
+						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dtFinal) || dataAlteracao.isEqual(dtFinal);
+						
+						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
+					})
+				.max(comparing(HistoricoDePrecoDTO::getPreco))
+				.orElseThrow(() -> new RecursoNotFoundException("max(preco)"));	
+	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+		
+		return produto.getPrecos().stream()
+				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.filter(histPrecoItem -> 
+					{ 
+						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
+						
+						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dtInicial) || dataAlteracao.isEqual(dtInicial);
+						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dtFinal) || dataAlteracao.isEqual(dtFinal);
+						
+						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
+					})
+				.min(comparing(HistoricoDePrecoDTO::getPreco))
+				.orElseThrow(() -> new RecursoNotFoundException("min(preco)"));	
+	}
+	
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -215,29 +266,24 @@ public class ProdutoService {
 		return avaliacaoService.findAllByProduto(produto, pageable);
 	}
 	
-	public Page<AvaliacaoDTO> listarAvaliacoesDadoProdutoAndComentario(String codigoProduto, String codigoComentario, Pageable pageable) {
+	public AvaliacaoDTO avaliarProduto(String codigoProduto, AvaliacaoDTO dtoEntrada) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-				
-		Comentario comentario = produto.getComentarios().stream()
-				.filter(dto -> dto.getCodigo().equals(codigoComentario))
-				.findFirst()
-					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
-		return avaliacaoService.findAllByComentario(comentario, pageable);
-	}
+		produto.getAvaliacoes().stream()
+			.filter(avaliacao -> avaliacao.getUsuario().equalsIgnoreCase(dtoEntrada.getUsuario()))
+			.findFirst()
+				.ifPresent(avaliacao -> {
+					throw new RecursoAlreadyExistsException("Produto já avalido pelo usuário " + avaliacao.getUsuario());
+				});
 	
-	public AvaliacaoDTO avaliarProduto(String codigoProduto, AvaliacaoDTO dtoAvaliacao) {
-		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-		
-		Avaliacao avaliacao = modelMapper.map(dtoAvaliacao, Avaliacao.class);	
+		Avaliacao avaliacao = modelMapper.map(dtoEntrada, Avaliacao.class);	
 
-		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao, LocalDateTime.now()));
+		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao.getUsuario(), LocalDateTime.now()));
 		avaliacao.setComentario(null);
 		avaliacao.setUsuario(avaliacao.getUsuario());
 		avaliacao.setProduto(produto);
-		avaliacao.setRating(dtoAvaliacao.getRating());
+		avaliacao.setRating(dtoEntrada.getRating());
 
 		produto.addAvaliacao(avaliacao);		
 		repository.save(produto);
@@ -245,29 +291,6 @@ public class ProdutoService {
 		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
 	}
 	
-	public AvaliacaoDTO avaliarComentario(String codigoProduto, String codigoComentario, AvaliacaoDTO dtoAvaliacao) {
-		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-		
-		Comentario comentario = produto.getComentarios().stream()
-			.filter(dto -> dto.getCodigo().equals(codigoComentario))
-			.findFirst()
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-		
-		Avaliacao avaliacao = modelMapper.map(dtoAvaliacao, Avaliacao.class);	
-
-		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao, LocalDateTime.now()));
-		avaliacao.setComentario(comentario);
-		avaliacao.setUsuario(avaliacao.getUsuario());
-		avaliacao.setProduto(null);
-		avaliacao.setRating(dtoAvaliacao.getRating());
-
-		produto.addAvaliacao(avaliacao);		
-		repository.save(produto);
-		
-		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
-	}	
-		
 	private ProdutoDTO historizarPreco(Produto produtoSalvo) {
 		produtoSalvo.addHistoricoDePreco(getHistoricoDePreco(produtoSalvo));
 		
@@ -287,13 +310,8 @@ public class ProdutoService {
 		return historico;
 	}
 	
-	private String geraCodigoEmBase64(Comentario comentario, LocalDateTime dataHoraAtual) {
-		String identificador = comentario.getUsuario() + dataHoraAtual;
-		return new String(getEncoder().encode(identificador.getBytes()));
-	}
-	
-	private String geraCodigoEmBase64(Avaliacao avaliacao, LocalDateTime dataHoraAtual) {
-		String identificador = avaliacao.getUsuario() + dataHoraAtual;
+	private String geraCodigoEmBase64(String usuario, LocalDateTime dataHoraAtual) {
+		String identificador = usuario + dataHoraAtual;
 		return new String(getEncoder().encode(identificador.getBytes()));
 	}
 

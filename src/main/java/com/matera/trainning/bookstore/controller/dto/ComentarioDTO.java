@@ -1,13 +1,11 @@
 package com.matera.trainning.bookstore.controller.dto;
 
 import java.time.LocalDateTime;
-import java.util.OptionalDouble;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.modelmapper.Converter;
-import org.modelmapper.spi.MappingContext;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -44,35 +42,26 @@ public class ComentarioDTO {
 	private LocalDateTime dataHoraCriacao;
 	
 	@Getter @Setter @JsonView
-	private Double rating;
+	private Double rating = 0.0;
 	
 	public static Converter<Comentario, ComentarioDTO> getConverter() {
-		Converter<Comentario, ComentarioDTO> conversor = new Converter<Comentario, ComentarioDTO>() {
+		return (contexto) -> {
+			Comentario comentario = contexto.getSource();
 			
-			@Override
-			public ComentarioDTO convert(MappingContext<Comentario, ComentarioDTO> contexto) {
-				Comentario comentario = contexto.getSource();
-								
-				ComentarioDTO dtoComentario = new ComentarioDTO();				
-				dtoComentario.setCodigo(comentario.getCodigo());
-				dtoComentario.setDescricao(comentario.getDescricao());
-				dtoComentario.setUsuario(comentario.getUsuario());
-				dtoComentario.setDataHoraCriacao(comentario.getDataHoraCriacao());
-				
-				OptionalDouble optional = comentario.getAvaliacoes().stream()
-						.mapToDouble(avaliacao -> avaliacao.getRating().doubleValue())
-						.average();
-				
-				if (optional.isPresent())				
-					dtoComentario.setRating(optional.getAsDouble());
-				else
-					dtoComentario.setRating(0.0);				
-					
-				return dtoComentario;
-			}
+			ComentarioDTO dtoComentario = new ComentarioDTO();				
+			dtoComentario.setCodigo(comentario.getCodigo());
+			dtoComentario.setDescricao(comentario.getDescricao());
+			dtoComentario.setUsuario(comentario.getUsuario());
+			dtoComentario.setDataHoraCriacao(comentario.getDataHoraCriacao());
+			
+			Double rating = comentario.getAvaliacoes().stream()
+				.mapToDouble(avaliacao -> avaliacao.getRating())
+				.average().orElse(0.0);
+			
+			dtoComentario.setRating(rating);			
+			
+			return dtoComentario;			
 		};
-		
-		return conversor;
 	}
 	    
 }

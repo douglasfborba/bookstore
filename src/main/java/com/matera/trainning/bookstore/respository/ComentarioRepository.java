@@ -12,9 +12,9 @@ import com.matera.trainning.bookstore.domain.Produto;
 public interface ComentarioRepository extends PagingAndSortingRepository<Comentario, Long> {
 
 	public Optional<Comentario> findByCodigo(String codigo);
-	
+		
+	public Page<Comentario> findAllByUsuario(String usuario, Pageable pageable);
+
 	public Page<Comentario> findAllByProduto(Produto produto, Pageable pageable);
 
-	public Page<Comentario> findAllByUsuario(String usuario, Pageable pageable);
-	
 }

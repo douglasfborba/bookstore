@@ -10,8 +10,10 @@ import com.matera.trainning.bookstore.domain.Produto;
 
 public interface AvaliacaoRepository extends PagingAndSortingRepository<Avaliacao, Long> {
 	
+	public Page<Avaliacao> findAllByUsuario(String usuario, Pageable pageable);
+
 	public Page<Avaliacao> findAllByProduto(Produto produto, Pageable pageable);
 	
 	public Page<Avaliacao> findAllByComentario(Comentario comentario, Pageable pageable);
-
+	
 }

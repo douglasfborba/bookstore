@@ -1,25 +1,25 @@
 package com.matera.trainning.bookstore.exception;
 
-public class ResourceAlreadyExistsException extends RuntimeException {
+public class RecursoAlreadyExistsException extends RuntimeException {
 
 	private static final long serialVersionUID = -1758818662225463733L;
 
 	private String codigo;
 		
-	public ResourceAlreadyExistsException() {
+	public RecursoAlreadyExistsException() {
 		super("Recurso duplicado");
 	}
 
-	public ResourceAlreadyExistsException(String codigo) {
+	public RecursoAlreadyExistsException(String codigo) {
 		super("Recurso " + codigo + " duplicado");
 		this.codigo = codigo;
 	}
 
-	public ResourceAlreadyExistsException(Throwable causa) {
+	public RecursoAlreadyExistsException(Throwable causa) {
 		super(causa);
 	}
 
-	public ResourceAlreadyExistsException(String mensagem, Throwable causa) {
+	public RecursoAlreadyExistsException(String mensagem, Throwable causa) {
 		super(mensagem, causa);
 	}
 

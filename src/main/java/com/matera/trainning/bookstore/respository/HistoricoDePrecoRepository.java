@@ -10,5 +10,5 @@ import com.matera.trainning.bookstore.domain.Produto;
 public interface HistoricoDePrecoRepository extends PagingAndSortingRepository<HistoricoDePreco, Long> {
 
 	public Page<HistoricoDePreco> findAllByProduto(Produto produto, Pageable pageable);
-
+	
 }

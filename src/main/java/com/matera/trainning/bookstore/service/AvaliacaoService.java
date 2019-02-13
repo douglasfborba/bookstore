@@ -1,5 +1,7 @@
 package com.matera.trainning.bookstore.service;
 
+import javax.annotation.PostConstruct;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,18 +18,28 @@ public class AvaliacaoService {
 
 	@Autowired
 	private ModelMapper modelMapper;
-	
+
 	@Autowired
 	private AvaliacaoRepository repository;
-	
+
+	@PostConstruct
+	public void configuraMapper() {
+		modelMapper.addConverter(AvaliacaoDTO.getConverter());
+	}
+
 	public Page<AvaliacaoDTO> findAllByProduto(Produto produto, Pageable pageable) {
 		return repository.findAllByProduto(produto, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
-	
+
 	public Page<AvaliacaoDTO> findAllByComentario(Comentario comentario, Pageable pageable) {
 		return repository.findAllByComentario(comentario, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
-	
+
+	public Page<AvaliacaoDTO> findAllByUsuario(String usuario, Pageable pageable) {
+		return repository.findAllByUsuario(usuario, pageable)
+				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
+	}
+
 }

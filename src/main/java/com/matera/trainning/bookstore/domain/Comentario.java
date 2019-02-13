@@ -66,5 +66,13 @@ public class Comentario {
 		this.dataHoraCriacao = dataHoraCriacao;
 		this.produto = produto;
 	}	
+	
+	public void addAvaliacao(Avaliacao avaliacao) {
+		this.avaliacoes.add(avaliacao);
+	}
+	
+	public void removeAvaliacao(Avaliacao avaliacao) {
+		this.avaliacoes.remove(avaliacao);
+	}
 
 }

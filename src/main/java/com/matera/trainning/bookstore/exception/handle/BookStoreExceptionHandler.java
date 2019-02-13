@@ -10,13 +10,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.matera.trainning.bookstore.exception.ResourceAlreadyExistsException;
+import com.matera.trainning.bookstore.exception.RecursoAlreadyExistsException;
 
 @ControllerAdvice
 public class BookStoreExceptionHandler {
 
-    @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<Object> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+    @ExceptionHandler(RecursoAlreadyExistsException.class)
+    public ResponseEntity<Object> handleResourceAlreadyExistsException(RecursoAlreadyExistsException ex) {
     	HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(getUriDadoCodigoRecurso(ex.getCodigo()));
 		return new ResponseEntity<Object>(headers, CONFLICT);

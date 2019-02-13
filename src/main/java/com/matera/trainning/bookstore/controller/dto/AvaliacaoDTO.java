@@ -7,7 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.modelmapper.Converter;
-import org.modelmapper.spi.MappingContext;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.matera.trainning.bookstore.domain.Avaliacao;
@@ -36,26 +35,20 @@ public class AvaliacaoDTO {
 	private Double rating;
 
 	public static final Converter<Avaliacao, AvaliacaoDTO> getConverter() {
-		Converter<Avaliacao, AvaliacaoDTO> conversor = new Converter<Avaliacao, AvaliacaoDTO>() {
-			
-			@Override
-			public AvaliacaoDTO convert(MappingContext<Avaliacao, AvaliacaoDTO> contexto) {
-				Avaliacao avaliacao = contexto.getSource();
-	
-				AvaliacaoDTO dtoAvaliacao = new AvaliacaoDTO();				
-				dtoAvaliacao.setCodigo(avaliacao.getCodigo());
-				dtoAvaliacao.setUsuario(avaliacao.getUsuario());
-				dtoAvaliacao.setRating(avaliacao.getRating());
-				
-				if (avaliacao.getProduto() != null)
-					dtoAvaliacao.setDescricao(avaliacao.getProduto().getDescricao());
-				else
-					dtoAvaliacao.setDescricao(avaliacao.getComentario().getDescricao());
-				
-				return dtoAvaliacao;
-			}
+		return (contexto) -> {
+			Avaliacao avaliacao = contexto.getSource();
+
+			AvaliacaoDTO dtoAvaliacao = new AvaliacaoDTO();
+			dtoAvaliacao.setCodigo(avaliacao.getCodigo());
+			dtoAvaliacao.setUsuario(avaliacao.getUsuario());
+			dtoAvaliacao.setRating(avaliacao.getRating());
+
+			if (avaliacao.getProduto() != null)
+				dtoAvaliacao.setDescricao(avaliacao.getProduto().getDescricao());
+			else
+				dtoAvaliacao.setDescricao(avaliacao.getComentario().getDescricao());
+
+			return dtoAvaliacao;
 		};
-		
-		return conversor;
 	}
 }
