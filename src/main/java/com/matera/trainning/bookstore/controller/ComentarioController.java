@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,29 +26,29 @@ import com.matera.trainning.bookstore.service.ComentarioService;
 public class ComentarioController {
 	
 	@Autowired
-	private ComentarioService service;
+	private ComentarioService comentarioService;
 	
-	@PutMapping("v1/comentarios/{codigoComentario}")
+	@PutMapping("v1/comentarios/{codComentario}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void atualizar(@PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO dtoComentario) {
-		service.atualizar(codigoComentario, dtoComentario);
+	public void atualizarComentario(@PathVariable String codComentario, @Valid @RequestBody ComentarioDTO dtoEntrada) {
+		comentarioService.atualizarComentario(codComentario, dtoEntrada);
 	}
 	
-	@DeleteMapping("v1/comentarios/{codigoComentario}")
+	@DeleteMapping("v1/comentarios/{codComentario}")
 	@ResponseStatus(code = NO_CONTENT)
-	public void remover(@PathVariable String codigoComentario) {
-		service.remover(codigoComentario);
+	public void removerComentario(@PathVariable String codComentario) {
+		comentarioService.removerComentario(codComentario);
 	}
 
-	@GetMapping("v1/comentarios/{codigoComentario}")
-	public ResponseEntity<ComentarioDTO> buscarDadoCodigo(@PathVariable String codigoComentario) {
-		ComentarioDTO dtoComentario = service.buscarDadoCodigo(codigoComentario);
+	@GetMapping("v1/comentarios/{codComentario}")
+	public ResponseEntity<ComentarioDTO> buscarComentarioDadoCodigo(@PathVariable String codComentario) {
+		ComentarioDTO dtoComentario = comentarioService.buscarDadoCodigo(codComentario);
 		return ResponseEntity.ok(dtoComentario);	
 	}
 	
-	@GetMapping("v1/comentarios")
-	public Page<ComentarioDTO> listarTodos(Pageable pageable) {
-		return service.listarTodos(pageable);
-	}	
+	@GetMapping(value = "v1/comentarios", params = { "usuario" })
+	public Page<ComentarioDTO> buscarComentarioDadoUsuario(@RequestParam("usuario") String usuComentario, Pageable pageable) {
+		return comentarioService.buscarComentarioDadoUsuario(usuComentario, pageable);
+	}
 		
 }

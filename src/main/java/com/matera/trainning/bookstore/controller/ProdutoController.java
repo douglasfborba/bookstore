@@ -7,7 +7,6 @@ import static org.springframework.web.servlet.support.ServletUriComponentsBuilde
 import java.net.URI;
 import java.time.LocalDate;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
@@ -41,112 +39,106 @@ public class ProdutoController {
 	private ProdutoService produtoService;
 	
 	@GetMapping("v1/produtos")
-	public Page<ProdutoDTO> listarTodos(Pageable pageable) {
-		System.out.println("listarTodos");
-		return produtoService.listarTodos(pageable);
+	public Page<ProdutoDTO> listarProdutos(Pageable pageable) {
+		return produtoService.listarProdutos(pageable);
 	}
-	
-	@GetMapping(value = "v1/produtos", params = { "descricao" })
-	public Page<ProdutoDTO> buscarDadoDescricao(@RequestParam("descricao") String descricao, Pageable pageable) {
-		return produtoService.buscarDadoDescricao(descricao, pageable);
-	}
-	
+		
 	@PostMapping("v1/produtos")
-	public ResponseEntity<ProdutoDTO> inserir(@Valid @RequestBody ProdutoDTO dtoProduto, HttpServletResponse response) {
-		System.out.println("inserir");
-		ProdutoDTO dto = produtoService.inserir(dtoProduto);
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(dto.getCodigo()));
-		
-		return new ResponseEntity<ProdutoDTO>(dto, headers, CREATED);
+	public ResponseEntity<ProdutoDTO> inserirProduto(@Valid @RequestBody ProdutoDTO dtoEntrada) {
+		ProdutoDTO dtoSaida = produtoService.inserirProduto(dtoEntrada);
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		return new ResponseEntity<>(dtoSaida, headers, CREATED);
 	}	
 	
-	@GetMapping("v1/produtos/{codigoProduto}")
-	public ResponseEntity<ProdutoDTO> buscarDadoCodigo(@PathVariable String codigoProduto) {
-		ProdutoDTO dtoProduto = produtoService.buscarDadoCodigo(codigoProduto);
+	@PutMapping("v1/produtos/{codProduto}")
+	@ResponseStatus(code = NO_CONTENT)
+	public void atualizarProduto(@PathVariable String codProduto, @Valid @RequestBody ProdutoDTO dtoEntrada) {
+		produtoService.atualizarProduto(codProduto, dtoEntrada);
+	}
+	
+	@DeleteMapping("v1/produtos/{codProduto}")
+	@ResponseStatus(code = NO_CONTENT)
+	public void removerProduto(@PathVariable String codProduto) {
+		produtoService.removerProduto(codProduto);
+	}
+	
+	@GetMapping("v1/produtos/{codProduto}")
+	public ResponseEntity<ProdutoDTO> buscarProdutoDadoCodigo(@PathVariable String codProduto) {
+		ProdutoDTO dtoProduto = produtoService.buscarProdutoDadoCodigo(codProduto);
 		return ResponseEntity.ok(dtoProduto);	
 	}
 	
-	@PutMapping("v1/produtos/{codigoProduto}")
-	@ResponseStatus(code = NO_CONTENT)
-	public void atualizar(@PathVariable String codigoProduto, @Valid @RequestBody ProdutoDTO dtoProduto) {
-		produtoService.atualizar(codigoProduto, dtoProduto);
+	@GetMapping(value = "v1/produtos", params = { "descricao" })
+	public Page<ProdutoDTO> buscarProdutoDadoDescricao(@RequestParam("descricao") String descProduto, Pageable pageable) {
+		return produtoService.buscarProdutoDadoDescricao(descProduto, pageable);
 	}
 	
-	@DeleteMapping("v1/produtos/{codigoProduto}")
-	@ResponseStatus(code = NO_CONTENT)
-	public void remover(@PathVariable String codigoProduto) {
-		produtoService.remover(codigoProduto);
+	
+	
+	@GetMapping("v1/produtos/{codProduto}/comentarios")
+	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(@PathVariable String codProduto, Pageable pageable) {
+		return produtoService.listarComentariosDadoCodigoProduto(codProduto, pageable);
 	}
 	
-	@GetMapping("v1/produtos/{codigoProduto}/comentarios")
-	public Page<ComentarioDTO> listarComentarios(@PathVariable String codigoProduto, Pageable pageable) {
-		return produtoService.listarComentariosDadoCodigoDoProduto(codigoProduto, pageable);
+	@PostMapping("v1/produtos/{codProduto}/comentarios")
+	public ResponseEntity<ComentarioDTO> inserirComentario(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
+		ComentarioDTO dtoSaida = produtoService.inserirComentario(codProduto, dtoEntrada);
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		return new ResponseEntity<>(dtoSaida, headers, CREATED);		
 	}
-	
-	@PostMapping("v1/produtos/{codigoProduto}/comentarios")
-	public ResponseEntity<ComentarioDTO> inserirComentario(@PathVariable String codigoProduto, @Valid @RequestBody ComentarioDTO dtoComentario) {
-		ComentarioDTO dto = produtoService.comentarProduto(codigoProduto, dtoComentario);
-		
+
+	private HttpHeaders configuraHeaderLocation(String codigo) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(dto.getCodigo()));
-		
-		return new ResponseEntity<ComentarioDTO>(dto, headers, CREATED);		
+		headers.setLocation(getUriDadoCodigoRecurso(codigo));
+		return headers;
 	}
 	
-	@GetMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
-	public ComentarioDTO buscarComentarioDadoCodigoProdutoAndCodigoComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
-		return produtoService.buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(codigoProduto, codigoComentario);
-	}
-	
-	@PutMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
-	public void atualizarComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody ComentarioDTO dtoComentario) {
-		produtoService.atualizarComentario(codigoProduto, codigoComentario, dtoComentario);
-	}
-	
-	@DeleteMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}")
-	public void removerComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario) {
-		produtoService.removerComentario(codigoProduto, codigoComentario);
-	}
-			
-	@GetMapping("v1/produtos/{codigoProduto}/precos")
-	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codigoProduto, Pageable pageable) {
-		return produtoService.listarPrecosDadoCodigoDoProduto(codigoProduto, pageable);
-	}
-	
-	@GetMapping(value = "v1/produtos/{codigoProduto}/precos", params = { "dataInicial", "dataFinal" })
-	public Page<HistoricoDePrecoDTO> listasPrecosEntreDataInicialAndDataFinal(@PathVariable String codigoProduto, @RequestParam("dataInicial") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial, @RequestParam("") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal, Pageable pageable) {
-		return produtoService.listasPrecosEntreDataInicialAndDataFinal(codigoProduto, dataInicial, dataFinal, pageable);
-	}
-	
-	@GetMapping("v1/produtos/{codigoProduto}/avaliacoes")
-	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(@PathVariable String codigoProduto, Pageable pageable) {
-		return produtoService.listarAvaliacoesDadoCodigoDoProduto(codigoProduto, pageable);
-	}
-	
-	@PostMapping("v1/produtos/{codigoProduto}/avaliacoes")
-	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codigoProduto, @Valid @RequestBody AvaliacaoDTO dtoAvaliacao) {
-		AvaliacaoDTO dto = produtoService.avaliarProduto(codigoProduto, dtoAvaliacao);
-		
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(dto.getCodigo()));
-		
-		return new ResponseEntity<AvaliacaoDTO>(dto, headers, CREATED);	
-	}
-	
-	@GetMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}/avaliacoes")
-	public Page<AvaliacaoDTO> listarAvaliacoesDadoProdutoAndComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario, Pageable pageable) {
-		return produtoService.listarAvaliacoesDadoProdutoAndComentario(codigoProduto, codigoComentario, pageable);
-	}
-	
-	@PostMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}/avaliacoes")
-	public AvaliacaoDTO avaliarProduto(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody AvaliacaoDTO dtoAvaliacao) {
-		return produtoService.avaliarComentario(codigoProduto, codigoComentario, dtoAvaliacao);
-	}
-		
-	public static final URI getUriDadoCodigoRecurso(String codigo) {
+	private URI getUriDadoCodigoRecurso(String codigo) {
 		return fromCurrentRequestUri().path("/{codigo}").buildAndExpand(codigo).toUri();
 	}
+			
+	
+	
+	@GetMapping("v1/produtos/{codProduto}/historico-precos")
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codProduto, Pageable pageable) {
+		return produtoService.listarHistoricoDePrecos(codProduto, pageable);
+	}
+	
+	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "dtInicio", "dtFim" })
+	public Page<HistoricoDePrecoDTO> buscarHistoricoDePrecosNoPeriodo(@PathVariable String codProduto, @RequestParam("dtInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, @RequestParam("dtFim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, Pageable pageable) {
+		return produtoService.buscarHistoricoDePrecosNoPeriodo(codProduto, dtInicio, dtFim, pageable);
+	}
+	
+//	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "max=1" })
+//	public ResponseEntity<ProdutoDTO> buscarPrecoMaximoDadoCodigoProduto(@PathVariable String codProduto) {
+//		return produtoService.buscarPrecoMaximoDadoCodigoProduto(codProduto);
+//	}
+
+//	@GetMapping("v1/produtos/{codigoProduto}/avaliacoes")
+//	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(@PathVariable String codigoProduto, Pageable pageable) {
+//		return produtoService.listarAvaliacoesDadoCodigoDoProduto(codigoProduto, pageable);
+//	}
+//	
+//	@PostMapping("v1/produtos/{codigoProduto}/avaliacoes")
+//	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codigoProduto, @Valid @RequestBody AvaliacaoDTO dtoAvaliacao) {
+//		AvaliacaoDTO dto = produtoService.avaliarProduto(codigoProduto, dtoAvaliacao);
+//		
+//		HttpHeaders headers = new HttpHeaders();
+//		headers.setLocation(getUriDadoCodigoRecurso(dto.getCodigo()));
+//		
+//		return new ResponseEntity<AvaliacaoDTO>(dto, headers, CREATED);	
+//	}
+//	
+//	@GetMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}/avaliacoes")
+//	public Page<AvaliacaoDTO> listarAvaliacoesDadoProdutoAndComentario(@PathVariable String codigoProduto, @PathVariable String codigoComentario, Pageable pageable) {
+//		return produtoService.listarAvaliacoesDadoProdutoAndComentario(codigoProduto, codigoComentario, pageable);
+//	}
+//	
+//	@PostMapping("v1/produtos/{codigoProduto}/comentarios/{codigoComentario}/avaliacoes")
+//	public AvaliacaoDTO avaliarProduto(@PathVariable String codigoProduto, @PathVariable String codigoComentario, @Valid @RequestBody AvaliacaoDTO dtoAvaliacao) {
+//		return produtoService.avaliarComentario(codigoProduto, codigoComentario, dtoAvaliacao);
+//	}
+//		
+
 	
 }

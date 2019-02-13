@@ -29,7 +29,7 @@ public class ComentarioService {
 		modelMapper.addConverter(ComentarioDTO.getConverter());
 	}
 	
-	public void atualizar(String codigoComentario, ComentarioDTO dtoComentario) {
+	public void atualizarComentario(String codigoComentario, ComentarioDTO dtoComentario) {
 		Comentario comentario = repository.findByCodigo(codigoComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
 
@@ -40,7 +40,7 @@ public class ComentarioService {
 	}
 
 	@Transactional
-	public void remover(String codigoComentario) {
+	public void removerComentario(String codigoComentario) {
 		Comentario comentario = repository.findByCodigo(codigoComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoComentario));
 
@@ -61,6 +61,11 @@ public class ComentarioService {
 
 	public Page<ComentarioDTO> listarTodos(Pageable pageable) {
 		return repository.findAll(pageable).map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
+	}
+
+	public Page<ComentarioDTO> buscarComentarioDadoUsuario(String usuComentario, Pageable pageable) {
+		return repository.findAllByUsuario(usuComentario, pageable)
+				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
 	}
 
 }
