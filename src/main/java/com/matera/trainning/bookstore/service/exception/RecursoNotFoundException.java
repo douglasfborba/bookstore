@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.exception;
+package com.matera.trainning.bookstore.service.exception;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 

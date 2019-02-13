@@ -25,9 +25,9 @@ import com.matera.trainning.bookstore.domain.Avaliacao;
 import com.matera.trainning.bookstore.domain.Comentario;
 import com.matera.trainning.bookstore.domain.HistoricoDePreco;
 import com.matera.trainning.bookstore.domain.Produto;
-import com.matera.trainning.bookstore.exception.RecursoAlreadyExistsException;
-import com.matera.trainning.bookstore.exception.RecursoNotFoundException;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
+import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsException;
+import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @Service
 public class ProdutoService {
