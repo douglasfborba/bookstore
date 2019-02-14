@@ -6,8 +6,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.matera.trainning.bookstore.domain.Comentario;
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.model.Produto;
 
 public interface ComentarioRepository extends PagingAndSortingRepository<Comentario, Long> {
 

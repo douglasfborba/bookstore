@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Produto;
 
 public interface ProdutoRepository extends PagingAndSortingRepository<Produto, Long> {
 

@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.modelmapper.Converter;
+import org.modelmapper.spi.MappingContext;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Produto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -49,23 +50,30 @@ public class ProdutoDTO {
 	private Double rating = 0.0;
 
 	public static final Converter<Produto, ProdutoDTO> getConverter() {
-		return (contexto) -> {
-			Produto produto = contexto.getSource();
+		Converter<Produto, ProdutoDTO> converter = new Converter<Produto, ProdutoDTO>() {
 
-			ProdutoDTO dtoProduto = new ProdutoDTO();
-			dtoProduto.setCodigo(produto.getCodigo());
-			dtoProduto.setDescricao(produto.getDescricao());
-			dtoProduto.setPreco(produto.getPreco());
-			dtoProduto.setDataCadastro(produto.getDataCadastro());
+			@Override
+			public ProdutoDTO convert(MappingContext<Produto, ProdutoDTO> contexto) {
+				Produto produto = contexto.getSource();
 
-			Double rating = produto.getAvaliacoes().stream()
-					.mapToDouble(avaliacao -> avaliacao.getRating())
-					.average().orElse(0.0);
+				ProdutoDTO dtoProduto = new ProdutoDTO();
+				dtoProduto.setCodigo(produto.getCodigo());
+				dtoProduto.setDescricao(produto.getDescricao());
+				dtoProduto.setPreco(produto.getPreco());
+				dtoProduto.setDataCadastro(produto.getDataCadastro());
 
-			dtoProduto.setRating(rating);
+				Double rating = produto.getAvaliacoes().stream()
+						.mapToDouble(avaliacao -> avaliacao.getRating())
+						.average()
+							.orElse(0.0);
 
-			return dtoProduto;
+				dtoProduto.setRating(rating);
+
+				return dtoProduto;
+			};
 		};
+
+		return converter;
 	}
 	
 }

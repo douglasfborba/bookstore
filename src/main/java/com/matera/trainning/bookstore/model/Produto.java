@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.domain;
+package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.LAZY;
@@ -19,8 +19,11 @@ import javax.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+
 @Entity
 @Table(name = "dis_produto")
 public class Produto {
@@ -58,16 +61,7 @@ public class Produto {
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL)
 	private Set<Avaliacao> avaliacoes = new HashSet<>();
-	
-	public Produto() { }
-	
-	public Produto(String codigo, String descricao, BigDecimal preco, LocalDate dataCadastro) {
-		this.codigo = codigo;
-		this.descricao = descricao;
-		this.preco = preco;
-		this.dataCadastro = dataCadastro;
-	}
-	
+			
 	public void addComentario(Comentario comentario) {
 		this.comentarios.add(comentario);
 	}

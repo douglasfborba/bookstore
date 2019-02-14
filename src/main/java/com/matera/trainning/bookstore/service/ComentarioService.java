@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
-import com.matera.trainning.bookstore.domain.Avaliacao;
-import com.matera.trainning.bookstore.domain.Comentario;
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Avaliacao;
+import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.ComentarioRepository;
 import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;

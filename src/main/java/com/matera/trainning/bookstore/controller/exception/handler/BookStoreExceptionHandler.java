@@ -19,7 +19,7 @@ public class BookStoreExceptionHandler {
     public ResponseEntity<Object> handleResourceAlreadyExistsException(RecursoAlreadyExistsException ex) {
     	HttpHeaders headers = new HttpHeaders();
 		headers.setLocation(getUriDadoCodigoRecurso(ex.getCodigo()));
-		return new ResponseEntity<Object>(headers, CONFLICT);
+		return new ResponseEntity<>(headers, CONFLICT);
 	}
 	
 	private URI getUriDadoCodigoRecurso(String codigo) {

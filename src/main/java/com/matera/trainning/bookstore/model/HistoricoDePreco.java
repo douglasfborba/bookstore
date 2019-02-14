@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.domain;
+package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -17,8 +17,11 @@ import javax.persistence.Table;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+
 @Entity
 @Table(name = "dis_historico")
 public class HistoricoDePreco {
@@ -41,13 +44,5 @@ public class HistoricoDePreco {
 	@EqualsAndHashCode.Exclude
 	@Column(name = "preco", nullable = false)
 	private BigDecimal preco;
-
-	public HistoricoDePreco() { }
 	
-	public HistoricoDePreco(Produto produto, LocalDateTime dataHoraAlteracao, BigDecimal preco) {
-		this.produto = produto;
-		this.dataHoraAlteracao = dataHoraAlteracao;
-		this.preco = preco;
-	}
-
 }

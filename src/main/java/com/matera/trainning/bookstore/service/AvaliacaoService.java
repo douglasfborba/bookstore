@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
-import com.matera.trainning.bookstore.domain.Comentario;
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.AvaliacaoRepository;
 
 @Service

@@ -1,4 +1,4 @@
-package com.matera.trainning.bookstore.domain;
+package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -47,21 +47,5 @@ public class Avaliacao {
 	@EqualsAndHashCode.Exclude
 	@Column(name = "rating", nullable = false)
 	private Double rating;
-	
-	public Avaliacao() { 
-		this.rating = 0.0;
-	}
-
-	public Avaliacao(Produto produto, Double rating) {
-		super();
-		this.produto = produto;
-		this.rating = rating;
-	}
-	
-	public Avaliacao(Comentario comentario, Double rating) {
-		super();
-		this.comentario = comentario;
-		this.rating = rating;
-	}
 	
 }

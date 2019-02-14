@@ -4,9 +4,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-import com.matera.trainning.bookstore.domain.Avaliacao;
-import com.matera.trainning.bookstore.domain.Comentario;
-import com.matera.trainning.bookstore.domain.Produto;
+import com.matera.trainning.bookstore.model.Avaliacao;
+import com.matera.trainning.bookstore.model.Comentario;
+import com.matera.trainning.bookstore.model.Produto;
 
 public interface AvaliacaoRepository extends PagingAndSortingRepository<Avaliacao, Long> {
 	
