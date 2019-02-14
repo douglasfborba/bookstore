@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet author="douglas.borba" id="25012019161739-1">
+		<createTable tableName="dis_produto">
+			<column name="id" type="bigint">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="codigo" type="varchar(10)">
+				<constraints nullable="false" unique="true" />
+			</column>
+			<column name="descricao" type="varchar(50)">
+				<constraints nullable="false" />
+			</column>
+			<column name="preco" type="currency" />
+			<column name="data_cadastro" type="date">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="25012019164327-1">
+		<createSequence sequenceName="dis_prod_seq" 
+			ordered="true" cycle="false" minValue="1" maxValue="2000" 
+			startValue="1" incrementBy="1" />
+	</changeSet>
+
+	<changeSet author="douglas.borba" id="25012019174921-1">
+		<sql endDelimiter="/">
+			CREATE OR REPLACE TRIGGER dis_prod_nextid 
+				BEFORE INSERT ON dis_produto
+				REFERENCING	OLD AS old NEW AS new
+				FOR EACH ROW
+			DECLARE
+				v_id NUMBER(38, 0);
+			BEGIN
+				IF :new.id IS NULL THEN
+					SELECT dis_prod_seq.NEXTVAL INTO v_id FROM dual;
+					:new.id := v_id;
+				END IF;
+			END dis_prod_nextid;
+		</sql>
+	</changeSet>
+
+	<changeSet author="douglas.borba" id="25012019164103-1">
+		<insert tableName="dis_produto" schemaName="system">
+			<column name="codigo" value="LIV0112457" />
+			<column name="descricao" value="LIVRO O SENHOR DOS ANEIS" />
+			<column name="preco" valueNumeric="82.50" />
+			<column name="data_cadastro" valueDate="2000-02-01" />
+		</insert>
+		<insert tableName="dis_produto" schemaName="system">
+			<column name="codigo" value="LIV0181246" />
+			<column name="descricao" value="LIVRO VIAGEM A LUA" />
+			<column name="preco" valueNumeric="35.00" />
+			<column name="data_cadastro" valueDate="2007-06-15" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

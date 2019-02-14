@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+		
+	<changeSet author="douglas.borba" id="05022019105423-1">
+		<createTable tableName="dis_historico">
+			<column name="id" type="bigint">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="data_hora_alteracao" type="timestamp">
+				<constraints nullable="false" />
+			</column>
+			<column name="preco" type="currency" />
+			<column name="produto_id" type="int">
+				<constraints nullable="false" foreignKeyName="fk_prod_hist"/>
+			</column>			
+		</createTable>
+		<addForeignKeyConstraint baseColumnNames="produto_id" baseTableName="dis_historico"
+	            constraintName="fk_hist_prod" deferrable="true" initiallyDeferred="true"
+	            onDelete="CASCADE" onUpdate="RESTRICT" referencedColumnNames="id"
+	            referencedTableName="dis_produto"/>
+	</changeSet>
+		
+	<changeSet author="douglas.borba" id="05022019105747-1">
+		<createSequence sequenceName="dis_hist_seq" 
+			ordered="true" cycle="false" minValue="1" maxValue="2000" 
+			startValue="1" incrementBy="1" />
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="05022019105800-1">
+		<sql endDelimiter="/">
+			CREATE OR REPLACE TRIGGER dis_hist_nextid 
+				BEFORE INSERT ON dis_historico
+				REFERENCING	OLD AS old NEW AS new
+				FOR EACH ROW
+			DECLARE
+				v_id NUMBER(38, 0);
+			BEGIN
+				IF :new.id IS NULL THEN
+					SELECT dis_hist_seq.NEXTVAL INTO v_id FROM dual;
+					:new.id := v_id;
+				END IF;
+			END dis_hist_nextid;
+		</sql>
+	</changeSet>
+	
+	<changeSet author="douglas.borba" id="05022019105850-1">
+		<insert tableName="dis_historico" schemaName="system">
+			<column name="data_hora_alteracao" valueComputed="${now}" />
+			<column name="preco" valueNumeric="35.00" />			
+			<column name="produto_id" valueNumeric="1" />		
+		</insert>
+		<insert tableName="dis_historico" schemaName="system">
+			<column name="data_hora_alteracao" valueComputed="${now}" />
+			<column name="preco" valueNumeric="42.90" />			
+			<column name="produto_id" valueNumeric="2" />			
+		</insert>
+	</changeSet>	
+
+</databaseChangeLog>

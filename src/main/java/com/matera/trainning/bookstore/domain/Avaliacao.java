@@ -45,7 +45,7 @@ public class Avaliacao {
 	private Comentario comentario;
 	
 	@EqualsAndHashCode.Exclude
-	@Column(name = "valor", nullable = false)
+	@Column(name = "rating", nullable = false)
 	private Double rating;
 	
 	public Avaliacao() { 
