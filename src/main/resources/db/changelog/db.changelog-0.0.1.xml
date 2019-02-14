@@ -16,7 +16,9 @@
 			<column name="descricao" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="preco" type="currency" />
+			<column name="preco" type="currency">
+				<constraints nullable="false" />			
+			</column>
 			<column name="data_cadastro" type="date">
 				<constraints nullable="false" />
 			</column>
@@ -47,13 +49,13 @@
 	</changeSet>
 
 	<changeSet author="douglas.borba" id="25012019164103-1">
-		<insert tableName="dis_produto" schemaName="system">
+		<insert tableName="dis_produto" schemaName="sdbanco">
 			<column name="codigo" value="LIV0112457" />
 			<column name="descricao" value="LIVRO O SENHOR DOS ANEIS" />
 			<column name="preco" valueNumeric="82.50" />
 			<column name="data_cadastro" valueDate="2000-02-01" />
 		</insert>
-		<insert tableName="dis_produto" schemaName="system">
+		<insert tableName="dis_produto" schemaName="sdbanco">
 			<column name="codigo" value="LIV0181246" />
 			<column name="descricao" value="LIVRO VIAGEM A LUA" />
 			<column name="preco" valueNumeric="35.00" />

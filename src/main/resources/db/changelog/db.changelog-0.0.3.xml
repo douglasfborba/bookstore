@@ -13,7 +13,9 @@
 			<column name="data_hora_alteracao" type="timestamp">
 				<constraints nullable="false" />
 			</column>
-			<column name="preco" type="currency" />
+			<column name="preco" type="currency">
+				<constraints nullable="false" />			
+			</column>
 			<column name="produto_id" type="int">
 				<constraints nullable="false" foreignKeyName="fk_prod_hist"/>
 			</column>			
@@ -48,12 +50,12 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="05022019105850-1">
-		<insert tableName="dis_historico" schemaName="system">
+		<insert tableName="dis_historico" schemaName="sdbanco">
 			<column name="data_hora_alteracao" valueComputed="${now}" />
 			<column name="preco" valueNumeric="35.00" />			
 			<column name="produto_id" valueNumeric="1" />		
 		</insert>
-		<insert tableName="dis_historico" schemaName="system">
+		<insert tableName="dis_historico" schemaName="sdbanco">
 			<column name="data_hora_alteracao" valueComputed="${now}" />
 			<column name="preco" valueNumeric="42.90" />			
 			<column name="produto_id" valueNumeric="2" />			

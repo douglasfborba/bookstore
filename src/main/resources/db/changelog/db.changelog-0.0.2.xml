@@ -56,14 +56,14 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="30012019142430-1">
-		<insert tableName="dis_comentario" schemaName="system">
+		<insert tableName="dis_comentario" schemaName="sdbanco">
 			<column name="codigo" value="MDFKVUwtMTEgMTY6MzE6NDA=" />
 			<column name="descricao" value="Bom." />			
 			<column name="usuario" value="fulano.teste" />
 			<column name="data_hora_criacao" valueComputed="${now}" />
 			<column name="produto_id" valueNumeric="1" />		
 		</insert>
-		<insert tableName="dis_comentario" schemaName="system">
+		<insert tableName="dis_comentario" schemaName="sdbanco">
 			<column name="codigo" value="MDJKVUwtMTEgMTY6MzM6MTA=" />
 			<column name="descricao" value="Ótimo livro, recomento a todos." />
 			<column name="usuario" value="beltrano.teste" />

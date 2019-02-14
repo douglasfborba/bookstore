@@ -60,7 +60,7 @@
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="05022019105850-1">
-		<insert tableName="dis_avaliacao" schemaName="system">
+		<insert tableName="dis_avaliacao" schemaName="sdbanco">
 			<column name="codigo" value="MDFKVUwtMTEhGM27846MzE6NDA==" />
 			<column name="valor" valueNumeric="3.0" />	
 			<column name="usuario" value="beltrano.teste" />
@@ -69,18 +69,18 @@
 	</changeSet>			
 
 	<changeSet author="douglas.borba" id="12022019171745-2">
-		 <renameColumn catalogName="system" tableName="dis_avaliacao" columnDataType="int" 
+		 <renameColumn catalogName="sdbanco" tableName="dis_avaliacao" columnDataType="int" 
 		 		newColumnName="rating" oldColumnName="valor" />
 	</changeSet>
 	
 	<changeSet author="douglas.borba" id="05022019105850-2">
-		<insert tableName="dis_avaliacao" schemaName="system">
+		<insert tableName="dis_avaliacao" schemaName="sdbanco">
 			<column name="codigo" value="HRFKVUwtmTHt34Kmgf7846MztFGOP==" />
 			<column name="rating" valueNumeric="5.0" />	
 			<column name="usuario" value="beltrano.teste" />
 			<column name="comentario_id" valueNumeric="2" />		
 		</insert>
-		<insert tableName="dis_avaliacao" schemaName="system">
+		<insert tableName="dis_avaliacao" schemaName="sdbanco">
 			<column name="codigo" value="B23MNFwtmTHt346MztFxRJKPxC06==" />
 			<column name="rating" valueNumeric="5.0" />	
 			<column name="usuario" value="fulano.teste" />
