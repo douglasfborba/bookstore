@@ -1,6 +1,8 @@
 package com.matera.trainning.bookstore.service;
 
 import static java.util.Base64.getEncoder;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
@@ -22,6 +25,7 @@ import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsExce
 import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @Service
+@Transactional(propagation = SUPPORTS, readOnly = true)
 public class ComentarioService {
 
 	@Autowired
@@ -39,6 +43,7 @@ public class ComentarioService {
 		modelMapper.addConverter(ComentarioDTO.getConverter());
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codComentario, ComentarioDTO dtoEntrada) {
 		Comentario comentario = repository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codComentario));
@@ -49,6 +54,7 @@ public class ComentarioService {
 		repository.save(comentario);
 	}
 
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerComentario(String codComentario) {
 		Comentario comentario = repository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codComentario));
@@ -84,6 +90,7 @@ public class ComentarioService {
 		return avalicaoService.findAllByComentario(comentario, pageable);
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public AvaliacaoDTO avaliarComentario(String codComentario, AvaliacaoDTO dtoEntrada) {		
 		Comentario comentario = repository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException(codComentario));

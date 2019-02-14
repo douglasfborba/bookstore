@@ -2,6 +2,8 @@ package com.matera.trainning.bookstore.service;
 
 import static java.util.Base64.getEncoder;
 import static java.util.Comparator.comparing;
+import static org.springframework.transaction.annotation.Propagation.REQUIRED;
+import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
@@ -30,6 +33,7 @@ import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsExce
 import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @Service
+@Transactional(propagation = SUPPORTS, readOnly = true)
 public class ProdutoService {
 
 	@Autowired
@@ -54,6 +58,7 @@ public class ProdutoService {
 		modelMapper.addConverter(ComentarioDTO.getConverter());
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public ProdutoDTO inserirProduto(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
 				.ifPresent(produto -> {
@@ -70,6 +75,7 @@ public class ProdutoService {
 		return dto;
 	}
 		
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarProduto(String codigoProduto, ProdutoDTO dtoProduto) {		
 		Produto produtoSalvo = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -86,6 +92,7 @@ public class ProdutoService {
 		repository.save(produto);
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerProduto(String codigoProduto) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -128,6 +135,7 @@ public class ProdutoService {
 					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public ComentarioDTO inserirComentario(String codigoProduto, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -145,6 +153,7 @@ public class ProdutoService {
 		return modelMapper.map(comentario, ComentarioDTO.class);
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codigoProduto, String codigoComentario, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -160,6 +169,7 @@ public class ProdutoService {
 		repository.save(produto);
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerComentario(String codigoProduto, String codigoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
@@ -266,6 +276,7 @@ public class ProdutoService {
 		return avaliacaoService.findAllByProduto(produto, pageable);
 	}
 	
+	@Transactional(propagation = REQUIRED, readOnly = false)
 	public AvaliacaoDTO avaliarProduto(String codigoProduto, AvaliacaoDTO dtoEntrada) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
