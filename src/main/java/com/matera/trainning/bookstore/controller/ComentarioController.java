@@ -2,7 +2,7 @@ package com.matera.trainning.bookstore.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 import java.net.URI;
 
@@ -59,25 +59,25 @@ public class ComentarioController {
 	}
 	
 	@GetMapping("v1/comentarios/{codComentario}/avaliacoes")
-	public Page<AvaliacaoDTO> listarAvaliacoesDadoProdutoAndComentario(@PathVariable String codComentario, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(@PathVariable String codComentario, Pageable pageable) {
 		return comentarioService.listarAvaliacoesDadoComentario(codComentario, pageable);
 	}
 
 	@PostMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public ResponseEntity<AvaliacaoDTO> avaliarComentario(@PathVariable String codComentario, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = comentarioService.avaliarComentario(codComentario, dtoEntrada);		
-		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "v1/avaliacoes/{codigo}");		
 		return new ResponseEntity<AvaliacaoDTO>(dtoSaida, headers, CREATED);	
 	}
 	
-	private HttpHeaders configuraHeaderLocation(String codigo) {
+	private HttpHeaders configuraHeaderLocation(String codigo, String uri) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(codigo));
+		headers.setLocation(getUriDadoCodigoRecurso(codigo, uri));
 		return headers;
 	}
 	
-	private URI getUriDadoCodigoRecurso(String codigo) {
-		return fromCurrentRequestUri().path("/{codigo}").buildAndExpand(codigo).toUri();
+	private URI getUriDadoCodigoRecurso(String codigo, String uri) {
+		return fromCurrentContextPath().path(uri).buildAndExpand(codigo).toUri();
 	}
 	
 }

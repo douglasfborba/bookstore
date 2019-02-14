@@ -79,8 +79,12 @@ public class ComentarioService {
 	}
 
 	public Page<ComentarioDTO> buscarComentarioDadoUsuario(String usuComentario, Pageable pageable) {
-		return repository.findAllByUsuario(usuComentario, pageable)
+		Page<ComentarioDTO> comentarios =  repository.findAllByUsuario(usuComentario, pageable)
 				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class));
+		
+		if (comentarios.isEmpty())
+			throw new RecursoNotFoundException("Usuário " + usuComentario + "inexistente"); 
+		return comentarios;
 	}
 		
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(String codComentario, Pageable pageable) {				

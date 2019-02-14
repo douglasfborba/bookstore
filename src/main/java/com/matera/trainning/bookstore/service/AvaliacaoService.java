@@ -12,9 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
+import com.matera.trainning.bookstore.model.Avaliacao;
 import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.AvaliacaoRepository;
+import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @Service
 @Transactional(propagation = SUPPORTS, readOnly = true)
@@ -31,6 +33,13 @@ public class AvaliacaoService {
 		modelMapper.addConverter(AvaliacaoDTO.getConverter());
 	}
 
+	public AvaliacaoDTO buscarAvaliacaoDadoCodigo(String codAvaliacao) {
+		Avaliacao avaliacao = repository.findByCodigo(codAvaliacao)
+				.orElseThrow(() -> new RecursoNotFoundException(codAvaliacao));
+
+		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
+	}
+	
 	public Page<AvaliacaoDTO> findAllByProduto(Produto produto, Pageable pageable) {
 		return repository.findAllByProduto(produto, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
@@ -41,7 +50,7 @@ public class AvaliacaoService {
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
 
-	public Page<AvaliacaoDTO> findAllByUsuario(String usuario, Pageable pageable) {
+	public Page<AvaliacaoDTO> listaAvaliacoesPorUsuario(String usuario, Pageable pageable) {
 		return repository.findAllByUsuario(usuario, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
