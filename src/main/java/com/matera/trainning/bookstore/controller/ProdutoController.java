@@ -74,7 +74,6 @@ public class ProdutoController {
 		return produtoService.buscarProdutoDadoDescricao(descProduto, pageable);
 	}
 	
-	
 	@GetMapping("v1/produtos/{codProduto}/comentarios")
 	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(@PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarComentariosDadoCodigoProduto(codProduto, pageable);

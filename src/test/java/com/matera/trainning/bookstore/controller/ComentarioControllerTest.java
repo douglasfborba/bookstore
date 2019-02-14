@@ -1,8 +1,8 @@
 package com.matera.trainning.bookstore.controller;
 
 import static org.assertj.core.util.Lists.list;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
@@ -38,6 +38,7 @@ import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.service.ComentarioService;
+import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsException;
 import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @RunWith(SpringRunner.class)
@@ -81,7 +82,6 @@ public class ComentarioControllerTest {
 	@Test
 	public void atualizaComentario() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(hater);
-
 		mockMvc.perform(put("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
@@ -91,7 +91,7 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void atualizaComentarioInexistente() throws Exception {					
-		doThrow(new RecursoNotFoundException())
+		doThrow(RecursoNotFoundException.class)
 			.when(service).atualizarComentario(Mockito.anyString(), Mockito.any(ComentarioDTO.class));
 		
 		String jsonObject = jsonMapper.writeValueAsString(hater);
@@ -112,7 +112,7 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void removeComentarioInexistente() throws Exception {
-		doThrow(new RecursoNotFoundException())
+		doThrow(RecursoNotFoundException.class)
 			.when(service).removerComentario(Mockito.anyString());
 		
 		mockMvc.perform(delete("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
@@ -141,7 +141,8 @@ public class ComentarioControllerTest {
 		mockMvc.perform(get("/v1/comentarios/{codigo}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
-				.andExpect(content().string(jsonObject));
+				.andExpect(content().string(jsonObject))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 
 	@Test
@@ -201,7 +202,7 @@ public class ComentarioControllerTest {
 	}
 	
 	@Test
-	public void avaliarComentario() throws Exception {
+	public void avaliaComentario() throws Exception {
 		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
 			.thenReturn(avaliacao);
 		
@@ -211,12 +212,26 @@ public class ComentarioControllerTest {
 				.content(jsonObject))
 				.andExpect(status().isCreated())
 				.andExpect(content().json(jsonObject))
-				.andExpect(header().string("location", containsString("http://localhost/v1/avaliacoes/" + avaliacao.getCodigo())))
+				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + avaliacao.getCodigo())))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 	
 	@Test
-	public void avaliarComentarioInexistente() throws Exception {
+	public void avaliaComentarioDuplicado() throws Exception {
+		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+			.thenThrow(RecursoAlreadyExistsException.class);
+		
+		String jsonObject = jsonMapper.writeValueAsString(avaliacao);
+		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+				.andExpect(status().isConflict())
+				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + avaliacao.getCodigo())))
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void avaliaComentarioInexistente() throws Exception {
 		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
 			.thenThrow(RecursoNotFoundException.class);
 		
