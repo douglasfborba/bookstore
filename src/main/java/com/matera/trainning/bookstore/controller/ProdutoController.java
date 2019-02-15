@@ -2,7 +2,7 @@ package com.matera.trainning.bookstore.controller;
 
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequestUri;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -47,7 +47,7 @@ public class ProdutoController {
 	@PostMapping("v1/produtos")
 	public ResponseEntity<ProdutoDTO> inserirProduto(@Valid @RequestBody ProdutoDTO dtoEntrada) {
 		ProdutoDTO dtoSaida = produtoService.inserirProduto(dtoEntrada);
-		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/produtos");		
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);
 	}	
 	
@@ -82,7 +82,7 @@ public class ProdutoController {
 	@PostMapping("v1/produtos/{codProduto}/comentarios")
 	public ResponseEntity<ComentarioDTO> comentarProduto(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
 		ComentarioDTO dtoSaida = produtoService.comentarProduto(codProduto, dtoEntrada);
-		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/comentarios");		
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);		
 	}
 	
@@ -137,18 +137,18 @@ public class ProdutoController {
 	@PostMapping("v1/produtos/{codProduto}/avaliacoes")
 	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codProduto, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = produtoService.avaliarProduto(codProduto, dtoEntrada);		
-		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/avaliacoes");
 		return new ResponseEntity<AvaliacaoDTO>(dtoSaida, headers, CREATED);	
 	}
 	
-	private HttpHeaders configuraHeaderLocation(String codigo) {
+	private HttpHeaders configuraHeaderLocation(String codigo, String uriRecurso) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(codigo));
+		headers.setLocation(getUriDadoCodigoRecurso(codigo, uriRecurso));
 		return headers;
 	}
 	
-	private URI getUriDadoCodigoRecurso(String codigo) {
-		return fromCurrentRequestUri().path("/{codigo}").buildAndExpand(codigo).toUri();
+	private URI getUriDadoCodigoRecurso(String codigo, String uriRecurso) {
+		return fromCurrentContextPath().path(uriRecurso).path("/{codigo}").buildAndExpand(codigo).toUri();
 	}		
 
 }

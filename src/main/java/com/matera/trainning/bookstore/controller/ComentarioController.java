@@ -66,18 +66,18 @@ public class ComentarioController {
 	@PostMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public ResponseEntity<AvaliacaoDTO> avaliarComentario(@PathVariable String codComentario, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = comentarioService.avaliarComentario(codComentario, dtoEntrada);		
-		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "v1/avaliacoes/{codigo}");		
+		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/avaliacoes");		
 		return new ResponseEntity<AvaliacaoDTO>(dtoSaida, headers, CREATED);	
 	}
 	
-	private HttpHeaders configuraHeaderLocation(String codigo, String uri) {
+	private HttpHeaders configuraHeaderLocation(String codigo, String uriRecurso) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(getUriDadoCodigoRecurso(codigo, uri));
+		headers.setLocation(getUriDadoCodigoRecurso(codigo, uriRecurso));
 		return headers;
 	}
 	
-	private URI getUriDadoCodigoRecurso(String codigo, String uri) {
-		return fromCurrentContextPath().path(uri).buildAndExpand(codigo).toUri();
+	private URI getUriDadoCodigoRecurso(String codigo, String uriRecurso) {
+		return fromCurrentContextPath().path(uriRecurso).path("/{codigo}").buildAndExpand(codigo).toUri();
 	}
 	
 }

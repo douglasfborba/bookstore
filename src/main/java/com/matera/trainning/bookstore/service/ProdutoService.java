@@ -62,7 +62,8 @@ public class ProdutoService {
 	public ProdutoDTO inserirProduto(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
 				.ifPresent(produto -> {
-					throw new RecursoAlreadyExistsException(produto.getCodigo()); 
+					String mensagem = "Produto já existente";
+					throw new RecursoAlreadyExistsException(mensagem, produto.getCodigo(), "/v1/produtos"); 
 				});
 				
 		Produto produto = modelMapper.map(dtoProduto, Produto.class);
@@ -207,7 +208,7 @@ public class ProdutoService {
 		return produto.getPrecos().stream()
 			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
 			.max(comparing(HistoricoDePrecoDTO::getPreco))
-			.orElseThrow(() -> new RecursoNotFoundException("max(preco)"));
+			.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente"));
 	}
 	
 	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(String codProduto) {
@@ -217,7 +218,7 @@ public class ProdutoService {
 		return produto.getPrecos().stream()
 			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
 			.min(comparing(HistoricoDePrecoDTO::getPreco))
-			.orElseThrow(() -> new RecursoNotFoundException("min(preco)"));
+			.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
 	}
 	
 	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
@@ -236,7 +237,7 @@ public class ProdutoService {
 						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
 					})
 				.max(comparing(HistoricoDePrecoDTO::getPreco))
-				.orElseThrow(() -> new RecursoNotFoundException("max(preco)"));	
+				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente"));	
 	}
 	
 	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
@@ -255,7 +256,7 @@ public class ProdutoService {
 						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
 					})
 				.min(comparing(HistoricoDePrecoDTO::getPreco))
-				.orElseThrow(() -> new RecursoNotFoundException("min(preco)"));	
+				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));	
 	}
 	
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
@@ -266,15 +267,16 @@ public class ProdutoService {
 	}
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
-	public AvaliacaoDTO avaliarProduto(String codigoProduto, AvaliacaoDTO dtoEntrada) {
-		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+	public AvaliacaoDTO avaliarProduto(String codProduto, AvaliacaoDTO dtoEntrada) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		produto.getAvaliacoes().stream()
 			.filter(avaliacao -> avaliacao.getUsuario().equalsIgnoreCase(dtoEntrada.getUsuario()))
 			.findFirst()
 				.ifPresent(avaliacao -> {
-					throw new RecursoAlreadyExistsException("Produto já avalido pelo usuário " + avaliacao.getUsuario());
+					String mensagem = "Avaliação já existente para o usuário " + dtoEntrada.getUsuario();
+					throw new RecursoAlreadyExistsException(mensagem, codProduto, "/v1/avaliacoes"); 
 				});
 	
 		Avaliacao avaliacao = modelMapper.map(dtoEntrada, Avaliacao.class);	

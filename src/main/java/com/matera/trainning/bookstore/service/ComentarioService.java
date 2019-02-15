@@ -84,6 +84,7 @@ public class ComentarioService {
 		
 		if (comentarios.isEmpty())
 			throw new RecursoNotFoundException("Usuário " + usuComentario + "inexistente"); 
+		
 		return comentarios;
 	}
 		
@@ -103,7 +104,8 @@ public class ComentarioService {
 			.filter(avaliacao -> avaliacao.getUsuario().equalsIgnoreCase(dtoEntrada.getUsuario()))
 			.findFirst()
 				.ifPresent(avaliacao -> {
-					throw new RecursoAlreadyExistsException("Comentário já avalido pelo usuário " + avaliacao.getUsuario());
+					String mensagem = "Avalição já existente para o usuário " + dtoEntrada.getUsuario();
+					throw new RecursoAlreadyExistsException(mensagem, avaliacao.getCodigo(), "/v1/avaliacoes");
 				});
 		
 		Avaliacao avaliacao = modelMapper.map(dtoEntrada, Avaliacao.class);	

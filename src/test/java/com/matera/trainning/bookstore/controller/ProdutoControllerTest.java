@@ -4,7 +4,6 @@ import static org.assertj.core.util.Lists.list;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
@@ -35,6 +34,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
@@ -60,6 +60,8 @@ public class ProdutoControllerTest {
 	private ComentarioDTO dtoComentario; 
 	
 	private HistoricoDePrecoDTO dtoHistoricoDePreco;
+	
+	private AvaliacaoDTO dtoAvaliacao;
 
 	@Before
 	public void setUp() {				
@@ -79,6 +81,12 @@ public class ProdutoControllerTest {
 		dtoHistoricoDePreco.setPreco(new BigDecimal(57.63));
 		dtoHistoricoDePreco.setProdutoDescricao(dtoProduto.getDescricao());
 		dtoHistoricoDePreco.setDataHoraAlteracao(LocalDateTime.now());
+		
+		dtoAvaliacao = new AvaliacaoDTO();
+		dtoAvaliacao.setCodigo("dXN1YXJpby52321ASScsDE5MTcyNPhT2e=");
+		dtoAvaliacao.setDescricao("Livro The Hobbit");
+		dtoAvaliacao.setRating(3.0);
+		dtoAvaliacao.setUsuario("usuario.hater");
 	}
 
 	@Test
@@ -131,7 +139,7 @@ public class ProdutoControllerTest {
 	@Test
 	public void insereProdutoDuplicado() throws Exception {
 		when(produtoService.inserirProduto(Mockito.any(ProdutoDTO.class)))
-			.thenThrow(new RecursoAlreadyExistsException(dtoProduto.getCodigo()));		
+			.thenThrow(new RecursoAlreadyExistsException("Produto já existente", dtoProduto.getCodigo(), "/v1/produtos"));		
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(post("/v1/produtos")
@@ -250,7 +258,7 @@ public class ProdutoControllerTest {
 			.thenReturn(comentarios);
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -263,7 +271,7 @@ public class ProdutoControllerTest {
 		when(produtoService.listarComentariosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenThrow(RecursoNotFoundException.class);
 	
-		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
 			.accept(APPLICATION_JSON_UTF8))
 			.andExpect(status().isNotFound())
 			.andExpect(content().string(isEmptyString()));
@@ -441,19 +449,56 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void listaAvaliacoesPeloProduto() throws Exception {
-		fail("Not yet implemented");
+		Page<AvaliacaoDTO> avaliacoes = new PageImpl<>(list(dtoAvaliacao));
 
-		Page<ComentarioDTO> comentarios = new PageImpl<>(list(dtoComentario));
-
-		when(produtoService.listarComentariosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
-			.thenReturn(comentarios);
+		when(produtoService.listarAvaliacoesDadoCodigoDoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenReturn(avaliacoes);
 		
-		String jsonArray = jsonMapper.writeValueAsString(comentarios);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+		String jsonArray = jsonMapper.writeValueAsString(avaliacoes);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
 				.andExpect(content().json(jsonArray))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void listaAvaliacoesPeloComentarioInexistente() throws Exception {
+		when(produtoService.listarAvaliacoesDadoCodigoDoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenThrow(RecursoNotFoundException.class);
+		
+		mockMvc.perform(get("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040=")
+				.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void avaliaProduto() throws Exception {
+		when(produtoService.avaliarProduto(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+			.thenReturn(dtoAvaliacao);
+		
+		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
+		mockMvc.perform(post("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+				.andExpect(status().isCreated())
+				.andExpect(content().json(jsonObject))
+				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + dtoAvaliacao.getCodigo())))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void avaliaProdutoInexistente() throws Exception {
+		when(produtoService.avaliarProduto(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+			.thenThrow(RecursoNotFoundException.class);
+		
+		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
+		mockMvc.perform(post("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
 	}
 }

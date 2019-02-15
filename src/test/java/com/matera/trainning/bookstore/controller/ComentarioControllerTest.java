@@ -219,7 +219,7 @@ public class ComentarioControllerTest {
 	@Test
 	public void avaliaComentarioDuplicado() throws Exception {
 		when(comentarioService.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
-			.thenThrow(RecursoAlreadyExistsException.class);
+			.thenThrow(new RecursoAlreadyExistsException("Avalição já existente para o usuário", dtoAvaliacao.getCodigo(), "/v1/avaliacoes"));		
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
