@@ -4,6 +4,7 @@ import static org.assertj.core.util.Lists.list;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
@@ -35,6 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
+import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.service.ProdutoService;
 import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsException;
@@ -53,28 +55,35 @@ public class ProdutoControllerTest {
 	@MockBean
 	private ProdutoService produtoService;
 
-	private ProdutoDTO livroTheHobbit;
+	private ProdutoDTO dtoProduto;
 	
-	private ComentarioDTO hater;
+	private ComentarioDTO dtoComentario; 
+	
+	private HistoricoDePrecoDTO dtoHistoricoDePreco;
 
 	@Before
 	public void setUp() {				
-		livroTheHobbit = new ProdutoDTO();
-		livroTheHobbit.setCodigo("LIVRO23040");
-		livroTheHobbit.setDescricao("Livro The Hobbit");
-		livroTheHobbit.setPreco(new BigDecimal(57.63));
-		livroTheHobbit.setDataCadastro(LocalDate.now());
+		dtoProduto = new ProdutoDTO();
+		dtoProduto.setCodigo("LIVRO23040");
+		dtoProduto.setDescricao("Livro The Hobbit");
+		dtoProduto.setPreco(new BigDecimal(57.63));
+		dtoProduto.setDataCadastro(LocalDate.now());
 		
-		hater = new ComentarioDTO();
-		hater.setCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
-		hater.setDescricao("Odiei, este é o pior livro do mundo!");
-		hater.setUsuario("usuario.hater");
-		hater.setDataHoraCriacao(LocalDateTime.now());
+		dtoComentario = new ComentarioDTO();
+		dtoComentario.setCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
+		dtoComentario.setDescricao("Odiei, este é o pior livro do mundo!");
+		dtoComentario.setUsuario("usuario.hater");
+		dtoComentario.setDataHoraCriacao(LocalDateTime.now());
+		
+		dtoHistoricoDePreco = new HistoricoDePrecoDTO();
+		dtoHistoricoDePreco.setPreco(new BigDecimal(57.63));
+		dtoHistoricoDePreco.setProdutoDescricao(dtoProduto.getDescricao());
+		dtoHistoricoDePreco.setDataHoraAlteracao(LocalDateTime.now());
 	}
 
 	@Test
 	public void listaProdutosEmBasePopulada() throws Exception {
-		Page<ProdutoDTO> produtos = new PageImpl<>(list(livroTheHobbit));
+		Page<ProdutoDTO> produtos = new PageImpl<>(list(dtoProduto));
 		
 		when(produtoService.listarProdutos(Mockito.any(Pageable.class)))
 			.thenReturn(produtos);
@@ -107,35 +116,35 @@ public class ProdutoControllerTest {
 	@Test
 	public void insereProduto() throws Exception {		
 		when(produtoService.inserirProduto(Mockito.any(ProdutoDTO.class)))
-			.thenReturn(livroTheHobbit);	
+			.thenReturn(dtoProduto);	
 		
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(post("/v1/produtos")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
 				.andExpect(content().json(jsonObject))
-				.andExpect(header().string("location", is("http://localhost/v1/produtos/" + livroTheHobbit.getCodigo())))
+				.andExpect(header().string("location", is("http://localhost/v1/produtos/" + dtoProduto.getCodigo())))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 	
 	@Test
 	public void insereProdutoDuplicado() throws Exception {
 		when(produtoService.inserirProduto(Mockito.any(ProdutoDTO.class)))
-			.thenThrow(new RecursoAlreadyExistsException(livroTheHobbit.getCodigo()));		
+			.thenThrow(new RecursoAlreadyExistsException(dtoProduto.getCodigo()));		
 
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(post("/v1/produtos")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isConflict())
-				.andExpect(header().string("location", is("http://localhost/v1/produtos/" + livroTheHobbit.getCodigo())))
+				.andExpect(header().string("location", is("http://localhost/v1/produtos/" + dtoProduto.getCodigo())))
 				.andExpect(content().string(isEmptyString()));
 	}
 	
 	@Test
 	public void atualizaProduto() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(put("/v1/produtos/{codProduto}", "LIVRO23040")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
@@ -148,7 +157,7 @@ public class ProdutoControllerTest {
 		doThrow(RecursoNotFoundException.class)
 			.when(produtoService).atualizarProduto(Mockito.anyString(), Mockito.any(ProdutoDTO.class));
 		
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(put("/v1/produtos/{codProduto}", "LIVRO23040")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
@@ -178,9 +187,9 @@ public class ProdutoControllerTest {
 	@Test
 	public void buscaProdutoPeloCodigo() throws Exception {
 		when(produtoService.buscarProdutoDadoCodigo(Mockito.anyString()))
-			.thenReturn(livroTheHobbit);
+			.thenReturn(dtoProduto);
 
-		String jsonObject = jsonMapper.writeValueAsString(livroTheHobbit);
+		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(get("/v1/produtos/{codProduto}", "LIVRO23040")
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -201,7 +210,7 @@ public class ProdutoControllerTest {
 
 	@Test
 	public void buscaProdutoPelaDescricao() throws Exception {
-		Page<ProdutoDTO> produtos = new PageImpl<>(list(livroTheHobbit));
+		Page<ProdutoDTO> produtos = new PageImpl<>(list(dtoProduto));
 
 		when(produtoService.buscarProdutoDadoDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(produtos);
@@ -235,7 +244,7 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void listaComentariosPeloProduto() throws Exception {
-		Page<ComentarioDTO> comentarios = new PageImpl<>(list(hater));
+		Page<ComentarioDTO> comentarios = new PageImpl<>(list(dtoComentario));
 
 		when(produtoService.listarComentariosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(comentarios);
@@ -259,5 +268,192 @@ public class ProdutoControllerTest {
 			.andExpect(status().isNotFound())
 			.andExpect(content().string(isEmptyString()));
 	}
+	
+	@Test
+	public void comentaProduto() throws Exception {
+		when(produtoService.comentarProduto(Mockito.anyString(), Mockito.any(ComentarioDTO.class)))
+			.thenReturn(dtoComentario);
+		
+		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
+		mockMvc.perform(post("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+				.andExpect(status().isCreated())
+				.andExpect(content().json(jsonObject))
+				.andExpect(header().string("location", is("http://localhost/v1/comentarios/" + dtoComentario.getCodigo())))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void comentaProdutoInexistente() throws Exception {
+		when(produtoService.comentarProduto(Mockito.anyString(), Mockito.any(ComentarioDTO.class)))
+			.thenThrow(RecursoNotFoundException.class);
+		
+		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
+		mockMvc.perform(post("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
+				.contentType(APPLICATION_JSON_UTF8)
+				.content(jsonObject))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void listaHistoricoDePrecosPeloProduto() throws Exception {
+		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoHistoricoDePreco));
 
+		when(produtoService.listarHistoricoDePrecosDadoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenReturn(historicoDePrecos);
+		
+		String jsonArray = jsonMapper.writeValueAsString(historicoDePrecos);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(1)))
+				.andExpect(content().json(jsonArray))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void listaHistoricoDePrecosPeloProdutoInexistente() throws Exception {
+		when(produtoService.listarHistoricoDePrecosDadoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenThrow(RecursoNotFoundException.class);
+		
+		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void listaHistoricoDePrecosNoPeriodoPeloProduto() throws Exception {
+		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoHistoricoDePreco));
+
+		when(produtoService.listarHistoricoDePrecosNoPeriodoDadoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(Pageable.class)))
+			.thenReturn(historicoDePrecos);
+
+		String jsonArray = jsonMapper.writeValueAsString(historicoDePrecos);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("dtInicio", LocalDate.now().toString())
+				.param("dtFim", LocalDate.now().toString()))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(1)))
+				.andExpect(content().json(jsonArray))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void listaHistoricoDePrecosNoPeriodoPeloProdutoInexistente() throws Exception {
+		when(produtoService.listarHistoricoDePrecosNoPeriodoDadoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(Pageable.class)))
+			.thenThrow(RecursoNotFoundException.class);
+
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("dtInicio", LocalDate.now().toString())
+				.param("dtFim", LocalDate.now().toString()))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMaximoPeloProduto() throws Exception {
+		when(produtoService.buscarPrecoMaximoDadoCodigoProduto(Mockito.anyString()))
+			.thenReturn(dtoHistoricoDePreco);
+
+		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("preco", "max"))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonObject))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMaximoPeloProdutoInexistente() throws Exception {
+		when(produtoService.buscarPrecoMaximoDadoCodigoProduto(Mockito.anyString()))
+			.thenThrow(RecursoNotFoundException.class);
+
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("preco", "max"))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMinimoPeloProduto() throws Exception {
+		when(produtoService.buscarPrecoMinimoDadoCodigoProduto(Mockito.anyString()))
+			.thenReturn(dtoHistoricoDePreco);
+
+		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("preco", "min"))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonObject))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMinimoPeloProdutoInexistente() throws Exception {
+		when(produtoService.buscarPrecoMinimoDadoCodigoProduto(Mockito.anyString()))
+			.thenThrow(RecursoNotFoundException.class);
+
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("preco", "min"))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMaximoNoPeriodoPeloProduto() throws Exception {
+		when(produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
+			.thenReturn(dtoHistoricoDePreco);
+
+		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("dtInicio", LocalDate.now().toString())
+				.param("dtFim", LocalDate.now().toString())
+				.param("preco", "max"))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonObject))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void buscaHistoricoDePrecoMinimoNoPeriodoPeloProduto() throws Exception {
+		when(produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
+			.thenReturn(dtoHistoricoDePreco);
+
+		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.accept(APPLICATION_JSON_UTF8)
+				.param("dtInicio", LocalDate.now().toString())
+				.param("dtFim", LocalDate.now().toString())
+				.param("preco", "min"))
+				.andExpect(status().isOk())
+				.andExpect(content().json(jsonObject))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
+	
+	@Test
+	public void listaAvaliacoesPeloProduto() throws Exception {
+		fail("Not yet implemented");
+
+		Page<ComentarioDTO> comentarios = new PageImpl<>(list(dtoComentario));
+
+		when(produtoService.listarComentariosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenReturn(comentarios);
+		
+		String jsonArray = jsonMapper.writeValueAsString(comentarios);
+		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content", hasSize(1)))
+				.andExpect(content().json(jsonArray))
+				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
+	}
 }

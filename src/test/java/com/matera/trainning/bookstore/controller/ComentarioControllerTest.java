@@ -52,11 +52,11 @@ public class ComentarioControllerTest {
 	private ObjectMapper jsonMapper;
 
 	@MockBean
-	private ComentarioService service;
+	private ComentarioService comentarioService;
 	
-	private AvaliacaoDTO avaliacao;
+	private AvaliacaoDTO dtoAvaliacao;
 
-	private ComentarioDTO hater;
+	private ComentarioDTO dtoComentario;
 	
 	@Before
 	public void setUp() {		
@@ -66,22 +66,22 @@ public class ComentarioControllerTest {
 		livroTheHobbit.setPreco(new BigDecimal(57.63));
 		livroTheHobbit.setDataCadastro(LocalDate.now());
 
-		hater = new ComentarioDTO();
-		hater.setCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
-		hater.setDescricao("Odiei, este é o pior livro do mundo!");
-		hater.setUsuario("usuario.hater");
-		hater.setDataHoraCriacao(LocalDateTime.now());
+		dtoComentario = new ComentarioDTO();
+		dtoComentario.setCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
+		dtoComentario.setDescricao("Odiei, este é o pior livro do mundo!");
+		dtoComentario.setUsuario("usuario.hater");
+		dtoComentario.setDataHoraCriacao(LocalDateTime.now());
 				
-		avaliacao = new AvaliacaoDTO();
-		avaliacao.setCodigo("dXN1YXJpby52321ASScsDE5MTcyNPhT2e=");
-		avaliacao.setDescricao("Livro The Hobbit");
-		avaliacao.setRating(3.0);
-		avaliacao.setUsuario("usuario.hater");
+		dtoAvaliacao = new AvaliacaoDTO();
+		dtoAvaliacao.setCodigo("dXN1YXJpby52321ASScsDE5MTcyNPhT2e=");
+		dtoAvaliacao.setDescricao("Livro The Hobbit");
+		dtoAvaliacao.setRating(3.0);
+		dtoAvaliacao.setUsuario("usuario.hater");
 	}
 	
 	@Test
 	public void atualizaComentario() throws Exception {
-		String jsonObject = jsonMapper.writeValueAsString(hater);
+		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(put("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
@@ -92,9 +92,9 @@ public class ComentarioControllerTest {
 	@Test
 	public void atualizaComentarioInexistente() throws Exception {					
 		doThrow(RecursoNotFoundException.class)
-			.when(service).atualizarComentario(Mockito.anyString(), Mockito.any(ComentarioDTO.class));
+			.when(comentarioService).atualizarComentario(Mockito.anyString(), Mockito.any(ComentarioDTO.class));
 		
-		String jsonObject = jsonMapper.writeValueAsString(hater);
+		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(put("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
@@ -113,7 +113,7 @@ public class ComentarioControllerTest {
 	@Test
 	public void removeComentarioInexistente() throws Exception {
 		doThrow(RecursoNotFoundException.class)
-			.when(service).removerComentario(Mockito.anyString());
+			.when(comentarioService).removerComentario(Mockito.anyString());
 		
 		mockMvc.perform(delete("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.accept(APPLICATION_JSON_UTF8))
@@ -123,7 +123,7 @@ public class ComentarioControllerTest {
 
 	@Test
 	public void buscaComentarioInexistentePeloCodigo() throws Exception {
-		when(service.buscarDadoCodigo(Mockito.anyString()))
+		when(comentarioService.buscarDadoCodigo(Mockito.anyString()))
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
@@ -134,10 +134,10 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void buscaComentarioPeloCodigo() throws Exception {
-		when(service.buscarDadoCodigo(Mockito.anyString()))
-			.thenReturn(hater);
+		when(comentarioService.buscarDadoCodigo(Mockito.anyString()))
+			.thenReturn(dtoComentario);
 		
-		String jsonObject = jsonMapper.writeValueAsString(hater);
+		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(get("/v1/comentarios/{codigo}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
@@ -147,9 +147,9 @@ public class ComentarioControllerTest {
 
 	@Test
 	public void listaComentarioPorUsuario() throws Exception {
-		Page<ComentarioDTO> comentarios = new PageImpl<>(list(hater));
+		Page<ComentarioDTO> comentarios = new PageImpl<>(list(dtoComentario));
 
-		when(service.buscarComentarioDadoUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(comentarioService.buscarComentarioDadoUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(comentarios);
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
@@ -164,7 +164,7 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void listaComentarioParaUsuarioInexistente() throws Exception {
-		when(service.buscarComentarioDadoUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(comentarioService.buscarComentarioDadoUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios")
@@ -175,10 +175,10 @@ public class ComentarioControllerTest {
 	}
 	
 	@Test
-	public void listaAvaliacoesDadoComentario() throws Exception {
-		Page<AvaliacaoDTO> comentarios = new PageImpl<>(list(avaliacao));
+	public void listaAvaliacoesPeloComentario() throws Exception {
+		Page<AvaliacaoDTO> comentarios = new PageImpl<>(list(dtoAvaliacao));
 
-		when(service.listarAvaliacoesDadoComentario(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(comentarioService.listarAvaliacoesDadoComentario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(comentarios);
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
@@ -191,8 +191,8 @@ public class ComentarioControllerTest {
 	}
 	
 	@Test
-	public void listaAvaliacoesDadoComentarioInexistente() throws Exception {
-		when(service.listarAvaliacoesDadoComentario(Mockito.anyString(), Mockito.any(Pageable.class)))
+	public void listaAvaliacoesPeloComentarioInexistente() throws Exception {
+		when(comentarioService.listarAvaliacoesDadoComentario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
@@ -203,39 +203,39 @@ public class ComentarioControllerTest {
 	
 	@Test
 	public void avaliaComentario() throws Exception {
-		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
-			.thenReturn(avaliacao);
+		when(comentarioService.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+			.thenReturn(dtoAvaliacao);
 		
-		String jsonObject = jsonMapper.writeValueAsString(avaliacao);
+		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
 				.andExpect(content().json(jsonObject))
-				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + avaliacao.getCodigo())))
+				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + dtoAvaliacao.getCodigo())))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
 	}
 	
 	@Test
 	public void avaliaComentarioDuplicado() throws Exception {
-		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+		when(comentarioService.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
 			.thenThrow(RecursoAlreadyExistsException.class);
 		
-		String jsonObject = jsonMapper.writeValueAsString(avaliacao);
+		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isConflict())
-				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + avaliacao.getCodigo())))
+				.andExpect(header().string("location", is("http://localhost/v1/avaliacoes/" + dtoAvaliacao.getCodigo())))
 				.andExpect(content().string(isEmptyString()));
 	}
 	
 	@Test
 	public void avaliaComentarioInexistente() throws Exception {
-		when(service.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
+		when(comentarioService.avaliarComentario(Mockito.anyString(), Mockito.any(AvaliacaoDTO.class)))
 			.thenThrow(RecursoNotFoundException.class);
 		
-		String jsonObject = jsonMapper.writeValueAsString(avaliacao);
+		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))

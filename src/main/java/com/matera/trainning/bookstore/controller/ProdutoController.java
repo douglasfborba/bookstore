@@ -80,23 +80,23 @@ public class ProdutoController {
 	}
 	
 	@PostMapping("v1/produtos/{codProduto}/comentarios")
-	public ResponseEntity<ComentarioDTO> inserirComentario(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
-		ComentarioDTO dtoSaida = produtoService.inserirComentario(codProduto, dtoEntrada);
+	public ResponseEntity<ComentarioDTO> comentarProduto(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
+		ComentarioDTO dtoSaida = produtoService.comentarProduto(codProduto, dtoEntrada);
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo());		
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);		
 	}
 	
 	@GetMapping("v1/produtos/{codProduto}/historico-precos")
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codProduto, Pageable pageable) {
-		return produtoService.listarHistoricoDePrecos(codProduto, pageable);
+		return produtoService.listarHistoricoDePrecosDadoProduto(codProduto, pageable);
 	}
 	
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "dtInicio", "dtFim" })
-	public Page<HistoricoDePrecoDTO> buscarHistoricoDePrecosNoPeriodo(@PathVariable String codProduto, 
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoCodigoProduto(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
 			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
 			Pageable pageable) {
-		return produtoService.buscarHistoricoDePrecosNoPeriodo(codProduto, dtInicio, dtFim, pageable);
+		return produtoService.listarHistoricoDePrecosNoPeriodoDadoProduto(codProduto, dtInicio, dtFim, pageable);
 	}
 	
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "preco=max" })

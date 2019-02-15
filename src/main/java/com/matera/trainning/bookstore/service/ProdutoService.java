@@ -123,20 +123,9 @@ public class ProdutoService {
 
 		return comentarioService.findAllByProduto(produto, pageable);
 	}	
-	
-	public ComentarioDTO buscarComentarioDadoCodigoDoProdutoAndCodigoComentario(String codigoProduto, String codigoComentario) {
-		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-				
-		return produto.getComentarios().stream()
-				.map(comentario -> modelMapper.map(comentario, ComentarioDTO.class))		
-				.filter(dto -> dto.getCodigo().equals(codigoComentario))
-				.findFirst()
-					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
-	}
-	
+		
 	@Transactional(propagation = REQUIRED, readOnly = false)
-	public ComentarioDTO inserirComentario(String codigoProduto, ComentarioDTO dtoComentario) {
+	public ComentarioDTO comentarProduto(String codigoProduto, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
@@ -184,14 +173,14 @@ public class ProdutoService {
 		repository.save(produto);
 	}
 	
-	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(String codigoProduto, Pageable pageable) {
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosDadoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
 		return historicoService.findAllByProduto(produto, pageable);
 	}
 	
-	public Page<HistoricoDePrecoDTO> buscarHistoricoDePrecosNoPeriodo(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {		
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoProduto(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {		
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
@@ -302,13 +291,13 @@ public class ProdutoService {
 		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
 	}
 	
-	private ProdutoDTO historizarPreco(Produto produtoSalvo) {
-		produtoSalvo.addHistoricoDePreco(getHistoricoDePreco(produtoSalvo));
+	private ProdutoDTO historizarPreco(Produto produto) {
+		produto.addHistoricoDePreco(getHistoricoDePreco(produto));
 		
-		ProdutoDTO dto =  modelMapper.map(produtoSalvo, ProdutoDTO.class);
-		atualizarProduto(produtoSalvo.getCodigo(), dto);
+		ProdutoDTO dtoProduto =  modelMapper.map(produto, ProdutoDTO.class);
+		atualizarProduto(produto.getCodigo(), dtoProduto);
 		
-		return dto;
+		return dtoProduto;
 	}
 	
 	private HistoricoDePreco getHistoricoDePreco(Produto produto) {

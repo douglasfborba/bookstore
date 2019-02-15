@@ -27,8 +27,8 @@ public class AvaliacaoController {
 	}
 	
 	@GetMapping(value = "v1/avaliacoes")
-	public Page<AvaliacaoDTO> listaAvaliacoesPorUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
-		return avaliacaoService.listaAvaliacoesPorUsuario(usuario, pageable);
+	public Page<AvaliacaoDTO> listarAvaliacoesPorUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
+		return avaliacaoService.listarAvaliacoesPorUsuario(usuario, pageable);
 	}
 	
 }

@@ -50,7 +50,7 @@ public class AvaliacaoService {
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
 
-	public Page<AvaliacaoDTO> listaAvaliacoesPorUsuario(String usuario, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesPorUsuario(String usuario, Pageable pageable) {
 		return repository.findAllByUsuario(usuario, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
