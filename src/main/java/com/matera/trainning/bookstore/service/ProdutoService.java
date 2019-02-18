@@ -62,7 +62,7 @@ public class ProdutoService {
 	public ProdutoDTO inserirProduto(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
 				.ifPresent(produto -> {
-					String mensagem = "Produto já existente";
+					String mensagem = "Produto " + produto.getCodigo() + " já existente";
 					throw new RecursoAlreadyExistsException(mensagem, produto.getCodigo(), "/v1/produtos"); 
 				});
 				
@@ -122,7 +122,7 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 
-		return comentarioService.findAllByProduto(produto, pageable);
+		return comentarioService.listarComentariosDadoProduto(produto, pageable);
 	}	
 		
 	@Transactional(propagation = REQUIRED, readOnly = false)
@@ -178,7 +178,7 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
-		return historicoService.findAllByProduto(produto, pageable);
+		return historicoService.listarItensHistPrecosDadoProduto(produto, pageable);
 	}
 	
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoProduto(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {		
@@ -263,7 +263,7 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
 		
-		return avaliacaoService.findAllByProduto(produto, pageable);
+		return avaliacaoService.listarAvaliacoesDadoProduto(produto, pageable);
 	}
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)

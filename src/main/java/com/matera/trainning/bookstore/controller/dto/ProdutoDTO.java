@@ -18,6 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
 import com.matera.trainning.bookstore.model.Produto;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -32,21 +33,25 @@ public class ProdutoDTO {
 	private String codigo;
 
 	@Getter @Setter
+	@EqualsAndHashCode.Exclude
 	@NotNull(message = "Campo código não pode ser nulo")
 	@Size(min = 3, max = 50, message = "Campo código deve possuir entre 3 e 50 caracteres")
 	private String descricao;
 
 	@Getter @Setter
+	@EqualsAndHashCode.Exclude
 	@NotNull(message = "Campo preço não pode ser nulo")
 	private BigDecimal preco;
 
 	@Getter @Setter
+	@EqualsAndHashCode.Exclude
 	@JsonView @JsonFormat(pattern = "dd-MM-yyyy")
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate dataCadastro;
 	
 	@Getter @Setter @JsonView
+	@EqualsAndHashCode.Exclude
 	private Double rating = 0.0;
 
 	public static final Converter<Produto, ProdutoDTO> getConverter() {

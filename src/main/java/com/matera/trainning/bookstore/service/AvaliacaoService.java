@@ -35,22 +35,22 @@ public class AvaliacaoService {
 
 	public AvaliacaoDTO buscarAvaliacaoDadoCodigo(String codAvaliacao) {
 		Avaliacao avaliacao = repository.findByCodigo(codAvaliacao)
-				.orElseThrow(() -> new RecursoNotFoundException(codAvaliacao));
-
+				.orElseThrow(() -> new RecursoNotFoundException("Avaliação " + codAvaliacao + " inexistente"));
+		
 		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
 	}
 	
-	public Page<AvaliacaoDTO> findAllByProduto(Produto produto, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(Produto produto, Pageable pageable) {
 		return repository.findAllByProduto(produto, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
 
-	public Page<AvaliacaoDTO> findAllByComentario(Comentario comentario, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(Comentario comentario, Pageable pageable) {
 		return repository.findAllByComentario(comentario, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}
 
-	public Page<AvaliacaoDTO> listarAvaliacoesPorUsuario(String usuario, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoUsuario(String usuario, Pageable pageable) {
 		return repository.findAllByUsuario(usuario, pageable)
 				.map(avaliacao -> modelMapper.map(avaliacao, AvaliacaoDTO.class));
 	}

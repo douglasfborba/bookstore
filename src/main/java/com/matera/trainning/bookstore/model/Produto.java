@@ -28,13 +28,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "dis_produto")
 public class Produto {
 
+	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
 	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq", allocationSize = 1)
 	private Long id;
 
-	@EqualsAndHashCode.Exclude
 	@Column(name = "codigo", nullable = false)
 	private String codigo;
 

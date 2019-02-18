@@ -49,18 +49,18 @@ public class ComentarioController {
 
 	@GetMapping("v1/comentarios/{codComentario}")
 	public ResponseEntity<ComentarioDTO> buscarComentarioDadoCodigo(@PathVariable String codComentario) {
-		ComentarioDTO dtoComentario = comentarioService.buscarDadoCodigo(codComentario);
-		return ResponseEntity.ok(dtoComentario);	
+		ComentarioDTO dtoSaida = comentarioService.buscarComentarioDadoCodigo(codComentario);
+		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@GetMapping(value = "v1/comentarios")
-	public Page<ComentarioDTO> buscarComentarioDadoUsuario(@RequestParam(name = "usuario", required = true) String usuComentario, Pageable pageable) {
-		return comentarioService.buscarComentarioDadoUsuario(usuComentario, pageable);
+	public Page<ComentarioDTO> listarComentariosDadoUsuario(@RequestParam(name = "usuario", required = true) String usuComentario, Pageable pageable) {
+		return comentarioService.listarComentariosDadoUsuario(usuComentario, pageable);
 	}
 	
 	@GetMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(@PathVariable String codComentario, Pageable pageable) {
-		return comentarioService.listarAvaliacoesDadoComentario(codComentario, pageable);
+		return comentarioService.listarAvaliacoesDadoCodigoComentario(codComentario, pageable);
 	}
 
 	@PostMapping("v1/comentarios/{codComentario}/avaliacoes")

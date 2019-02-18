@@ -64,7 +64,7 @@ public class AvaliacaoControllerTest {
 	public void listaAvaliacoesPorUsuario() throws Exception {
 		Page<AvaliacaoDTO> avaliacoes = new PageImpl<>(list(avaliacao));
 
-		when(service.listarAvaliacoesPorUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(service.listarAvaliacoesDadoUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(avaliacoes);
 		
 		String jsonArray = jsonMapper.writeValueAsString(avaliacoes);

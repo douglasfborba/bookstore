@@ -29,13 +29,13 @@ import lombok.NoArgsConstructor;
 @Table(name = "dis_comentario")
 public class Comentario {
 
+	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_cmtr_sequence")
 	@SequenceGenerator(name = "dis_cmtr_sequence", sequenceName = "dis_cmtr_seq", allocationSize = 1)
 	private Long id;
 
-	@EqualsAndHashCode.Exclude
 	@Column(name = "codigo", nullable = false)
 	private String codigo;
 

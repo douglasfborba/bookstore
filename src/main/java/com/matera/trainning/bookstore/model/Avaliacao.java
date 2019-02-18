@@ -20,13 +20,13 @@ import lombok.EqualsAndHashCode;
 @Table(name = "dis_avaliacao")
 public class Avaliacao {
 
+	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
 	@GeneratedValue(strategy = SEQUENCE, generator = "dis_aval_sequence")
 	@SequenceGenerator(name = "dis_aval_sequence", sequenceName = "dis_aval_seq", allocationSize = 1)
 	private Long id;
 
-	@EqualsAndHashCode.Exclude
 	@Column(name = "codigo", nullable = false)
 	private String codigo;
 	

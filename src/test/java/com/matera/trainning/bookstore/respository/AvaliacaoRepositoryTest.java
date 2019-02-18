@@ -110,6 +110,31 @@ public class AvaliacaoRepositoryTest {
 	}
 
 	@Test
+	public void buscaAvaliacoesPeloProduto() throws Exception {
+		avaliacao.setProduto(produto);
+		produto.addAvaliacao(avaliacao);
+		
+		entityManager.persist(produto);
+
+		List<Avaliacao> avaliacoes = repository.findAllByProduto(produto, PageRequest.of(0, 1)).getContent();
+
+		assertThat(avaliacoes).isNotEmpty().hasSize(1).contains(avaliacao);
+	}
+
+	@Test
+	public void buscaAvaliacoesPeloProdutoInexistente() throws Exception {
+		produto.addComentario(comentario);
+		avaliacao.setComentario(comentario);
+		comentario.addAvaliacao(avaliacao);
+		
+		entityManager.persist(produto);
+
+		List<Avaliacao> avaliacoes = repository.findAllByProduto(produto, PageRequest.of(0, 1)).getContent();
+
+		assertThat(avaliacoes).hasSize(0);
+	}
+	
+	@Test
 	public void buscaAvaliacoesPeloComentario() throws Exception {
 		produto.addComentario(comentario);
 		avaliacao.setComentario(comentario);

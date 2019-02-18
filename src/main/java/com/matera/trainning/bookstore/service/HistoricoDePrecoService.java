@@ -23,7 +23,7 @@ public class HistoricoDePrecoService {
 	@Autowired
 	private HistoricoDePrecoRepository repository;
 
-	public Page<HistoricoDePrecoDTO> findAllByProduto(Produto produto, Pageable pageable) {
+	public Page<HistoricoDePrecoDTO> listarItensHistPrecosDadoProduto(Produto produto, Pageable pageable) {
 		return repository.findAllByProduto(produto, pageable)
 				.map(itemHistorico -> modelMapper.map(itemHistorico, HistoricoDePrecoDTO.class));
 	}

@@ -21,14 +21,14 @@ public class AvaliacaoController {
 	AvaliacaoService avaliacaoService;
 
 	@GetMapping("v1/avaliacoes/{codAvaliacao}")
-	public ResponseEntity<AvaliacaoDTO> buscarProdutoDadoCodigo(@PathVariable String codAvaliacao) {
+	public ResponseEntity<AvaliacaoDTO> buscaAvaliacaoDadoCodigo(@PathVariable String codAvaliacao) {
 		AvaliacaoDTO dtoSaida = avaliacaoService.buscarAvaliacaoDadoCodigo(codAvaliacao);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@GetMapping(value = "v1/avaliacoes")
 	public Page<AvaliacaoDTO> listarAvaliacoesPorUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
-		return avaliacaoService.listarAvaliacoesPorUsuario(usuario, pageable);
+		return avaliacaoService.listarAvaliacoesDadoUsuario(usuario, pageable);
 	}
 	
 }
