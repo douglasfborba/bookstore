@@ -71,7 +71,7 @@ public class ProdutoController {
 	
 	@GetMapping(value = "v1/produtos", params = { "descricao" })
 	public Page<ProdutoDTO> buscarProdutoDadoDescricao(@RequestParam(name = "descricao", required = true) String descProduto, Pageable pageable) {
-		return produtoService.buscarProdutoDadoDescricao(descProduto, pageable);
+		return produtoService.listarProdutosDadoDescricao(descProduto, pageable);
 	}
 	
 	@GetMapping("v1/produtos/{codProduto}/comentarios")

@@ -64,7 +64,7 @@ public class ProdutoRepositoryTest {
 	public void listaProdutosPelaDescricao() {
 		entityManager.persist(produto);
 
-		List<Produto> produtos = repository.findByDescricao("HoBbiT", PageRequest.of(0, 1)).getContent();
+		List<Produto> produtos = repository.findAllByDescricao("HoBbiT", PageRequest.of(0, 1)).getContent();
 
 		assertThat(produtos).isNotEmpty().hasSize(1).contains(produto);
 	}
@@ -73,7 +73,7 @@ public class ProdutoRepositoryTest {
 	public void listaProdutosPelaDescricaoInexistente() {
 		entityManager.persist(produto);
 
-		List<Produto> produtos = repository.findByDescricao("Senhor", PageRequest.of(0, 1)).getContent();
+		List<Produto> produtos = repository.findAllByDescricao("Senhor", PageRequest.of(0, 1)).getContent();
 
 		assertThat(produtos).hasSize(0);
 	}

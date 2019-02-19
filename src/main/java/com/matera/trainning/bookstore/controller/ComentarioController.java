@@ -53,7 +53,7 @@ public class ComentarioController {
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
-	@GetMapping(value = "v1/comentarios")
+	@GetMapping(value = "v1/comentarios", params = { "usuario" })
 	public Page<ComentarioDTO> listarComentariosDadoUsuario(@RequestParam(name = "usuario", required = true) String usuComentario, Pageable pageable) {
 		return comentarioService.listarComentariosDadoUsuario(usuComentario, pageable);
 	}

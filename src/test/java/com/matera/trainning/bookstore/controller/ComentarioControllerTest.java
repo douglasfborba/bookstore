@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.Base64Utils.encodeToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -83,6 +85,7 @@ public class ComentarioControllerTest {
 	public void atualizaComentario() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(put("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNoContent())
@@ -96,6 +99,7 @@ public class ComentarioControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(put("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNotFound())
@@ -105,6 +109,7 @@ public class ComentarioControllerTest {
 	@Test
 	public void removeComentario() throws Exception {
 		mockMvc.perform(delete("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNoContent())
 				.andExpect(content().string(isEmptyString()));
@@ -116,6 +121,7 @@ public class ComentarioControllerTest {
 			.when(comentarioService).removerComentario(Mockito.anyString());
 		
 		mockMvc.perform(delete("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -127,6 +133,7 @@ public class ComentarioControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -139,6 +146,7 @@ public class ComentarioControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(get("/v1/comentarios/{codigo}", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(content().string(jsonObject))
@@ -154,6 +162,7 @@ public class ComentarioControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
 		mockMvc.perform(get("/v1/comentarios")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("usuario", "usuario.hater"))
 				.andExpect(status().isOk())
@@ -168,6 +177,7 @@ public class ComentarioControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("usuario", "usuario.hater"))
 				.andExpect(status().isNotFound())
@@ -183,6 +193,7 @@ public class ComentarioControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
 		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby52321ASScsDE5MTcyNPhT2e=")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -196,6 +207,7 @@ public class ComentarioControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -208,6 +220,7 @@ public class ComentarioControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
@@ -223,6 +236,7 @@ public class ComentarioControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isConflict())
@@ -237,6 +251,7 @@ public class ComentarioControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/comentarios/{codComentario}/avaliacoes", "dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNotFound())

@@ -3,11 +3,13 @@ package com.matera.trainning.bookstore.controller;
 import static org.assertj.core.util.Lists.list;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.Base64Utils.encodeToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -69,6 +71,7 @@ public class AvaliacaoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(avaliacoes);
 		mockMvc.perform(get("/v1/avaliacoes")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("usuario", "usuario.hater"))
 				.andExpect(status().isOk())

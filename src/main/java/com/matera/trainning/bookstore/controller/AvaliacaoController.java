@@ -26,7 +26,7 @@ public class AvaliacaoController {
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
-	@GetMapping(value = "v1/avaliacoes")
+	@GetMapping(value = "v1/avaliacoes", params = { "usuario" })
 	public Page<AvaliacaoDTO> listarAvaliacoesPorUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
 		return avaliacaoService.listarAvaliacoesDadoUsuario(usuario, pageable);
 	}

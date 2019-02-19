@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -15,6 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.util.Base64Utils.encodeToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,6 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -98,6 +101,7 @@ public class ProdutoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(produtos);
 		mockMvc.perform(get("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -114,6 +118,7 @@ public class ProdutoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(produtos);
 		mockMvc.perform(get("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(0)))
@@ -128,6 +133,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(post("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
@@ -143,6 +149,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(post("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isConflict())
@@ -154,6 +161,7 @@ public class ProdutoControllerTest {
 	public void atualizaProduto() throws Exception {
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(put("/v1/produtos/{codProduto}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNoContent())
@@ -167,6 +175,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(put("/v1/produtos/{codProduto}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNotFound())
@@ -176,6 +185,7 @@ public class ProdutoControllerTest {
 	@Test
 	public void removeProduto() throws Exception {
 		mockMvc.perform(delete("/v1/produtos/{codProduto}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNoContent())
 				.andExpect(content().string(isEmptyString()));
@@ -187,6 +197,7 @@ public class ProdutoControllerTest {
 			.removerProduto(Mockito.anyString());
 		
 		mockMvc.perform(delete("/v1/produtos/{codProduto}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -199,6 +210,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoProduto);
 		mockMvc.perform(get("/v1/produtos/{codProduto}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(content().json(jsonObject))
@@ -211,6 +223,7 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/produtos/{codigo}", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -220,11 +233,12 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPelaDescricao() throws Exception {
 		Page<ProdutoDTO> produtos = new PageImpl<>(list(dtoProduto));
 
-		when(produtoService.buscarProdutoDadoDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(produtoService.listarProdutosDadoDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(produtos);
 
 		String jsonArray = jsonMapper.writeValueAsString(produtos);
 		mockMvc.perform(get("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("descricao", "HoBbIt"))
 				.andExpect(status().isOk())
@@ -237,11 +251,12 @@ public class ProdutoControllerTest {
 	public void buscaProdutoPelaDescricaoInexistente() throws Exception {
 		Page<ProdutoDTO> produtos = new PageImpl<>(list());
 
-		when(produtoService.buscarProdutoDadoDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(produtoService.listarProdutosDadoDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(produtos);
 
 		String jsonArray = jsonMapper.writeValueAsString(produtos);
 		mockMvc.perform(get("/v1/produtos")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("descricao", "LiVrO"))
 				.andExpect(status().isOk())
@@ -259,6 +274,7 @@ public class ProdutoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(comentarios);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -272,9 +288,10 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 	
 		mockMvc.perform(get("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
-			.accept(APPLICATION_JSON_UTF8))
-			.andExpect(status().isNotFound())
-			.andExpect(content().string(isEmptyString()));
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
+				.accept(APPLICATION_JSON_UTF8))
+				.andExpect(status().isNotFound())
+				.andExpect(content().string(isEmptyString()));
 	}
 	
 	@Test
@@ -284,6 +301,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(post("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
@@ -299,6 +317,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoComentario);
 		mockMvc.perform(post("/v1/produtos/{codProduto}/comentarios", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNotFound())
@@ -314,6 +333,7 @@ public class ProdutoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(historicoDePrecos);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -327,6 +347,7 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -341,6 +362,7 @@ public class ProdutoControllerTest {
 
 		String jsonArray = jsonMapper.writeValueAsString(historicoDePrecos);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
 				.param("dtFim", LocalDate.now().toString()))
@@ -356,6 +378,7 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
 				.param("dtFim", LocalDate.now().toString()))
@@ -370,6 +393,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("preco", "max"))
 				.andExpect(status().isOk())
@@ -383,6 +407,7 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("preco", "max"))
 				.andExpect(status().isNotFound())
@@ -396,6 +421,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("preco", "min"))
 				.andExpect(status().isOk())
@@ -404,11 +430,13 @@ public class ProdutoControllerTest {
 	}
 	
 	@Test
+	@WithMockUser(username = "user", password = "password")
 	public void buscaHistoricoDePrecoMinimoPeloProdutoInexistente() throws Exception {
 		when(produtoService.buscarPrecoMinimoDadoCodigoProduto(Mockito.anyString()))
 			.thenThrow(RecursoNotFoundException.class);
 
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("preco", "min"))
 				.andExpect(status().isNotFound())
@@ -422,6 +450,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
 				.param("dtFim", LocalDate.now().toString())
@@ -438,6 +467,7 @@ public class ProdutoControllerTest {
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
 				.param("dtFim", LocalDate.now().toString())
@@ -456,6 +486,7 @@ public class ProdutoControllerTest {
 		
 		String jsonArray = jsonMapper.writeValueAsString(avaliacoes);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.content", hasSize(1)))
@@ -469,6 +500,7 @@ public class ProdutoControllerTest {
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040=")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
@@ -481,6 +513,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isCreated())
@@ -496,6 +529,7 @@ public class ProdutoControllerTest {
 		
 		String jsonObject = jsonMapper.writeValueAsString(dtoAvaliacao);
 		mockMvc.perform(post("/v1/produtos/{codProduto}/avaliacoes", "LIVRO23040")
+				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.contentType(APPLICATION_JSON_UTF8)
 				.content(jsonObject))
 				.andExpect(status().isNotFound())

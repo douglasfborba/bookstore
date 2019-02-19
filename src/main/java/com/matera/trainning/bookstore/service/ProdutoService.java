@@ -77,12 +77,13 @@ public class ProdutoService {
 	}
 		
 	@Transactional(propagation = REQUIRED, readOnly = false)
-	public void atualizarProduto(String codigoProduto, ProdutoDTO dtoProduto) {		
-		Produto produtoSalvo = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+	public void atualizarProduto(String codProduto, ProdutoDTO dtoProduto) {		
+		Produto produtoSalvo = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		Produto produto = modelMapper.map(dtoProduto, Produto.class);			
 		produto.setId(produtoSalvo.getId());
+		produto.setDescricao(dtoProduto.getDescricao());
 		produto.setDataCadastro(produtoSalvo.getDataCadastro());
 		produto.setComentarios(produtoSalvo.getComentarios());
 		produto.setPrecos(produtoSalvo.getPrecos());
@@ -96,20 +97,20 @@ public class ProdutoService {
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerProduto(String codigoProduto) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 
 		repository.delete(produto);
 	}
 
 	public ProdutoDTO buscarProdutoDadoCodigo(String codigoProduto) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 
 		return modelMapper.map(produto, ProdutoDTO.class);
 	}
 
-	public Page<ProdutoDTO> buscarProdutoDadoDescricao(String descricao, Pageable pageable) {
-		return repository.findByDescricao(descricao, pageable)
+	public Page<ProdutoDTO> listarProdutosDadoDescricao(String descricao, Pageable pageable) {
+		return repository.findAllByDescricao(descricao, pageable)
 				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
 	}
 
@@ -120,7 +121,7 @@ public class ProdutoService {
 	
 	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 
 		return comentarioService.listarComentariosDadoProduto(produto, pageable);
 	}	
@@ -128,7 +129,7 @@ public class ProdutoService {
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public ComentarioDTO comentarProduto(String codigoProduto, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		Comentario comentario = modelMapper.map(dtoComentario, Comentario.class);	
 		LocalDateTime dataHoraAtual = LocalDateTime.now();
@@ -146,12 +147,12 @@ public class ProdutoService {
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codigoProduto, String codigoComentario, ComentarioDTO dtoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		Comentario comentario = produto.getComentarios().stream()
 				.filter(dto -> dto.getCodigo().equals(codigoComentario))
 				.findFirst()
-					.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+					.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codigoComentario + " inexistente"));
 		
 		comentario.setUsuario(comentario.getUsuario());
 		comentario.setDescricao(dtoComentario.getDescricao());
@@ -162,12 +163,12 @@ public class ProdutoService {
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerComentario(String codigoProduto, String codigoComentario) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		Comentario comentario = produto.getComentarios().stream()
 			.filter(dto -> dto.getCodigo().equals(codigoComentario))
 			.findFirst()
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codigoComentario + " inexistente"));
 		
 		produto.removeComentario(comentario);
 		
@@ -176,14 +177,14 @@ public class ProdutoService {
 	
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosDadoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		return historicoService.listarItensHistPrecosDadoProduto(produto, pageable);
 	}
 	
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoProduto(String codigoProduto, LocalDate dataInicial, LocalDate dataFinal, Pageable pageable) {		
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		List<HistoricoDePrecoDTO> precoes = produto.getPrecos().stream()
 				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
@@ -203,7 +204,7 @@ public class ProdutoService {
 	
 	public HistoricoDePrecoDTO buscarPrecoMaximoDadoCodigoProduto(String codProduto) {
 		Produto produto = repository.findByCodigo(codProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		return produto.getPrecos().stream()
 			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
@@ -213,7 +214,7 @@ public class ProdutoService {
 	
 	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(String codProduto) {
 		Produto produto = repository.findByCodigo(codProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		return produto.getPrecos().stream()
 			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
@@ -223,7 +224,7 @@ public class ProdutoService {
 	
 	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
 		Produto produto = repository.findByCodigo(codProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		return produto.getPrecos().stream()
 				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
@@ -242,7 +243,7 @@ public class ProdutoService {
 	
 	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
 		Produto produto = repository.findByCodigo(codProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
 		return produto.getPrecos().stream()
 				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
@@ -261,7 +262,7 @@ public class ProdutoService {
 	
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
-				.orElseThrow(() -> new RecursoNotFoundException(codigoProduto));
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
 		return avaliacaoService.listarAvaliacoesDadoProduto(produto, pageable);
 	}

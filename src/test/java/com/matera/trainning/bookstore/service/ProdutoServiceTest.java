@@ -1,5 +1,7 @@
 package com.matera.trainning.bookstore.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.util.Lists.list;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
@@ -7,6 +9,8 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +19,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
@@ -24,6 +32,7 @@ import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.ProdutoRepository;
 import com.matera.trainning.bookstore.service.exception.RecursoAlreadyExistsException;
+import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException;
 
 @RunWith(SpringRunner.class)
 public class ProdutoServiceTest {
@@ -68,23 +77,26 @@ public class ProdutoServiceTest {
 	}
 	
 	@Test
-	public void inserirProduto() {
-		fail();
-		
+	public void inserirProduto() {		
 		ModelMapper mapper = criaAndConfiguraMapper(); 
 
-		String mensagem = "Produto " + produto.getCodigo() + " já existente";
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
-			.thenThrow(new RecursoAlreadyExistsException(mensagem, produto.getCodigo(), "/v1/produtos"));
+			.thenReturn(Optional.empty())
+			.thenReturn(Optional.of(produto));
 		
 		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
-
-		try {
-			produtoService.inserirProduto(dtoEntrada);
-			fail();
-		} catch (RecursoAlreadyExistsException ex) {
-			assertEquals("Produto " + dtoEntrada.getCodigo() + " já existente", ex.getMessage());
-		}
+		when(modelMapper.map(produto, ProdutoDTO.class))
+			.thenReturn(dtoEntrada);
+		
+		when(modelMapper.map(dtoEntrada, Produto.class))
+			.thenReturn(produto);
+		
+		when(produtoRepository.save(Mockito.any(Produto.class)))
+			.thenReturn(produto);
+				
+		ProdutoDTO dtoSaida = produtoService.inserirProduto(dtoEntrada);
+		
+		assertThat(dtoSaida).isNotNull().isEqualTo(dtoEntrada);
 	}
 	
 	@Test
@@ -105,11 +117,185 @@ public class ProdutoServiceTest {
 		}
 	}
 	
+	@Test
+	public void atualizarProduto() {
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.of(produto));
+	
+		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
+		when(modelMapper.map(dtoEntrada, Produto.class))
+			.thenReturn(produto);
+		
+		when(modelMapper.map(produto, ProdutoDTO.class))
+			.thenReturn(dtoEntrada);
+		
+		dtoEntrada.setDescricao("Livro It - A coisa");
+		produtoService.atualizarProduto("LIVRO23040", dtoEntrada);
+		
+		assertThat(produto.getDescricao()).isNotNull().isEqualTo(dtoEntrada.getDescricao());
+	}
+	
+	@Test
+	public void atualizarProdutoInexistente() {
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.empty());
+		
+		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
+		
+		try {
+			produtoService.atualizarProduto("LIVRO23040", dtoEntrada);
+			fail();
+		} catch (RecursoNotFoundException ex) {
+			assertEquals("Produto " + dtoEntrada.getCodigo() + " inexistente", ex.getMessage());
+		}
+	}
+		
+	@Test
+	public void removerProduto() throws Exception {
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.of(produto));
+		
+		produtoService.removerProduto("LIVRO23040");		
+	}
+	
+	@Test
+	public void removerProdutoInexistente() throws Exception {
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.empty());
+	
+		try {
+			produtoService.removerProduto("LIVRO23040");
+			fail();
+		} catch (RecursoNotFoundException ex) {
+			assertEquals("Produto " + produto.getCodigo() + " inexistente", ex.getMessage());
+		}		
+	}
+	
+	@Test
+	public void buscarProdutoDadoCodigo() throws Exception {
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.of(produto));
+
+		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
+		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+			.thenReturn(dtoProduto);		
+		
+		ProdutoDTO dtoSaida = produtoService.buscarProdutoDadoCodigo("LIVRO23040");
+				
+		assertThat(dtoSaida).isNotNull().isEqualTo(dtoProduto);
+	}
+	
+	@Test
+	public void buscarProdutoDadoCodigoInexistente() {
+		when(produtoRepository.findByCodigo(Mockito.anyString()))
+			.thenReturn(Optional.empty());
+		
+		try {
+			produtoService.buscarProdutoDadoCodigo("LIVRO23040");
+			fail();
+		} catch (RecursoNotFoundException ex) {
+			assertEquals("Produto " + produto.getCodigo() + " inexistente", ex.getMessage());
+		}
+	}
+	
+	@Test
+	public void listarProdutosDadoDescricao() throws Exception {				
+		Page<Produto> pgProdutos = new PageImpl<>(list(produto));
+		when(produtoRepository.findAllByDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);
+		
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);	
+		
+		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+			.thenReturn(dtoProduto);
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutosDadoDescricao("Hobbit", PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).isNotEmpty().hasSize(1).contains(dtoProduto);		
+	}
+	
+	@Test
+	public void listarProdutosDadoDescricaoInexistente() throws Exception {	
+		Page<Produto> pgProdutos = new PageImpl<>(list());
+		
+		when(produtoRepository.findAllByDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);		
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutosDadoDescricao("Hobbit", PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).hasSize(0);
+	}
+	
+	@Test
+	public void listarProdutosEmBasePopulada() throws Exception {				
+		Page<Produto> pgProdutos = new PageImpl<>(list(produto));
+		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);
+		
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
+		
+		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+			.thenReturn(dtoProduto);
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).isNotEmpty().hasSize(1).contains(dtoProduto);		
+	}
+	
+	@Test
+	public void listarProdutosEmBaseVazia() throws Exception {	
+		Page<Produto> pgProdutos = new PageImpl<>(list());
+		
+		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);		
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).hasSize(0);
+	}
+	
+	@Test
+	public void listarComentariosDadoCodigoProduto() throws Exception {				
+		Page<Produto> pgProdutos = new PageImpl<>(list(produto));
+		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);
+		
+		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
+		
+		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+			.thenReturn(dtoProduto);
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).isNotEmpty().hasSize(1).contains(dtoProduto);		
+	}
+	
+	@Test
+	public void listarComentariosDadoCodigoProdutoInexistente() throws Exception {	
+		Page<Produto> pgProdutos = new PageImpl<>(list());
+		
+		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
+			.thenReturn(pgProdutos);		
+		
+		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
+		
+		assertThat(produtos).hasSize(0);
+	}
+	
+	
 	private ModelMapper criaAndConfiguraMapper() {
 		ModelMapper mapper = new ModelMapper();
 		mapper.addConverter(AvaliacaoDTO.getConverter());
 		return mapper;
 	}
 
-	
 }
