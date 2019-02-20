@@ -54,9 +54,7 @@ public class ProdutoServiceTest {
 	private Avaliacao avaliacao;
 
 	@Before
-	public void setUp() {
-		produtoService.configuraMapper();
-		
+	public void setUp() {		
 		produto = new Produto();
 		produto.setCodigo("LIVRO23040");
 		produto.setDescricao("Livro The Hobbit");

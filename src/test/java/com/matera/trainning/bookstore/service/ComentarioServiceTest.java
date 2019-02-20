@@ -55,9 +55,7 @@ public class ComentarioServiceTest {
 	private Avaliacao avaliacao;
 
 	@Before
-	public void setUp() {
-		comentarioService.configuraMapper();
-		
+	public void setUp() {		
 		produto = new Produto();
 		produto.setCodigo("LIVRO23040");
 		produto.setDescricao("Livro The Hobbit");
@@ -79,7 +77,7 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void atualizarComentario() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
@@ -94,7 +92,7 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void atualizarComentarioInexistente() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		
 		ComentarioDTO dtoEntrada = mapper.map(comentario, ComentarioDTO.class);
 		dtoEntrada.setDescricao("Amei, melhor livro que já li.");
@@ -134,7 +132,7 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void buscarComentarioDadoCodigo() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
@@ -169,7 +167,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findAllByProduto(Mockito.any(Produto.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgComentarios);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
 		
 		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
@@ -200,7 +198,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findAll(Mockito.any(Pageable.class)))
 			.thenReturn(pgComentarios);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
 		
 		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
@@ -229,7 +227,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findAllByUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(pgComentarios);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);	
 		
 		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
@@ -257,7 +255,7 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void listarAvaliacoesDadoCodigoComentario() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 				
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
@@ -291,7 +289,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		AvaliacaoDTO dtoEntrada = mapper.map(avaliacao, AvaliacaoDTO.class);
 		
 		dtoEntrada.setDescricao(comentario.getDescricao());
@@ -315,7 +313,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.empty());		
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = modelMapper;; 
 		AvaliacaoDTO dtoEntrada = mapper.map(avaliacao, AvaliacaoDTO.class);
 
 		try {
@@ -333,7 +331,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 
-		ModelMapper mapper = criaAndConfiguraMapper();
+		ModelMapper mapper = modelMapper;;
 		AvaliacaoDTO dtoEntrada = mapper.map(avaliacao, AvaliacaoDTO.class);
 
 		try {
@@ -343,12 +341,5 @@ public class ComentarioServiceTest {
 			assertEquals("Avaliação já existente para o usuário " + dtoEntrada.getUsuario(), ex.getMessage());
 		}
 	}
-	
-	private ModelMapper criaAndConfiguraMapper() {
-		ModelMapper mapper = new ModelMapper();
-		mapper.addConverter(AvaliacaoDTO.getConverter());
-		mapper.addConverter(ComentarioDTO.getConverter());
-		return mapper;
-	}
-	
+
 }

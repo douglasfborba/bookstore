@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -50,14 +48,7 @@ public class ProdutoService {
 	
 	@Autowired
 	private AvaliacaoService avaliacaoService;
-	
-	@PostConstruct
-	public void configuraMapper() {
-		modelMapper.addConverter(ProdutoDTO.getConverter());
-		modelMapper.addConverter(AvaliacaoDTO.getConverter());
-		modelMapper.addConverter(ComentarioDTO.getConverter());
-	}
-	
+			
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public ProdutoDTO inserirProduto(ProdutoDTO dtoProduto)  {	
 		repository.findByCodigo(dtoProduto.getCodigo())
@@ -206,20 +197,14 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
-		return produto.getPrecos().stream()
-			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
-			.max(comparing(HistoricoDePrecoDTO::getPreco))
-			.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente"));
+		return historicoService.buscarPrecoMaximoDadoCodigoProduto(produto);
 	}
 	
 	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(String codProduto) {
 		Produto produto = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
-		return produto.getPrecos().stream()
-			.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
-			.min(comparing(HistoricoDePrecoDTO::getPreco))
-			.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
+		return historicoService.buscarPrecoMinimoDadoCodigoProduto(produto);
 	}
 	
 	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {

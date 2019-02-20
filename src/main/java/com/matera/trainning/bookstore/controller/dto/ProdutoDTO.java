@@ -6,9 +6,6 @@ import java.time.LocalDate;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.modelmapper.Converter;
-import org.modelmapper.spi.MappingContext;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -16,7 +13,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
-import com.matera.trainning.bookstore.model.Produto;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -52,33 +48,6 @@ public class ProdutoDTO {
 	
 	@Getter @Setter @JsonView
 	@EqualsAndHashCode.Exclude
-	private Double rating = 0.0;
-
-	public static final Converter<Produto, ProdutoDTO> getConverter() {
-		Converter<Produto, ProdutoDTO> converter = new Converter<Produto, ProdutoDTO>() {
-
-			@Override
-			public ProdutoDTO convert(MappingContext<Produto, ProdutoDTO> contexto) {
-				Produto produto = contexto.getSource();
-
-				ProdutoDTO dtoProduto = new ProdutoDTO();
-				dtoProduto.setCodigo(produto.getCodigo());
-				dtoProduto.setDescricao(produto.getDescricao());
-				dtoProduto.setPreco(produto.getPreco());
-				dtoProduto.setDataCadastro(produto.getDataCadastro());
-
-				Double rating = produto.getAvaliacoes().stream()
-						.mapToDouble(avaliacao -> avaliacao.getRating())
-						.average()
-							.orElse(0.0);
-
-				dtoProduto.setRating(rating);
-
-				return dtoProduto;
-			};
-		};
-
-		return converter;
-	}
+	private Double rating;
 	
 }

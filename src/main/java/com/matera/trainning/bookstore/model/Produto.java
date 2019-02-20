@@ -17,6 +17,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Formula;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -51,6 +53,10 @@ public class Produto {
 	private LocalDate dataCadastro;
 
 	@EqualsAndHashCode.Exclude
+	@Formula("(SELECT AVG(a.rating) FROM dis_avaliacao a WHERE a.produto_id = id)")
+	private Double rating;
+	
+	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL, orphanRemoval = true)
 	private Set<Comentario> comentarios = new HashSet<>();
 
@@ -60,7 +66,7 @@ public class Produto {
 
 	@EqualsAndHashCode.Exclude
 	@OneToMany(mappedBy = "produto", fetch = LAZY, cascade = ALL)
-	private Set<Avaliacao> avaliacoes = new HashSet<>();
+	private Set<Avaliacao> avaliacoes = new HashSet<>();	
 			
 	public void addComentario(Comentario comentario) {
 		this.comentarios.add(comentario);

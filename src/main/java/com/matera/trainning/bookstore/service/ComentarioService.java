@@ -6,8 +6,6 @@ import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 import java.time.LocalDateTime;
 
-import javax.annotation.PostConstruct;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,12 +34,6 @@ public class ComentarioService {
 	
 	@Autowired
 	private AvaliacaoService avaliacaoService;
-	
-	@PostConstruct
-	public void configuraMapper() {
-		modelMapper.addConverter(AvaliacaoDTO.getConverter());
-		modelMapper.addConverter(ComentarioDTO.getConverter());
-	}
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codComentario, ComentarioDTO dtoEntrada) {

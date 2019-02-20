@@ -13,7 +13,7 @@
 			<column name="codigo" type="varchar(100)">
 				<constraints nullable="false" unique="true" />
 			</column>
-			<column name="valor" type="int">
+			<column name="valor" type="float" defaultValueNumeric="0">
 				<constraints nullable="false" />
 			</column>
 			<column name="usuario" type="varchar(50)">
@@ -69,7 +69,7 @@
 	</changeSet>			
 
 	<changeSet author="douglas.borba" id="12022019171745-2">
-		 <renameColumn catalogName="sdbanco" tableName="dis_avaliacao" columnDataType="int" 
+		 <renameColumn catalogName="sdbanco" tableName="dis_avaliacao" columnDataType="float" 
 		 		newColumnName="rating" oldColumnName="valor" />
 	</changeSet>
 	
@@ -82,7 +82,7 @@
 		</insert>
 		<insert tableName="dis_avaliacao" schemaName="sdbanco">
 			<column name="codigo" value="B23MNFwtmTHt346MztFxRJKPxC06==" />
-			<column name="rating" valueNumeric="5.0" />	
+			<column name="rating" valueNumeric="4.5" />	
 			<column name="usuario" value="fulano.teste" />
 			<column name="produto_id" valueNumeric="1" />		
 		</insert>
