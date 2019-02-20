@@ -24,7 +24,7 @@ public class HistoricoDePrecoDTO {
 	private LocalDateTime dataHoraAlteracao;
 	
 	@Getter @Setter @JsonView
-	private String produtoDescricao;
+	private String produtoDescricaoAtual;
 	
 	@Getter @Setter @JsonView
 	private BigDecimal preco;

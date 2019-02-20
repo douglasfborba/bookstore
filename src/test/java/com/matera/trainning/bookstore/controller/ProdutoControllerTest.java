@@ -82,7 +82,7 @@ public class ProdutoControllerTest {
 		
 		dtoHistoricoDePreco = new HistoricoDePrecoDTO();
 		dtoHistoricoDePreco.setPreco(new BigDecimal(57.63));
-		dtoHistoricoDePreco.setProdutoDescricao(dtoProduto.getDescricao());
+		dtoHistoricoDePreco.setProdutoDescricaoAtual(dtoProduto.getDescricao());
 		dtoHistoricoDePreco.setDataHoraAlteracao(LocalDateTime.now());
 		
 		dtoAvaliacao = new AvaliacaoDTO();
