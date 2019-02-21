@@ -11,23 +11,27 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.hibernate.annotations.Formula;
+import com.matera.trainning.bookstore.model.listener.ProdutoListener;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
 
 @Data
 @NoArgsConstructor
 
 @Entity
 @Table(name = "dis_produto")
+@EntityListeners(ProdutoListener.class)
 public class Produto {
 
 	@EqualsAndHashCode.Exclude
@@ -51,9 +55,9 @@ public class Produto {
 	@EqualsAndHashCode.Exclude
 	@Column(name = "dataCadastro", nullable = false)
 	private LocalDate dataCadastro;
-
+	
 	@EqualsAndHashCode.Exclude
-	@Formula("(SELECT AVG(a.rating) FROM dis_avaliacao a WHERE a.produto_id = id)")
+	@Transient
 	private Double rating;
 	
 	@EqualsAndHashCode.Exclude
@@ -91,5 +95,5 @@ public class Produto {
 	public void removeHistoricoDePreco(Avaliacao avaliacao) {
 		this.avaliacoes.remove(avaliacao);
 	}	
-
+	
 }

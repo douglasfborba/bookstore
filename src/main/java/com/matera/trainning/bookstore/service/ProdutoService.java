@@ -110,6 +110,11 @@ public class ProdutoService {
 				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
 	}
 	
+	public Page<ProdutoDTO> listarProdutosComRatingMaiorQueParam(Double rating, Pageable pageable) {
+		Page<Produto> produtos = repository.findAllByRatingGreaterThanParam(rating, pageable);
+		return produtos.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
+	}
+	
 	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
@@ -207,26 +212,7 @@ public class ProdutoService {
 		return historicoService.buscarPrecoMinimoDadoCodigoProduto(produto);
 	}
 	
-	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
-		Produto produto = repository.findByCodigo(codProduto)
-				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
-		
-		return produto.getPrecos().stream()
-				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
-				.filter(histPrecoItem -> 
-					{ 
-						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
-						
-						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dtInicial) || dataAlteracao.isEqual(dtInicial);
-						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dtFinal) || dataAlteracao.isEqual(dtFinal);
-						
-						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
-					})
-				.max(comparing(HistoricoDePrecoDTO::getPreco))
-				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente"));	
-	}
-	
-	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProduto(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
 		Produto produto = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
@@ -242,8 +228,41 @@ public class ProdutoService {
 						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
 					})
 				.min(comparing(HistoricoDePrecoDTO::getPreco))
-				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));	
+				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente no período informado"));	
 	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
+		
+		return produto.getPrecos().stream()
+				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.filter(histPrecoItem -> 
+					{ 
+						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
+						
+						boolean isAfterOrEqualDataInicial = dataAlteracao.isAfter(dtInicial) || dataAlteracao.isEqual(dtInicial);
+						boolean isBeforeOrEqualDataFinal = dataAlteracao.isBefore(dtFinal) || dataAlteracao.isEqual(dtFinal);
+						
+						return isAfterOrEqualDataInicial && isBeforeOrEqualDataFinal;		
+					})
+				.max(comparing(HistoricoDePrecoDTO::getPreco))
+				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente no período informado"));	
+	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV2(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
+		
+		return historicoService.buscarPrecoMinimoDadoProdutoNoPeriodo(produto, dtInicial, dtFinal);
+	}
+	
+	public HistoricoDePrecoDTO buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV2(String codProduto, LocalDate dtInicial, LocalDate dtFinal) {
+		Produto produto = repository.findByCodigo(codProduto)
+				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
+		
+		return historicoService.buscarPrecoMaximoDadoProdutoNoPeriodo(produto, dtInicial, dtFinal);	
+	}	
 	
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoDoProduto(String codigoProduto, Pageable pageable) {
 		Produto produto = repository.findByCodigo(codigoProduto)

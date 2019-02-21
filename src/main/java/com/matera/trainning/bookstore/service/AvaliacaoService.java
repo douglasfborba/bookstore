@@ -33,6 +33,11 @@ public class AvaliacaoService {
 		modelMapper.addConverter(AvaliacaoDTO.getConverter());
 	}
 
+	public Double buscarAvaliacaoMediaDadoProduto(Produto produto) {
+		return repository.findAvgRatingByProduto(produto)
+				.orElseThrow(() -> new RecursoNotFoundException("Avaliação média inexistente"));
+	}
+	
 	public AvaliacaoDTO buscarAvaliacaoDadoCodigo(String codAvaliacao) {
 		Avaliacao avaliacao = repository.findByCodigo(codAvaliacao)
 				.orElseThrow(() -> new RecursoNotFoundException("Avaliação " + codAvaliacao + " inexistente"));

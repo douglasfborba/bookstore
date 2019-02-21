@@ -2,6 +2,8 @@ package com.matera.trainning.bookstore.service;
 
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
+import java.time.LocalDate;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -31,15 +33,29 @@ public class HistoricoDePrecoService {
 	}
 
 	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(Produto produto) {
-		HistoricoDePreco itemHistPreco = repository.findMinPrecoByProduto(produto.getId())
+		HistoricoDePreco itemHistPreco = repository.findMinPrecoByProduto(produto)
 				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
 
 		return modelMapper.map(itemHistPreco, HistoricoDePrecoDTO.class);
 	}
 
 	public HistoricoDePrecoDTO buscarPrecoMaximoDadoCodigoProduto(Produto produto) {
-		HistoricoDePreco itemHistPreco = repository.findMaxPrecoByProduto(produto.getId())
+		HistoricoDePreco itemHistPreco = repository.findMaxPrecoByProduto(produto)
 				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
+
+		return modelMapper.map(itemHistPreco, HistoricoDePrecoDTO.class);
+	}
+
+	public HistoricoDePrecoDTO buscarPrecoMinimoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial, LocalDate dtFinal) {
+		HistoricoDePreco itemHistPreco = repository.findMinByProdutoBetweenDates(produto, dtInicial, dtFinal)
+				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente no período informado"));
+
+		return modelMapper.map(itemHistPreco, HistoricoDePrecoDTO.class);
+	}
+
+	public HistoricoDePrecoDTO buscarPrecoMaximoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial, LocalDate dtFinal) {
+		HistoricoDePreco itemHistPreco = repository.findMaxByProdutoBetweenDates(produto, dtInicial, dtFinal)
+				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente no período informado"));
 
 		return modelMapper.map(itemHistPreco, HistoricoDePrecoDTO.class);
 	}

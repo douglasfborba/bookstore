@@ -392,10 +392,9 @@ public class ProdutoControllerTest {
 			.thenReturn(dtoHistoricoDePreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/max", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
-				.accept(APPLICATION_JSON_UTF8)
-				.param("preco", "max"))
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(content().json(jsonObject))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
@@ -406,7 +405,7 @@ public class ProdutoControllerTest {
 		when(produtoService.buscarPrecoMaximoDadoCodigoProduto(Mockito.anyString()))
 			.thenThrow(RecursoNotFoundException.class);
 
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/max", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("preco", "max"))
@@ -420,10 +419,9 @@ public class ProdutoControllerTest {
 			.thenReturn(dtoHistoricoDePreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/min", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
-				.accept(APPLICATION_JSON_UTF8)
-				.param("preco", "min"))
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isOk())
 				.andExpect(content().json(jsonObject))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
@@ -435,17 +433,16 @@ public class ProdutoControllerTest {
 		when(produtoService.buscarPrecoMinimoDadoCodigoProduto(Mockito.anyString()))
 			.thenThrow(RecursoNotFoundException.class);
 
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/min", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
-				.accept(APPLICATION_JSON_UTF8)
-				.param("preco", "min"))
+				.accept(APPLICATION_JSON_UTF8))
 				.andExpect(status().isNotFound())
 				.andExpect(content().string(isEmptyString()));
 	}
 	
 	@Test
 	public void buscaHistoricoDePrecoMaximoNoPeriodoPeloProduto() throws Exception {
-		when(produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
+		when(produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
 			.thenReturn(dtoHistoricoDePreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
@@ -462,7 +459,7 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void buscaHistoricoDePrecoMinimoNoPeriodoPeloProduto() throws Exception {
-		when(produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
+		when(produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
 			.thenReturn(dtoHistoricoDePreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
