@@ -13,16 +13,16 @@ public interface ProdutoRepository extends PagingAndSortingRepository<Produto, L
 
 	public Optional<Produto> findByCodigo(String codigo);
 	
+	@Query(value = "SELECT p.*, r.rate AS rating FROM dis_produto p " + 
+				   "JOIN (SELECT produto_id, comentario_id, avg(rating) AS rate FROM dis_avaliacao GROUP BY produto_id, comentario_id) r " + 
+				   "ON r.produto_id = p.id WHERE r.rate > :rating",
+		   countQuery = "SELECT COUNT(p.id) AS cnt FROM dis_produto p " +  
+		   				"JOIN (SELECT produto_id, comentario_id, avg(rating) AS rate FROM dis_avaliacao GROUP BY produto_id, comentario_id) r " + 
+		   				"ON r.produto_id = p.id WHERE r.rate > :rating",
+		   nativeQuery = true)
+	public Page<Object> findAllByRatingGreaterThanParam(Double rating, Pageable pageable);
+	
 	@Query("SELECT p FROM Produto p WHERE LOWER(p.descricao) LIKE CONCAT('%', LOWER(?1), '%')")
-	public Page<Produto> findAllByDescricao(String descricao, Pageable pageable);
-
-	@Query(value = "SELECT p.* FROM dis_produto p " +
-				   "JOIN dis_avaliacao a ON a.produto_id = p.id " +
-				   "WHERE a.rating > ?1",
-		  countQuery = "SELECT COUNT(p.id) FROM dis_produto p " +
-				   "JOIN dis_avaliacao a ON a.produto_id = p.id " +
-				   "WHERE a.rating > ?1",
-		  nativeQuery = true)
-	public Page<Produto> findAllByRatingGreaterThanParam(Double rating, Pageable pageable);
+	public Page<Produto> findAllByDescricao(String descricao, Pageable pageable);	
 		
 }

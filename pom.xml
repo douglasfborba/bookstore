@@ -54,6 +54,10 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.flywaydb</groupId>
+			<artifactId>flyway-core</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -84,6 +88,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
@@ -95,6 +104,12 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+		          <profiles>
+		            <profile>oracle</profile>
+		            <profile>mysql</profile>
+		          </profiles>
+		        </configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.liquibase</groupId>

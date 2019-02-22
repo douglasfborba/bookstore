@@ -1,0 +1,7 @@
+CREATE TABLE dis_produto (
+	id BIGINT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    codigo VARCHAR(50) UNIQUE NOT NULL,
+    descricao VARCHAR(50) NOT NULL,
+    preco DECIMAL(30,2) NOT NULL,
+    data_cadastro DATE NOT NULL
+);

@@ -5,6 +5,8 @@ import static java.util.Comparator.comparing;
 import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -111,7 +113,23 @@ public class ProdutoService {
 	}
 	
 	public Page<ProdutoDTO> listarProdutosComRatingMaiorQueParam(Double rating, Pageable pageable) {
-		Page<Produto> produtos = repository.findAllByRatingGreaterThanParam(rating, pageable);
+		Page<ProdutoDTO> produtos = repository.findAllByRatingGreaterThanParam(rating, pageable)
+									.map(registro -> {
+										Object[] linha = (Object[]) registro;
+										ProdutoDTO dtoProduto = new ProdutoDTO();
+					
+										dtoProduto.setCodigo((String) linha[1]);
+										dtoProduto.setDescricao((String) linha[2]);
+										dtoProduto.setPreco((BigDecimal) linha[3]);
+										
+										Timestamp dataCadastro = (Timestamp) linha[4];
+										dtoProduto.setDataCadastro(dataCadastro.toLocalDateTime().toLocalDate());
+										
+										BigDecimal avaliacao = (BigDecimal) linha[5];
+										dtoProduto.setRating(avaliacao.doubleValue());
+					
+										return dtoProduto;
+									});
 		return produtos.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
 	}
 	

@@ -79,6 +79,11 @@ public class ComentarioService {
 		
 		return comentarios;
 	}
+	
+	public Page<ComentarioDTO> listarComentariosComRatingMaiorQueParam(Double rating, Pageable pageable) {
+		Page<Comentario> comentarios = repository.findAllByRatingGreaterThanParam(rating, pageable);
+		return comentarios.map(produto -> modelMapper.map(produto, ComentarioDTO.class));
+	}
 		
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoComentario(String codComentario, Pageable pageable) {				
 		Comentario comentario = repository.findByCodigo(codComentario)

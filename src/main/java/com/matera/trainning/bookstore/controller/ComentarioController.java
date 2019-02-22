@@ -58,6 +58,11 @@ public class ComentarioController {
 		return comentarioService.listarComentariosDadoUsuario(usuComentario, pageable);
 	}
 	
+	@GetMapping(value = "v1/comentarios/rating", params = { "gt" })
+	public Page<ComentarioDTO> listarComentariosComRatingMaiorQueParam(@RequestParam(name = "gt", required = true) Double rating, Pageable pageable) {
+		return comentarioService.listarComentariosComRatingMaiorQueParam(rating, pageable);
+	}
+		
 	@GetMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(@PathVariable String codComentario, Pageable pageable) {
 		return comentarioService.listarAvaliacoesDadoCodigoComentario(codComentario, pageable);
