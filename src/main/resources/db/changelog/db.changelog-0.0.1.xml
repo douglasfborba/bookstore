@@ -10,7 +10,7 @@
 			<column name="id" type="bigint">
 				<constraints primaryKey="true" nullable="false" />
 			</column>
-			<column name="codigo" type="varchar(10)">
+			<column name="codigo" type="varchar(50)">
 				<constraints nullable="false" unique="true" />
 			</column>
 			<column name="descricao" type="varchar(50)">

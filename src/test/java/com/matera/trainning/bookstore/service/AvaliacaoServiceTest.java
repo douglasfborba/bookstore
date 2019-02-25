@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
+import com.matera.trainning.bookstore.controller.mapper.AvaliacaoMapper;
 import com.matera.trainning.bookstore.model.Avaliacao;
 import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.Produto;
@@ -37,10 +37,7 @@ public class AvaliacaoServiceTest {
 	
 	@InjectMocks
 	private AvaliacaoService avaliacaoService;
-	
-	@Mock
-	private ModelMapper modelMapper;
-	
+		
 	@Mock
 	private AvaliacaoRepository avaliacaoRepository;
 	
@@ -49,9 +46,7 @@ public class AvaliacaoServiceTest {
 	private Avaliacao avaliacao;
 
 	@Before
-	public void setUp() {
-		avaliacaoService.configuraMapper();
-		
+	public void setUp() {		
 		produto = new Produto();
 		produto.setCodigo("LIVRO23040");
 		produto.setDescricao("Livro The Hobbit");
@@ -72,16 +67,16 @@ public class AvaliacaoServiceTest {
 	}
 
 	@Test
-	public void buscarAvaliacaoDadoCodigo() {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
-		
+	public void buscarAvaliacaoDadoCodigo() {	
+		AvaliacaoMapper mapper = AvaliacaoMapper.INSTANCE;
+
 		avaliacao.setProduto(produto);
 			
 		when(avaliacaoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(avaliacao));
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);
+		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 	
 		AvaliacaoDTO dtoSaida = avaliacaoService.buscarAvaliacaoDadoCodigo("1YXJpby5oYXRlco124qWErTEyMDE5MTckQtz");
@@ -103,17 +98,15 @@ public class AvaliacaoServiceTest {
 	}
 
 	@Test
-	public void listarAvaliacoesDadoProduto() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
-		
+	public void listarAvaliacoesDadoProduto() throws Exception {	
 		avaliacao.setProduto(produto);
 		
 		Page<Avaliacao> pgAvaliacoes = new PageImpl<>(list(avaliacao));
 		when(avaliacaoRepository.findAllByProduto(Mockito.any(Produto.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);	
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		
 		List<AvaliacaoDTO> avaliacoes = avaliacaoService.listarAvaliacoesDadoProduto(produto, PageRequest.of(0, 1)).getContent();
@@ -134,17 +127,15 @@ public class AvaliacaoServiceTest {
 	}
 	
 	@Test
-	public void listarAvaliacoesDadoComentario() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
-		
+	public void listarAvaliacoesDadoComentario() throws Exception {		
 		avaliacao.setComentario(comentario);
 		
 		Page<Avaliacao> pgAvaliacoes = new PageImpl<>(list(avaliacao));
 		when(avaliacaoRepository.findAllByComentario(Mockito.any(Comentario.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);	
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		
 		List<AvaliacaoDTO> avaliacoes = avaliacaoService.listarAvaliacoesDadoComentario(comentario, PageRequest.of(0, 1)).getContent();
@@ -165,15 +156,13 @@ public class AvaliacaoServiceTest {
 	}
 	
 	@Test
-	public void listarAvaliacoesDadoUsuario() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
-				
+	public void listarAvaliacoesDadoUsuario() throws Exception {				
 		Page<Avaliacao> pgAvaliacoes = new PageImpl<>(list(avaliacao));
 		when(avaliacaoRepository.findAllByUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);	
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		
 		List<AvaliacaoDTO> avaliacoes = avaliacaoService.listarAvaliacoesDadoUsuario("usuario.teste", PageRequest.of(0, 1)).getContent();
@@ -193,10 +182,4 @@ public class AvaliacaoServiceTest {
 		assertThat(avaliacoes).hasSize(0);	
 	}
 	
-	private ModelMapper criaAndConfiguraMapper() {
-		ModelMapper mapper = new ModelMapper();
-		mapper.addConverter(AvaliacaoDTO.getConverter());
-		return mapper;
-	}
-
 }

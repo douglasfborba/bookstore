@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,6 +23,10 @@ import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
+import com.matera.trainning.bookstore.controller.mapper.AvaliacaoMapper;
+import com.matera.trainning.bookstore.controller.mapper.ComentarioMapper;
+import com.matera.trainning.bookstore.controller.mapper.HistoricoDePrecoMapper;
+import com.matera.trainning.bookstore.controller.mapper.ProdutoMapper;
 import com.matera.trainning.bookstore.model.Avaliacao;
 import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.HistoricoDePreco;
@@ -37,7 +40,7 @@ import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException
 public class ProdutoService {
 
 	@Autowired
-	private ModelMapper modelMapper;
+	private ProdutoMapper mapper;
 	
 	@Autowired
 	private ProdutoRepository repository;
@@ -59,7 +62,7 @@ public class ProdutoService {
 					throw new RecursoAlreadyExistsException(mensagem, produto.getCodigo(), "/v1/produtos"); 
 				});
 				
-		Produto produto = modelMapper.map(dtoProduto, Produto.class);
+		Produto produto = mapper.toEntity(dtoProduto);
 		if (produto.getDataCadastro() == null)
 			produto.setDataCadastro(LocalDate.now());
 				
@@ -74,7 +77,7 @@ public class ProdutoService {
 		Produto produtoSalvo = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
-		Produto produto = modelMapper.map(dtoProduto, Produto.class);			
+		Produto produto = mapper.toEntity(dtoProduto);			
 		produto.setId(produtoSalvo.getId());
 		produto.setDescricao(dtoProduto.getDescricao());
 		produto.setDataCadastro(produtoSalvo.getDataCadastro());
@@ -99,17 +102,17 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 
-		return modelMapper.map(produto, ProdutoDTO.class);
+		return mapper.toDto(produto);
 	}
 
 	public Page<ProdutoDTO> listarProdutosDadoDescricao(String descricao, Pageable pageable) {
 		return repository.findAllByDescricao(descricao, pageable)
-				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
+				.map(produto -> mapper.toDto(produto));
 	}
 
 	public Page<ProdutoDTO> listarProdutos(Pageable pageable) {
 		return repository.findAll(pageable)
-				.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
+				.map(produto -> mapper.toDto(produto));
 	}
 	
 	public Page<ProdutoDTO> listarProdutosComRatingMaiorQueParam(Double rating, Pageable pageable) {
@@ -130,7 +133,7 @@ public class ProdutoService {
 					
 										return dtoProduto;
 									});
-		return produtos.map(produto -> modelMapper.map(produto, ProdutoDTO.class));
+		return produtos;
 	}
 	
 	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(String codigoProduto, Pageable pageable) {
@@ -145,7 +148,9 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
-		Comentario comentario = modelMapper.map(dtoComentario, Comentario.class);	
+		ComentarioMapper mapper = ComentarioMapper.INSTANCE;		
+		Comentario comentario = mapper.toEntity(dtoComentario);
+		
 		LocalDateTime dataHoraAtual = LocalDateTime.now();
 
 		comentario.setCodigo(geraCodigoEmBase64(comentario.getUsuario(), dataHoraAtual));
@@ -155,7 +160,7 @@ public class ProdutoService {
 		produto.addComentario(comentario);
 		repository.save(produto);
 		
-		return modelMapper.map(comentario, ComentarioDTO.class);
+		return mapper.toDto(comentario);
 	}
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
@@ -200,8 +205,10 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codigoProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codigoProduto + " inexistente"));
 		
+		HistoricoDePrecoMapper mapper = HistoricoDePrecoMapper.INSTANCE;
+
 		List<HistoricoDePrecoDTO> precoes = produto.getPrecos().stream()
-				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.map(itemHistPreco -> mapper.toDto(itemHistPreco))
 				.filter(histPrecoItem -> 
 					{ 
 						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
@@ -234,8 +241,10 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
+		HistoricoDePrecoMapper mapper = HistoricoDePrecoMapper.INSTANCE;
+		
 		return produto.getPrecos().stream()
-				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.map(itemHistPreco -> mapper.toDto(itemHistPreco))
 				.filter(histPrecoItem -> 
 					{ 
 						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
@@ -253,8 +262,10 @@ public class ProdutoService {
 		Produto produto = repository.findByCodigo(codProduto)
 				.orElseThrow(() -> new RecursoNotFoundException("Produto " + codProduto + " inexistente"));
 		
+		HistoricoDePrecoMapper mapper = HistoricoDePrecoMapper.INSTANCE;
+
 		return produto.getPrecos().stream()
-				.map(histPrecoItem -> modelMapper.map(histPrecoItem, HistoricoDePrecoDTO.class))
+				.map(itemHistPreco -> mapper.toDto(itemHistPreco))
 				.filter(histPrecoItem -> 
 					{ 
 						LocalDate dataAlteracao = histPrecoItem.getDataHoraAlteracao().toLocalDate();
@@ -302,7 +313,8 @@ public class ProdutoService {
 					throw new RecursoAlreadyExistsException(mensagem, codProduto, "/v1/avaliacoes"); 
 				});
 	
-		Avaliacao avaliacao = modelMapper.map(dtoEntrada, Avaliacao.class);	
+		AvaliacaoMapper mapper = AvaliacaoMapper.INSTANCE;
+		Avaliacao avaliacao = mapper.toEntity(dtoEntrada);	
 
 		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao.getUsuario(), LocalDateTime.now()));
 		avaliacao.setComentario(null);
@@ -313,13 +325,13 @@ public class ProdutoService {
 		produto.addAvaliacao(avaliacao);		
 		repository.save(produto);
 		
-		return modelMapper.map(avaliacao, AvaliacaoDTO.class);
+		return mapper.toDto(avaliacao);
 	}
 	
 	private ProdutoDTO historizarPreco(Produto produto) {
 		produto.addHistoricoDePreco(getHistoricoDePreco(produto));
 		
-		ProdutoDTO dtoProduto =  modelMapper.map(produto, ProdutoDTO.class);
+		ProdutoDTO dtoProduto =  mapper.toDto(produto);
 		atualizarProduto(produto.getCodigo(), dtoProduto);
 		
 		return dtoProduto;

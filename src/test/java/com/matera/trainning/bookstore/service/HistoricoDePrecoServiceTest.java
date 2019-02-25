@@ -15,15 +15,14 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
+import com.matera.trainning.bookstore.controller.mapper.HistoricoDePrecoMapper;
 import com.matera.trainning.bookstore.model.HistoricoDePreco;
 import com.matera.trainning.bookstore.model.Produto;
 import com.matera.trainning.bookstore.respository.HistoricoDePrecoRepository;
@@ -35,7 +34,7 @@ public class HistoricoDePrecoServiceTest {
 	private HistoricoDePrecoService histDePrecosService;
 	
 	@Mock
-	private ModelMapper modelMapper;
+	private HistoricoDePrecoMapper histDePrecosMapper;
 	
 	@Mock
 	private HistoricoDePrecoRepository histDePrecosRepository;
@@ -44,7 +43,7 @@ public class HistoricoDePrecoServiceTest {
 	private HistoricoDePreco itemHistPrecos;
 
 	@Before
-	public void setUp() {
+	public void setUp() {		
 		produto = new Produto();
 		produto.setCodigo("LIVRO23040");
 		produto.setDescricao("Livro The Hobbit");
@@ -59,7 +58,7 @@ public class HistoricoDePrecoServiceTest {
 
 	@Test
 	public void listarItensHistPrecosDadoProduto() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		HistoricoDePrecoMapper mapper = HistoricoDePrecoMapper.INSTANCE;
 		
 		itemHistPrecos.setProduto(produto);
 		
@@ -67,13 +66,9 @@ public class HistoricoDePrecoServiceTest {
 		when(histDePrecosRepository.findAllByProduto(Mockito.any(Produto.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgItensHistPrecos);
 		
-		HistoricoDePrecoDTO dtoItemHistPrecos = mapper.map(itemHistPrecos, HistoricoDePrecoDTO.class);	
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
-			.thenReturn(dtoItemHistPrecos);
-		
 		List<HistoricoDePrecoDTO> itensHistPrecos = histDePrecosService.listarItensHistPrecosDadoProduto(produto, PageRequest.of(0, 1)).getContent();
 		
-		assertThat(itensHistPrecos).isNotEmpty().hasSize(1).contains(dtoItemHistPrecos);		
+		assertThat(itensHistPrecos).isNotEmpty().hasSize(1).contains(mapper.toDto(itemHistPrecos));		
 	}
 	
 	@Test
@@ -86,12 +81,6 @@ public class HistoricoDePrecoServiceTest {
 		List<HistoricoDePrecoDTO> itensHistPrecos = histDePrecosService.listarItensHistPrecosDadoProduto(produto, PageRequest.of(0, 1)).getContent();
 		
 		assertThat(itensHistPrecos).hasSize(0);	
-	}
-	
-	private ModelMapper criaAndConfiguraMapper() {
-		ModelMapper mapper = new ModelMapper();
-		mapper.addConverter(AvaliacaoDTO.getConverter());
-		return mapper;
 	}
 	
 }

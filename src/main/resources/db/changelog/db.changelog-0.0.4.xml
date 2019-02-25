@@ -19,10 +19,10 @@
 			<column name="usuario" type="varchar(50)">
 				<constraints nullable="false" />
 			</column>
-			<column name="comentario_id" type="int">
+			<column name="comentario_id" type="bigint">
 				<constraints nullable="true" foreignKeyName="fk_com_aval"/>
 			</column>	
-			<column name="produto_id" type="int">
+			<column name="produto_id" type="bigint">
 				<constraints nullable="true" foreignKeyName="fk_prod_aval"/>
 			</column>			
 		</createTable>

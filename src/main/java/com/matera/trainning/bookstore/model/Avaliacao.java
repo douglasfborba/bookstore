@@ -1,7 +1,7 @@
 package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.SEQUENCE;
+import static javax.persistence.GenerationType.IDENTITY;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
@@ -23,8 +22,7 @@ public class Avaliacao {
 	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
-	@GeneratedValue(strategy = SEQUENCE, generator = "dis_aval_sequence")
-	@SequenceGenerator(name = "dis_aval_sequence", sequenceName = "dis_aval_seq", allocationSize = 1)
+	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
 	@Column(name = "codigo", nullable = false)

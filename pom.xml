@@ -66,19 +66,20 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
+		
 		<dependency>
-		  <groupId>org.modelmapper</groupId>
-		  <artifactId>modelmapper</artifactId>
-		  <version>2.3.0</version>
-		</dependency>
+	        <groupId>org.mapstruct</groupId>
+	        <artifactId>mapstruct</artifactId>
+	        <version>1.3.0.Final</version>
+    	</dependency>
+    
 		<dependency>
 		    <groupId>javax.validation</groupId>
 		    <artifactId>validation-api</artifactId>
 		</dependency>
 		<dependency>
-		    <groupId>org.hibernate</groupId>
+		    <groupId>org.hibernate.validator</groupId>
 		    <artifactId>hibernate-validator</artifactId>
-		    <version>6.0.14.Final</version>
 		</dependency>
 
 		<dependency>
@@ -105,32 +106,49 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-		          <profiles>
-		            <profile>oracle</profile>
-		            <profile>mysql</profile>
-		          </profiles>
+		           <profiles>
+		              <profile>oracle</profile>
+		              <profile>mysql</profile>
+		           </profiles>
 		        </configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>3.0.5</version>
-				<configuration>
-					<changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
-					<driver>oracle.jdbc.driver.OracleDriver</driver>
-					<url>jdbc:oracle:thin:@localhost:1521:bctst11g</url>
-					<username>sdbanco</username>
-					<password>sdbanco</password>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>clearCheckSums</goal>
-						</goals>
-					</execution>
-				</executions>
+	            <groupId>org.apache.maven.plugins</groupId>
+	            <artifactId>maven-compiler-plugin</artifactId>	            
+            	<configuration>
+	                <source>1.8</source>
+	                <target>1.8</target>
+	                <annotationProcessorPaths>
+	                	<path>
+	                        <groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+	                        <version>1.18.4</version>	                        
+	                    </path>
+	                	<path>
+	                        <groupId>org.mapstruct</groupId>
+	                        <artifactId>mapstruct-processor</artifactId>
+	                        <version>1.3.0.Final</version>
+	                    </path>
+	                </annotationProcessorPaths>
+	                <compilerArgs>
+			            <compilerArg>-Amapstruct.suppressGeneratorTimestamp=true</compilerArg>
+			            <compilerArg>-Amapstruct.suppressGeneratorVersionInfoComment=true</compilerArg>
+			        </compilerArgs>
+            	</configuration>
+        	</plugin>
+			<plugin>
+				  <groupId>org.liquibase</groupId>
+				  <artifactId>liquibase-maven-plugin</artifactId>
+				  <version>3.0.5</version>
+				  <configuration>
+					 <changeLogFile>src/main/resources/db/changelog/db.changelog-master.xml</changeLogFile>
+					 <driver>oracle.jdbc.driver.OracleDriver</driver>
+					 <url>jdbc:oracle:thin:@localhost:1521:bctst11g</url>
+					 <username>sdbanco</username>
+					 <password>sdbanco</password>
+				  </configuration>				
 			</plugin>
-		</plugins>
+		 </plugins>			
 	</build>
 
 </project>

@@ -22,7 +22,7 @@
 			<column name="data_hora_criacao" type="timestamp">
 				<constraints nullable="false" />
 			</column>
-			<column name="produto_id" type="int">
+			<column name="produto_id" type="bigint">
 				<constraints nullable="false" foreignKeyName="fk_prod_cmtr"/>
 			</column>			
 		</createTable>

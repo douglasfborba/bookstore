@@ -2,7 +2,7 @@ package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.SEQUENCE;
+import static javax.persistence.GenerationType.IDENTITY;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,7 +15,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Formula;
@@ -34,8 +33,7 @@ public class Comentario {
 	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
-	@GeneratedValue(strategy = SEQUENCE, generator = "dis_cmtr_sequence")
-	@SequenceGenerator(name = "dis_cmtr_sequence", sequenceName = "dis_cmtr_seq", allocationSize = 1)
+	@GeneratedValue(strategy = IDENTITY)
 	private Long id;
 
 	@Column(name = "codigo", nullable = false)

@@ -45,5 +45,5 @@ public class ComentarioDTO {
 	@Getter @Setter @JsonView
 	@EqualsAndHashCode.Exclude
 	private Double rating;
-		    
+ 
 }

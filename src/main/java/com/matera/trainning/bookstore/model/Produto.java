@@ -2,7 +2,6 @@ package com.matera.trainning.bookstore.model;
 
 import static javax.persistence.CascadeType.ALL;
 import static javax.persistence.FetchType.LAZY;
-import static javax.persistence.GenerationType.SEQUENCE;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,9 +11,9 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.Formula;
@@ -33,8 +32,7 @@ public class Produto {
 	@EqualsAndHashCode.Exclude
 	@Id
 	@Column(name = "id", nullable = false)
-	@GeneratedValue(strategy = SEQUENCE, generator = "dis_prod_sequence")
-	@SequenceGenerator(name = "dis_prod_sequence", sequenceName = "dis_prod_seq", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(name = "codigo", nullable = false)

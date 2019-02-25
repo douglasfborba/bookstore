@@ -62,7 +62,7 @@ public class ProdutoControllerTest {
 	
 	private ComentarioDTO dtoComentario; 
 	
-	private HistoricoDePrecoDTO dtoHistoricoDePreco;
+	private HistoricoDePrecoDTO dtoItemHistPreco;
 	
 	private AvaliacaoDTO dtoAvaliacao;
 
@@ -80,10 +80,10 @@ public class ProdutoControllerTest {
 		dtoComentario.setUsuario("usuario.hater");
 		dtoComentario.setDataHoraCriacao(LocalDateTime.now());
 		
-		dtoHistoricoDePreco = new HistoricoDePrecoDTO();
-		dtoHistoricoDePreco.setPreco(new BigDecimal(57.63));
-		dtoHistoricoDePreco.setProdutoDescricaoAtual(dtoProduto.getDescricao());
-		dtoHistoricoDePreco.setDataHoraAlteracao(LocalDateTime.now());
+		dtoItemHistPreco = new HistoricoDePrecoDTO();
+		dtoItemHistPreco.setPreco(new BigDecimal(57.63));
+		dtoItemHistPreco.setDescricao(dtoProduto.getDescricao());
+		dtoItemHistPreco.setDataHoraAlteracao(LocalDateTime.now());
 		
 		dtoAvaliacao = new AvaliacaoDTO();
 		dtoAvaliacao.setCodigo("dXN1YXJpby52321ASScsDE5MTcyNPhT2e=");
@@ -326,7 +326,7 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void listaHistoricoDePrecosPeloProduto() throws Exception {
-		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoHistoricoDePreco));
+		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoItemHistPreco));
 
 		when(produtoService.listarHistoricoDePrecosDadoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(historicoDePrecos);
@@ -355,7 +355,7 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void listaHistoricoDePrecosNoPeriodoPeloProduto() throws Exception {
-		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoHistoricoDePreco));
+		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoItemHistPreco));
 
 		when(produtoService.listarHistoricoDePrecosNoPeriodoDadoProduto(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class), Mockito.any(Pageable.class)))
 			.thenReturn(historicoDePrecos);
@@ -389,9 +389,9 @@ public class ProdutoControllerTest {
 	@Test
 	public void buscaHistoricoDePrecoMaximoPeloProduto() throws Exception {
 		when(produtoService.buscarPrecoMaximoDadoCodigoProduto(Mockito.anyString()))
-			.thenReturn(dtoHistoricoDePreco);
+			.thenReturn(dtoItemHistPreco);
 
-		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/max", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
@@ -416,9 +416,9 @@ public class ProdutoControllerTest {
 	@Test
 	public void buscaHistoricoDePrecoMinimoPeloProduto() throws Exception {
 		when(produtoService.buscarPrecoMinimoDadoCodigoProduto(Mockito.anyString()))
-			.thenReturn(dtoHistoricoDePreco);
+			.thenReturn(dtoItemHistPreco);
 
-		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/min", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8))
@@ -443,9 +443,9 @@ public class ProdutoControllerTest {
 	@Test
 	public void buscaHistoricoDePrecoMaximoNoPeriodoPeloProduto() throws Exception {
 		when(produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
-			.thenReturn(dtoHistoricoDePreco);
+			.thenReturn(dtoItemHistPreco);
 
-		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
@@ -460,9 +460,9 @@ public class ProdutoControllerTest {
 	@Test
 	public void buscaHistoricoDePrecoMinimoNoPeriodoPeloProduto() throws Exception {
 		when(produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(Mockito.anyString(), Mockito.any(LocalDate.class), Mockito.any(LocalDate.class)))
-			.thenReturn(dtoHistoricoDePreco);
+			.thenReturn(dtoItemHistPreco);
 
-		String jsonObject = jsonMapper.writeValueAsString(dtoHistoricoDePreco);
+		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
 		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)

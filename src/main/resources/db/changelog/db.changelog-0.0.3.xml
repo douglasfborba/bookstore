@@ -16,7 +16,7 @@
 			<column name="preco" type="currency">
 				<constraints nullable="false" />			
 			</column>
-			<column name="produto_id" type="int">
+			<column name="produto_id" type="bigint">
 				<constraints nullable="false" foreignKeyName="fk_prod_hist"/>
 			</column>			
 		</createTable>

@@ -27,6 +27,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
+import com.matera.trainning.bookstore.controller.mapper.ProdutoMapper;
 import com.matera.trainning.bookstore.model.Avaliacao;
 import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.Produto;
@@ -41,7 +42,7 @@ public class ProdutoServiceTest {
 	private ProdutoService produtoService;
 	
 	@Mock
-	private ModelMapper modelMapper;
+	private ProdutoMapper produtoMapper;
 	
 	@Mock
 	private ProdutoRepository produtoRepository;
@@ -76,17 +77,17 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void inserirProduto() {		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ProdutoMapper mapper = ProdutoMapper.INSTANCE;
 
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.empty())
 			.thenReturn(Optional.of(produto));
 		
-		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
-		when(modelMapper.map(produto, ProdutoDTO.class))
+		ProdutoDTO dtoEntrada = mapper.toDto(produto);
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoEntrada);
 		
-		when(modelMapper.map(dtoEntrada, Produto.class))
+		when(produtoMapper.toEntity(Mockito.any(ProdutoDTO.class)))
 			.thenReturn(produto);
 		
 		when(produtoRepository.save(Mockito.any(Produto.class)))
@@ -123,10 +124,10 @@ public class ProdutoServiceTest {
 			.thenReturn(Optional.of(produto));
 	
 		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
-		when(modelMapper.map(dtoEntrada, Produto.class))
+		when(produtoMapper.map(dtoEntrada, Produto.class))
 			.thenReturn(produto);
 		
-		when(modelMapper.map(produto, ProdutoDTO.class))
+		when(produtoMapper.map(produto, ProdutoDTO.class))
 			.thenReturn(dtoEntrada);
 		
 		dtoEntrada.setDescricao("Livro It - A coisa");
@@ -181,7 +182,7 @@ public class ProdutoServiceTest {
 			.thenReturn(Optional.of(produto));
 
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
 			.thenReturn(dtoProduto);		
 		
 		ProdutoDTO dtoSaida = produtoService.buscarProdutoDadoCodigo("LIVRO23040");
@@ -211,7 +212,7 @@ public class ProdutoServiceTest {
 		ModelMapper mapper = criaAndConfiguraMapper(); 
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);	
 		
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutosDadoDescricao("Hobbit", PageRequest.of(0, 1)).getContent();
@@ -240,7 +241,7 @@ public class ProdutoServiceTest {
 		ModelMapper mapper = criaAndConfiguraMapper(); 
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
 		
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
@@ -269,7 +270,7 @@ public class ProdutoServiceTest {
 		ModelMapper mapper = criaAndConfiguraMapper(); 
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
 		
-		when(modelMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
