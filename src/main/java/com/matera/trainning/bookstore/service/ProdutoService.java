@@ -6,7 +6,7 @@ import static org.springframework.transaction.annotation.Propagation.REQUIRED;
 import static org.springframework.transaction.annotation.Propagation.SUPPORTS;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -123,10 +123,10 @@ public class ProdutoService {
 					
 										dtoProduto.setCodigo((String) linha[1]);
 										dtoProduto.setDescricao((String) linha[2]);
-										dtoProduto.setPreco((BigDecimal) linha[3]);
+										dtoProduto.setPreco((BigDecimal) linha[3]);	
 										
-										Timestamp dataCadastro = (Timestamp) linha[4];
-										dtoProduto.setDataCadastro(dataCadastro.toLocalDateTime().toLocalDate());
+										Date dataCadastro = (Date) linha[4];
+										dtoProduto.setDataCadastro(dataCadastro.toLocalDate());
 										
 										BigDecimal avaliacao = (BigDecimal) linha[5];
 										dtoProduto.setRating(avaliacao.doubleValue());

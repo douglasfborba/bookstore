@@ -21,7 +21,7 @@ public interface HistoricoDePrecoRepository extends PagingAndSortingRepository<H
 	public Optional<HistoricoDePreco> findMinPrecoByProduto(@Param("produto") Produto produto);
 	
 	@Query(value = "SELECT h.* FROM dis_historico h " + 
-			"JOIN (SELECT produto_id, MIN(preco) AS preco FROM dis_historico GROUP BY produto_id) j ON j.produto_id = h.produto_id " +
+			"JOIN (SELECT produto_id, MAX(preco) AS preco FROM dis_historico GROUP BY produto_id) j ON j.produto_id = h.produto_id " +
 			"WHERE h.preco = j.preco and h.produto_id = :#{#produto.id}", 
 		  nativeQuery = true)
 	public Optional<HistoricoDePreco> findMaxPrecoByProduto(@Param("produto") Produto produto);
