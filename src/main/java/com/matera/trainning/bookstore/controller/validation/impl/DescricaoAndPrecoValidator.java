@@ -26,19 +26,30 @@ public class DescricaoAndPrecoValidator implements ConstraintValidator<ValidaDes
 
 	@Override
 	public boolean isValid(Object valor, ConstraintValidatorContext contexto) {
+		boolean resultado = true;
+		
 		try {
 			final String descricao = (String) getCampoValor(valor, this.baseField);
 	        final BigDecimal preco = new BigDecimal(getCampoValor(valor, this.matchField).toString());
-			return descricao.length() > CONST_VALOR_CORTE ? preco.doubleValue() > CONST_VALOR_CORTE : true;
+			
+	        if (descricao.length() > CONST_VALOR_CORTE)
+	        	resultado = isPrecoMaiorQueValorDeCorte(preco);
+				
 		} catch (Exception ex) {
-			return false;
+			resultado = false;
 		}
+		
+		return resultado;
 	}
-	
-	private Object getCampoValor(Object object, String nomeCampo) throws Exception {       
+
+	private Object getCampoValor(Object object, String nomeCampo) throws NoSuchFieldException, IllegalAccessException {       
         Field campo = object.getClass().getDeclaredField(nomeCampo);
         campo.setAccessible(true);        
         return campo.get(object);
     }
 
+	private boolean isPrecoMaiorQueValorDeCorte(final BigDecimal preco) {
+		return preco.doubleValue() > CONST_VALOR_CORTE;
+	}
+	
 }

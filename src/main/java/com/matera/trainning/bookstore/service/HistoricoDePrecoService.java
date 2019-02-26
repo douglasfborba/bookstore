@@ -22,43 +22,41 @@ import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException
 public class HistoricoDePrecoService {
 
 	@Autowired
-	private HistoricoDePrecoMapper mapper;
+	private HistoricoDePrecoMapper histPrecosMapper;
 
 	@Autowired
-	private HistoricoDePrecoRepository repository;
+	private HistoricoDePrecoRepository histPrecosRepository;
 
 	public Page<HistoricoDePrecoDTO> listarItensHistPrecosDadoProduto(Produto produto, Pageable pageable) {
-		return repository.findAllByProduto(produto, pageable).map(itemHistPreco -> mapper.toDto(itemHistPreco));
+		return histPrecosRepository.findAllByProduto(produto, pageable).map(itemHistPreco -> histPrecosMapper.toDto(itemHistPreco));
 	}
 
-	public HistoricoDePrecoDTO buscarPrecoMinimoDadoCodigoProduto(Produto produto) {
-		HistoricoDePreco itemHistPreco = repository.findMinPrecoByProduto(produto)
+	public HistoricoDePrecoDTO buscarPrecoMinimoDadoProduto(Produto produto) {
+		HistoricoDePreco itemHistPreco = histPrecosRepository.findMinPrecoByProduto(produto)
 				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
 
-		return mapper.toDto(itemHistPreco);
+		return histPrecosMapper.toDto(itemHistPreco);
 	}
 
-	public HistoricoDePrecoDTO buscarPrecoMaximoDadoCodigoProduto(Produto produto) {
-		HistoricoDePreco itemHistPreco = repository.findMaxPrecoByProduto(produto)
-				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente"));
+	public HistoricoDePrecoDTO buscarPrecoMaximoDadoProduto(Produto produto) {
+		HistoricoDePreco itemHistPreco = histPrecosRepository.findMaxPrecoByProduto(produto)
+				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente"));
 
-		return mapper.toDto(itemHistPreco);
+		return histPrecosMapper.toDto(itemHistPreco);
 	}
 
-	public HistoricoDePrecoDTO buscarPrecoMinimoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial,
-			LocalDate dtFinal) {
-		HistoricoDePreco itemHistPreco = repository.findMinByProdutoBetweenDates(produto, dtInicial, dtFinal)
+	public HistoricoDePrecoDTO buscarPrecoMinimoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial, LocalDate dtFinal) {
+		HistoricoDePreco itemHistPreco = histPrecosRepository.findMinByProdutoBetweenDates(produto, dtInicial, dtFinal)
 				.orElseThrow(() -> new RecursoNotFoundException("Preço mínimo inexistente no período informado"));
 
-		return mapper.toDto(itemHistPreco);
+		return histPrecosMapper.toDto(itemHistPreco);
 	}
 
-	public HistoricoDePrecoDTO buscarPrecoMaximoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial,
-			LocalDate dtFinal) {
-		HistoricoDePreco itemHistPreco = repository.findMaxByProdutoBetweenDates(produto, dtInicial, dtFinal)
+	public HistoricoDePrecoDTO buscarPrecoMaximoDadoProdutoNoPeriodo(Produto produto, LocalDate dtInicial, LocalDate dtFinal) {
+		HistoricoDePreco itemHistPreco = histPrecosRepository.findMaxByProdutoBetweenDates(produto, dtInicial, dtFinal)
 				.orElseThrow(() -> new RecursoNotFoundException("Preço máximo inexistente no período informado"));
 
-		return mapper.toDto(itemHistPreco);
+		return histPrecosMapper.toDto(itemHistPreco);
 	}
 
 }

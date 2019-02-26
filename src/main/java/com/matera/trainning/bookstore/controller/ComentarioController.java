@@ -72,7 +72,7 @@ public class ComentarioController {
 	public ResponseEntity<AvaliacaoDTO> avaliarComentario(@PathVariable String codComentario, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = comentarioService.avaliarComentario(codComentario, dtoEntrada);		
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/avaliacoes");		
-		return new ResponseEntity<AvaliacaoDTO>(dtoSaida, headers, CREATED);	
+		return new ResponseEntity<>(dtoSaida, headers, CREATED);	
 	}
 	
 	private HttpHeaders configuraHeaderLocation(String codigo, String uriRecurso) {

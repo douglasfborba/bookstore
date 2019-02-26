@@ -13,10 +13,12 @@ import com.matera.trainning.bookstore.model.Produto;
 @DecoratedWith(ProdutoMapperDecorator.class)
 public interface ProdutoMapper {
 
-	ProdutoMapper INSTANCE = getMapper(ProdutoMapper.class);
-
 	public Produto toEntity(ProdutoDTO dtoProduto);
 
 	public ProdutoDTO toDto(Produto produto);
 
+	public static ProdutoMapper getInstance() {
+		return getMapper(ProdutoMapper.class);
+	}
+	
 }

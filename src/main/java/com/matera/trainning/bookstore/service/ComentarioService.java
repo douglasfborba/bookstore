@@ -28,7 +28,7 @@ import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException
 public class ComentarioService {
 
 	@Autowired
-	private ComentarioRepository repository;
+	private ComentarioRepository comentarioRepository;
 	
 	@Autowired
 	private AvaliacaoService avaliacaoService;
@@ -42,41 +42,41 @@ public class ComentarioService {
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codComentario, ComentarioDTO dtoEntrada) {
-		Comentario comentario = repository.findByCodigo(codComentario)
+		Comentario comentario = comentarioRepository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 
 		comentario.setUsuario(dtoEntrada.getUsuario());
 		comentario.setDescricao(dtoEntrada.getDescricao());
 
-		repository.save(comentario);
+		comentarioRepository.save(comentario);
 	}
 
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void removerComentario(String codComentario) {
-		Comentario comentario = repository.findByCodigo(codComentario)
+		Comentario comentario = comentarioRepository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 
-		repository.delete(comentario);
+		comentarioRepository.delete(comentario);
 	}
 
 	public ComentarioDTO buscarComentarioDadoCodigo(String codComentario) {
-		Comentario comentario = repository.findByCodigo(codComentario)
+		Comentario comentario = comentarioRepository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 		
 		return comentarioMapper.toDto(comentario);
 	}
 
 	public Page<ComentarioDTO> listarComentariosDadoProduto(Produto produto, Pageable pageable) {
-		return repository.findAllByProduto(produto, pageable)
+		return comentarioRepository.findAllByProduto(produto, pageable)
 				.map(comentario -> comentarioMapper.toDto(comentario));
 	}
 
 	public Page<ComentarioDTO> listarComentarios(Pageable pageable) {
-		return repository.findAll(pageable).map(comentario -> comentarioMapper.toDto(comentario));
+		return comentarioRepository.findAll(pageable).map(comentario -> comentarioMapper.toDto(comentario));
 	}
 
 	public Page<ComentarioDTO> listarComentariosDadoUsuario(String usuComentario, Pageable pageable) {
-		Page<ComentarioDTO> comentarios =  repository.findAllByUsuario(usuComentario, pageable)
+		Page<ComentarioDTO> comentarios =  comentarioRepository.findAllByUsuario(usuComentario, pageable)
 				.map(comentario -> comentarioMapper.toDto(comentario));
 		
 		if (comentarios.isEmpty())
@@ -86,12 +86,12 @@ public class ComentarioService {
 	}
 	
 	public Page<ComentarioDTO> listarComentariosComRatingMaiorQueParam(Double rating, Pageable pageable) {
-		Page<Comentario> comentarios = repository.findAllByRatingGreaterThanParam(rating, pageable);
+		Page<Comentario> comentarios = comentarioRepository.findAllByRatingGreaterThanParam(rating, pageable);
 		return comentarios.map(produto -> comentarioMapper.toDto(produto));
 	}
 		
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoComentario(String codComentario, Pageable pageable) {				
-		Comentario comentario = repository.findByCodigo(codComentario)
+		Comentario comentario = comentarioRepository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 
 		return avaliacaoService.listarAvaliacoesDadoComentario(comentario, pageable);
@@ -99,7 +99,7 @@ public class ComentarioService {
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public AvaliacaoDTO avaliarComentario(String codComentario, AvaliacaoDTO dtoEntrada) {		
-		Comentario comentario = repository.findByCodigo(codComentario)
+		Comentario comentario = comentarioRepository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 		
 		comentario.getAvaliacoes().stream()
@@ -119,7 +119,7 @@ public class ComentarioService {
 		avaliacao.setRating(dtoEntrada.getRating());
 
 		comentario.addAvaliacao(avaliacao);		
-		repository.save(comentario);
+		comentarioRepository.save(comentario);
 		
 		return avaliacaoMapper.toDto(avaliacao);
 	}

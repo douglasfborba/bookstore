@@ -18,7 +18,7 @@ public interface ComentarioRepository extends PagingAndSortingRepository<Comenta
 
 	public Page<Comentario> findAllByProduto(Produto produto, Pageable pageable);
 
-	@Query( "SELECT c FROM Comentario c JOIN c.avaliacoes a WHERE a.rating > ?1")
+	@Query("SELECT c FROM Comentario c JOIN c.avaliacoes a WHERE a.rating > ?1")
 	public Page<Comentario> findAllByRatingGreaterThanParam(Double rating, Pageable pageable);
 
 }

@@ -43,16 +43,16 @@ public class ComentarioServiceTest {
 	private ComentarioService comentarioService;
 	
 	@Mock
-	private ComentarioRepository comentarioRepository;
+	private ComentarioMapper comentarioMapper;
+	
+	@Mock
+	private AvaliacaoMapper avaliacaoMapper;
 	
 	@Mock
 	private AvaliacaoService avaliacaoService;
 	
 	@Mock
-	private ComentarioMapper comentarioMapper;
-	
-	@Mock
-	private AvaliacaoMapper avaliacaoMapper;	
+	private ComentarioRepository comentarioRepository;		
 	
 	private Produto produto;
 	private Comentario comentario;
@@ -253,11 +253,42 @@ public class ComentarioServiceTest {
 			.thenReturn(pgComentarios);		
 		
 		try {
-			comentarioService.listarComentariosDadoUsuario("usuario.teste", PageRequest.of(0, 1)).getContent();;
+			comentarioService.listarComentariosDadoUsuario("usuario.teste", PageRequest.of(0, 1)).getContent();
 			fail();
 		} catch (RecursoNotFoundException ex) {
 			assertEquals("Usuário " + comentario.getUsuario() + " inexistente", ex.getMessage());
 		}								
+	}
+	
+	@Test
+	public void listarComentariosComRatingMaiorQueParam() throws Exception {
+		comentario.setRating(2.5);
+
+		Page<Comentario> pgComentarios = new PageImpl<>(list(comentario));
+		when(comentarioRepository.findAllByRatingGreaterThanParam(Mockito.anyDouble(), Mockito.any(Pageable.class)))
+			.thenReturn(pgComentarios);
+
+		ModelMapper mapper = new ModelMapper();
+		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
+		
+		when(comentarioMapper.toDto(Mockito.any(Comentario.class)))
+			.thenReturn(dtoComentario);
+
+		List<ComentarioDTO> comentarios = comentarioService.listarComentariosComRatingMaiorQueParam(2.0, PageRequest.of(0, 1)).getContent();
+
+		assertThat(comentarios).isNotEmpty().hasSize(1).contains(dtoComentario);
+	}
+	
+	@Test
+	public void listarComentariosComRatingMaiorQueParamVazio() throws Exception {
+		Page<Comentario> pgComentarios = new PageImpl<>(list());
+		
+		when(comentarioRepository.findAllByRatingGreaterThanParam(Mockito.anyDouble(), Mockito.any(Pageable.class)))
+			.thenReturn(pgComentarios);
+
+		List<ComentarioDTO> comentarios = comentarioService.listarComentariosComRatingMaiorQueParam(2.0, PageRequest.of(0, 1)).getContent();
+
+		assertThat(comentarios).hasSize(0);
 	}
 	
 	@Test

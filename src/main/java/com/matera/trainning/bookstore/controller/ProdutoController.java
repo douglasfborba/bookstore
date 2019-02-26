@@ -93,7 +93,7 @@ public class ProdutoController {
 	
 	@GetMapping("v1/produtos/{codProduto}/historico-precos")
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codProduto, Pageable pageable) {
-		return produtoService.listarHistoricoDePrecosDadoProduto(codProduto, pageable);
+		return produtoService.listarHistoricoDePrecosDadoCodigoProduto(codProduto, pageable);
 	}
 	
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "dtInicio", "dtFim" })
@@ -161,7 +161,7 @@ public class ProdutoController {
 	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codProduto, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = produtoService.avaliarProduto(codProduto, dtoEntrada);		
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/avaliacoes");
-		return new ResponseEntity<AvaliacaoDTO>(dtoSaida, headers, CREATED);	
+		return new ResponseEntity<>(dtoSaida, headers, CREATED);	
 	}
 	
 	private HttpHeaders configuraHeaderLocation(String codigo, String uriRecurso) {

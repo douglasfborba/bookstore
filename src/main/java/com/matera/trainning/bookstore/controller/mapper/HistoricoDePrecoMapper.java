@@ -11,11 +11,13 @@ import com.matera.trainning.bookstore.model.HistoricoDePreco;
 @Mapper(componentModel = "spring")
 public interface HistoricoDePrecoMapper {
 	
-	HistoricoDePrecoMapper INSTANCE = getMapper(HistoricoDePrecoMapper.class);
-
 	public HistoricoDePreco toEntity(HistoricoDePrecoDTO dtoItemHistPreco);
 
 	@Mapping(source = "produto.descricao", target = "descricao")
 	public HistoricoDePrecoDTO toDto(HistoricoDePreco itemHistPreco);
+
+	public static HistoricoDePrecoMapper getInstance() {
+		return getMapper(HistoricoDePrecoMapper.class);
+	}
 	
 }

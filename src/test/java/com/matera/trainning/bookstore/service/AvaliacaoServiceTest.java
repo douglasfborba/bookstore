@@ -69,7 +69,7 @@ public class AvaliacaoServiceTest {
 		avaliacao.setRating(3.5);
 		avaliacao.setUsuario("usuario.teste");
 	}
-
+	
 	@Test
 	public void buscarAvaliacaoDadoCodigo() {
 		avaliacao.setProduto(produto);

@@ -328,7 +328,7 @@ public class ProdutoControllerTest {
 	public void listaHistoricoDePrecosPeloProduto() throws Exception {
 		Page<HistoricoDePrecoDTO> historicoDePrecos = new PageImpl<>(list(dtoItemHistPreco));
 
-		when(produtoService.listarHistoricoDePrecosDadoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(produtoService.listarHistoricoDePrecosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(historicoDePrecos);
 		
 		String jsonArray = jsonMapper.writeValueAsString(historicoDePrecos);
@@ -343,7 +343,7 @@ public class ProdutoControllerTest {
 	
 	@Test
 	public void listaHistoricoDePrecosPeloProdutoInexistente() throws Exception {
-		when(produtoService.listarHistoricoDePrecosDadoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
+		when(produtoService.listarHistoricoDePrecosDadoCodigoProduto(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenThrow(RecursoNotFoundException.class);
 		
 		mockMvc.perform(get("/v1/comentarios/{codComentario}/avaliacoes", "LIVRO23040")

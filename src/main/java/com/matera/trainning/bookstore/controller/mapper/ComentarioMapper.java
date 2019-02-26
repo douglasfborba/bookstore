@@ -12,11 +12,13 @@ import com.matera.trainning.bookstore.model.Comentario;
 @Mapper(componentModel = "spring")
 @DecoratedWith(ComentarioMapperDecorator.class)
 public interface ComentarioMapper {
-
-	ComentarioMapper INSTANCE = getMapper(ComentarioMapper.class);
-
+	
 	public Comentario toEntity(ComentarioDTO dtComentario);
 
 	public ComentarioDTO toDto(Comentario comentario);
 
+	public static ComentarioMapper getInstance() {
+		return getMapper(ComentarioMapper.class);
+	}
+	
 }

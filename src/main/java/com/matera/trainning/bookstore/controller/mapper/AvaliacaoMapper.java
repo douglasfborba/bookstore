@@ -12,11 +12,13 @@ import com.matera.trainning.bookstore.model.Avaliacao;
 @Mapper(componentModel = "spring")
 @DecoratedWith(AvaliacaoMapperDecorator.class)
 public interface AvaliacaoMapper {
-
-	AvaliacaoMapper INSTANCE = getMapper(AvaliacaoMapper.class);
 	  
 	public Avaliacao toEntity(AvaliacaoDTO dtoAvaliacao);
 
 	public AvaliacaoDTO toDto(Avaliacao avaliacao);
+	
+	public static AvaliacaoMapper getInstance() {
+		return getMapper(AvaliacaoMapper.class);
+	}
 		
 }
