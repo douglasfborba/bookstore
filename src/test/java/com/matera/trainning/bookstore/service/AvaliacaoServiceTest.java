@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,9 @@ public class AvaliacaoServiceTest {
 	@InjectMocks
 	private AvaliacaoService avaliacaoService;
 		
+	@Mock
+	private AvaliacaoMapper avaliacaoMapper;
+	
 	@Mock
 	private AvaliacaoRepository avaliacaoRepository;
 	
@@ -67,15 +71,15 @@ public class AvaliacaoServiceTest {
 	}
 
 	@Test
-	public void buscarAvaliacaoDadoCodigo() {	
-		AvaliacaoMapper mapper = AvaliacaoMapper.INSTANCE;
-
+	public void buscarAvaliacaoDadoCodigo() {
 		avaliacao.setProduto(produto);
 			
 		when(avaliacaoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(avaliacao));
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);
+		ModelMapper mapper = new ModelMapper();			
+		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);
+		
 		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 	
@@ -105,7 +109,9 @@ public class AvaliacaoServiceTest {
 		when(avaliacaoRepository.findAllByProduto(Mockito.any(Produto.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		ModelMapper mapper = new ModelMapper();			
+		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);
+		
 		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		
@@ -134,7 +140,9 @@ public class AvaliacaoServiceTest {
 		when(avaliacaoRepository.findAllByComentario(Mockito.any(Comentario.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		ModelMapper mapper = new ModelMapper();			
+		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);
+		
 		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		
@@ -161,7 +169,9 @@ public class AvaliacaoServiceTest {
 		when(avaliacaoRepository.findAllByUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(pgAvaliacoes);
 		
-		AvaliacaoDTO dtoAvaliacao = mapper.toDto(avaliacao);	
+		ModelMapper mapper = new ModelMapper();			
+		AvaliacaoDTO dtoAvaliacao = mapper.map(avaliacao, AvaliacaoDTO.class);
+		
 		when(avaliacaoMapper.toDto(Mockito.any(Avaliacao.class)))
 			.thenReturn(dtoAvaliacao);
 		

@@ -446,12 +446,11 @@ public class ProdutoControllerTest {
 			.thenReturn(dtoItemHistPreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/max", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
-				.param("dtFim", LocalDate.now().toString())
-				.param("preco", "max"))
+				.param("dtFim", LocalDate.now().toString()))
 				.andExpect(status().isOk())
 				.andExpect(content().json(jsonObject))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));
@@ -463,12 +462,11 @@ public class ProdutoControllerTest {
 			.thenReturn(dtoItemHistPreco);
 
 		String jsonObject = jsonMapper.writeValueAsString(dtoItemHistPreco);
-		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos", "LIVRO23040")
+		mockMvc.perform(get("/v1/produtos/{codProduto}/historico-precos/min", "LIVRO23040")
 				.header(AUTHORIZATION, "Basic " + encodeToString("user:password".getBytes()))
 				.accept(APPLICATION_JSON_UTF8)
 				.param("dtInicio", LocalDate.now().toString())
-				.param("dtFim", LocalDate.now().toString())
-				.param("preco", "min"))
+				.param("dtFim", LocalDate.now().toString()))
 				.andExpect(status().isOk())
 				.andExpect(content().json(jsonObject))
 				.andExpect(content().contentType(APPLICATION_JSON_UTF8));

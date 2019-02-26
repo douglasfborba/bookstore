@@ -25,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.controller.mapper.ProdutoMapper;
 import com.matera.trainning.bookstore.model.Avaliacao;
@@ -77,13 +76,13 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void inserirProduto() {		
-		ProdutoMapper mapper = ProdutoMapper.INSTANCE;
+		ModelMapper mapper = new ModelMapper();
 
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.empty())
 			.thenReturn(Optional.of(produto));
 		
-		ProdutoDTO dtoEntrada = mapper.toDto(produto);
+		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
 		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoEntrada);
 		
@@ -100,7 +99,7 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void inserirProdutoDuplicado() {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 
 		String mensagem = "Produto " + produto.getCodigo() + " já existente";
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
@@ -118,16 +117,16 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void atualizarProduto() {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(produto));
 	
 		ProdutoDTO dtoEntrada = mapper.map(produto, ProdutoDTO.class);
-		when(produtoMapper.map(dtoEntrada, Produto.class))
+		when(produtoMapper.toEntity(Mockito.any(ProdutoDTO.class)))
 			.thenReturn(produto);
 		
-		when(produtoMapper.map(produto, ProdutoDTO.class))
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoEntrada);
 		
 		dtoEntrada.setDescricao("Livro It - A coisa");
@@ -138,7 +137,7 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void atualizarProdutoInexistente() {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.empty());
@@ -176,13 +175,13 @@ public class ProdutoServiceTest {
 	
 	@Test
 	public void buscarProdutoDadoCodigo() throws Exception {
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 
 		when(produtoRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(produto));
 
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
-		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoProduto);		
 		
 		ProdutoDTO dtoSaida = produtoService.buscarProdutoDadoCodigo("LIVRO23040");
@@ -209,10 +208,10 @@ public class ProdutoServiceTest {
 		when(produtoRepository.findAllByDescricao(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(pgProdutos);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);	
 		
-		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutosDadoDescricao("Hobbit", PageRequest.of(0, 1)).getContent();
@@ -238,10 +237,10 @@ public class ProdutoServiceTest {
 		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
 			.thenReturn(pgProdutos);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
 		
-		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
@@ -267,10 +266,10 @@ public class ProdutoServiceTest {
 		when(produtoRepository.findAll(Mockito.any(Pageable.class)))
 			.thenReturn(pgProdutos);
 		
-		ModelMapper mapper = criaAndConfiguraMapper(); 
+		ModelMapper mapper = new ModelMapper();
 		ProdutoDTO dtoProduto = mapper.map(produto, ProdutoDTO.class);
 		
-		when(produtoMapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(produtoMapper.toDto(Mockito.any(Produto.class)))
 			.thenReturn(dtoProduto);
 		
 		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
@@ -288,13 +287,6 @@ public class ProdutoServiceTest {
 		List<ProdutoDTO> produtos = produtoService.listarProdutos(PageRequest.of(0, 1)).getContent();
 		
 		assertThat(produtos).hasSize(0);
-	}
-	
-	
-	private ModelMapper criaAndConfiguraMapper() {
-		ModelMapper mapper = new ModelMapper();
-		mapper.addConverter(AvaliacaoDTO.getConverter());
-		return mapper;
 	}
 
 }

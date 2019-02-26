@@ -28,13 +28,17 @@ import com.matera.trainning.bookstore.service.exception.RecursoNotFoundException
 public class ComentarioService {
 
 	@Autowired
-	private ComentarioMapper mapper;
-	
-	@Autowired
 	private ComentarioRepository repository;
 	
 	@Autowired
 	private AvaliacaoService avaliacaoService;
+	
+	@Autowired
+	private ComentarioMapper comentarioMapper;
+	
+	@Autowired
+	private AvaliacaoMapper avaliacaoMapper;
+	
 	
 	@Transactional(propagation = REQUIRED, readOnly = false)
 	public void atualizarComentario(String codComentario, ComentarioDTO dtoEntrada) {
@@ -59,21 +63,21 @@ public class ComentarioService {
 		Comentario comentario = repository.findByCodigo(codComentario)
 				.orElseThrow(() -> new RecursoNotFoundException("Comentário " + codComentario + " inexistente"));
 		
-		return mapper.toDto(comentario);
+		return comentarioMapper.toDto(comentario);
 	}
 
 	public Page<ComentarioDTO> listarComentariosDadoProduto(Produto produto, Pageable pageable) {
 		return repository.findAllByProduto(produto, pageable)
-				.map(comentario -> mapper.toDto(comentario));
+				.map(comentario -> comentarioMapper.toDto(comentario));
 	}
 
 	public Page<ComentarioDTO> listarComentarios(Pageable pageable) {
-		return repository.findAll(pageable).map(comentario -> mapper.toDto(comentario));
+		return repository.findAll(pageable).map(comentario -> comentarioMapper.toDto(comentario));
 	}
 
 	public Page<ComentarioDTO> listarComentariosDadoUsuario(String usuComentario, Pageable pageable) {
 		Page<ComentarioDTO> comentarios =  repository.findAllByUsuario(usuComentario, pageable)
-				.map(comentario -> mapper.toDto(comentario));
+				.map(comentario -> comentarioMapper.toDto(comentario));
 		
 		if (comentarios.isEmpty())
 			throw new RecursoNotFoundException("Usuário " + usuComentario + " inexistente"); 
@@ -83,7 +87,7 @@ public class ComentarioService {
 	
 	public Page<ComentarioDTO> listarComentariosComRatingMaiorQueParam(Double rating, Pageable pageable) {
 		Page<Comentario> comentarios = repository.findAllByRatingGreaterThanParam(rating, pageable);
-		return comentarios.map(produto -> mapper.toDto(produto));
+		return comentarios.map(produto -> comentarioMapper.toDto(produto));
 	}
 		
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoCodigoComentario(String codComentario, Pageable pageable) {				
@@ -106,8 +110,7 @@ public class ComentarioService {
 					throw new RecursoAlreadyExistsException(mensagem, avaliacao.getCodigo(), "/v1/avaliacoes");
 				});
 		
-		AvaliacaoMapper mapper = AvaliacaoMapper.INSTANCE;		
-		Avaliacao avaliacao = mapper.toEntity(dtoEntrada);	
+		Avaliacao avaliacao = avaliacaoMapper.toEntity(dtoEntrada);	
 
 		avaliacao.setCodigo(geraCodigoEmBase64(avaliacao.getUsuario(), LocalDateTime.now()));
 		avaliacao.setComentario(comentario);
@@ -118,7 +121,7 @@ public class ComentarioService {
 		comentario.addAvaliacao(avaliacao);		
 		repository.save(comentario);
 		
-		return mapper.toDto(avaliacao);
+		return avaliacaoMapper.toDto(avaliacao);
 	}
 	
 	private String geraCodigoEmBase64(String usuario, LocalDateTime dataHoraAtual) {

@@ -27,6 +27,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
+import com.matera.trainning.bookstore.controller.mapper.AvaliacaoMapper;
+import com.matera.trainning.bookstore.controller.mapper.ComentarioMapper;
 import com.matera.trainning.bookstore.model.Avaliacao;
 import com.matera.trainning.bookstore.model.Comentario;
 import com.matera.trainning.bookstore.model.Produto;
@@ -41,13 +43,16 @@ public class ComentarioServiceTest {
 	private ComentarioService comentarioService;
 	
 	@Mock
-	private ModelMapper mapper;
-	
-	@Mock
 	private ComentarioRepository comentarioRepository;
 	
 	@Mock
 	private AvaliacaoService avaliacaoService;
+	
+	@Mock
+	private ComentarioMapper comentarioMapper;
+	
+	@Mock
+	private AvaliacaoMapper avaliacaoMapper;	
 	
 	private Produto produto;
 	private Comentario comentario;
@@ -76,8 +81,10 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void atualizarComentario() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
-			.thenReturn(Optional.of(comentario));
+			.thenReturn(Optional.of(comentario));		
 		
 		ComentarioDTO dtoEntrada = mapper.map(comentario, ComentarioDTO.class);
 		dtoEntrada.setDescricao("Amei, melhor livro que já li.");
@@ -89,6 +96,8 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void atualizarComentarioInexistente() throws Exception {		
+		ModelMapper mapper = new ModelMapper();
+		
 		ComentarioDTO dtoEntrada = mapper.map(comentario, ComentarioDTO.class);
 		dtoEntrada.setDescricao("Amei, melhor livro que já li.");
 
@@ -127,11 +136,13 @@ public class ComentarioServiceTest {
 	
 	@Test
 	public void buscarComentarioDadoCodigo() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
-		when(mapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(comentarioMapper.toDto(Mockito.any(Comentario.class)))
 			.thenReturn(dtoComentario);		
 		
 		ComentarioDTO dtoSaida = comentarioService.buscarComentarioDadoCodigo("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1");
@@ -153,7 +164,9 @@ public class ComentarioServiceTest {
 	}
 	
 	@Test
-	public void listarComentariosDadoProduto() throws Exception {		
+	public void listarComentariosDadoProduto() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		avaliacao.setProduto(produto);
 		
 		Page<Comentario> pgComentarios = new PageImpl<>(list(comentario));
@@ -162,7 +175,7 @@ public class ComentarioServiceTest {
 		
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
 		
-		when(mapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(comentarioMapper.toDto(Mockito.any(Comentario.class)))
 			.thenReturn(dtoComentario);
 		
 		List<ComentarioDTO> comentarios = comentarioService.listarComentariosDadoProduto(produto, PageRequest.of(0, 1)).getContent();
@@ -183,7 +196,9 @@ public class ComentarioServiceTest {
 	}
 	
 	@Test
-	public void listaComentariosEmBasePopulada() {		
+	public void listaComentariosEmBasePopulada() {
+		ModelMapper mapper = new ModelMapper();
+
 		avaliacao.setProduto(produto);
 		
 		Page<Comentario> pgComentarios = new PageImpl<>(list(comentario));
@@ -192,7 +207,7 @@ public class ComentarioServiceTest {
 		
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);
 		
-		when(mapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(comentarioMapper.toDto(Mockito.any(Comentario.class)))
 			.thenReturn(dtoComentario);
 		
 		List<ComentarioDTO> comentarios = comentarioService.listarComentarios(PageRequest.of(0, 1)).getContent();
@@ -213,14 +228,16 @@ public class ComentarioServiceTest {
 	}
 	
 	@Test
-	public void listarComentariosDadoUsuario() throws Exception {				
+	public void listarComentariosDadoUsuario() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		Page<Comentario> pgComentarios = new PageImpl<>(list(comentario));
 		when(comentarioRepository.findAllByUsuario(Mockito.anyString(), Mockito.any(Pageable.class)))
 			.thenReturn(pgComentarios);
 		
 		ComentarioDTO dtoComentario = mapper.map(comentario, ComentarioDTO.class);	
 		
-		when(mapper.map(Mockito.any(Object.class), Mockito.any()))
+		when(comentarioMapper.toDto(Mockito.any(Comentario.class)))
 			.thenReturn(dtoComentario);
 		
 		List<ComentarioDTO> comentarios = comentarioService.listarComentariosDadoUsuario("usuario.teste", PageRequest.of(0, 1)).getContent();
@@ -244,7 +261,9 @@ public class ComentarioServiceTest {
 	}
 	
 	@Test
-	public void listarAvaliacoesDadoCodigoComentario() throws Exception {				
+	public void listarAvaliacoesDadoCodigoComentario() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 		
@@ -273,7 +292,9 @@ public class ComentarioServiceTest {
 	}
 	
 	@Test
-	public void avaliarComentario() throws Exception {		
+	public void avaliarComentario() throws Exception {
+		ModelMapper mapper = new ModelMapper();
+
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 		
@@ -281,10 +302,10 @@ public class ComentarioServiceTest {
 		
 		dtoEntrada.setDescricao(comentario.getDescricao());
 
-		when(mapper.map(dtoEntrada, Avaliacao.class))
+		when(avaliacaoMapper.toEntity(Mockito.any(AvaliacaoDTO.class)))
 			.thenReturn(avaliacao);
 				
-		when(mapper.map(avaliacao, AvaliacaoDTO.class))
+		when(avaliacaoMapper.toDto(avaliacao))
 			.thenReturn(dtoEntrada);
 		
 		AvaliacaoDTO dtoSaida = comentarioService.avaliarComentario("dXN1YXJpby5oYXRlcjMwMDEyMDE5MTcyNDI1", dtoEntrada);
@@ -300,6 +321,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.empty());		
 		
+		ModelMapper mapper = new ModelMapper();
 		AvaliacaoDTO dtoEntrada = mapper.map(avaliacao, AvaliacaoDTO.class);
 
 		try {
@@ -317,6 +339,7 @@ public class ComentarioServiceTest {
 		when(comentarioRepository.findByCodigo(Mockito.anyString()))
 			.thenReturn(Optional.of(comentario));
 
+		ModelMapper mapper = new ModelMapper();
 		AvaliacaoDTO dtoEntrada = mapper.map(avaliacao, AvaliacaoDTO.class);
 
 		try {

@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -35,7 +36,7 @@ public class HistoricoDePrecoServiceTest {
 	
 	@Mock
 	private HistoricoDePrecoMapper histDePrecosMapper;
-	
+
 	@Mock
 	private HistoricoDePrecoRepository histDePrecosRepository;
 	
@@ -58,17 +59,21 @@ public class HistoricoDePrecoServiceTest {
 
 	@Test
 	public void listarItensHistPrecosDadoProduto() throws Exception {
-		HistoricoDePrecoMapper mapper = HistoricoDePrecoMapper.INSTANCE;
-		
 		itemHistPrecos.setProduto(produto);
 		
 		Page<HistoricoDePreco> pgItensHistPrecos = new PageImpl<>(list(itemHistPrecos));
 		when(histDePrecosRepository.findAllByProduto(Mockito.any(Produto.class), Mockito.any(Pageable.class)))
 			.thenReturn(pgItensHistPrecos);
 		
+		ModelMapper mapper = new ModelMapper();		
+		HistoricoDePrecoDTO dtoItemHistPrecos = mapper.map(itemHistPrecos, HistoricoDePrecoDTO.class);
+		
+		when(histDePrecosMapper.toDto(Mockito.any(HistoricoDePreco.class)))
+			.thenReturn(dtoItemHistPrecos);
+		
 		List<HistoricoDePrecoDTO> itensHistPrecos = histDePrecosService.listarItensHistPrecosDadoProduto(produto, PageRequest.of(0, 1)).getContent();
 		
-		assertThat(itensHistPrecos).isNotEmpty().hasSize(1).contains(mapper.toDto(itemHistPrecos));		
+		assertThat(itensHistPrecos).isNotEmpty().hasSize(1).contains(dtoItemHistPrecos);		
 	}
 	
 	@Test
