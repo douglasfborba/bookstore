@@ -8,11 +8,13 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
+import io.swagger.annotations.ApiModel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@ApiModel(value = "Avaliacao", description = "Representa uma avaliação")
 @NoArgsConstructor
 public class AvaliacaoDTO {
 

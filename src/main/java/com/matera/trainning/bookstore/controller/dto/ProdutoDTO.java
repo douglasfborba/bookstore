@@ -14,11 +14,13 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.matera.trainning.bookstore.controller.validation.ValidaDescricaoAndPreco;
 
+import io.swagger.annotations.ApiModel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@ApiModel(value = "Produto", description = "Representa um produto")
 @NoArgsConstructor
 @ValidaDescricaoAndPreco(baseField = "descricao", matchField = "preco", message = "Preço deve ser superior a 10.0")
 public class ProdutoDTO {

@@ -28,6 +28,10 @@ import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.controller.dto.ComentarioDTO;
 import com.matera.trainning.bookstore.service.ComentarioService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api(description = "Comentário APIs", tags = "Comentário")
 @RestController
 @RequestMapping
 public class ComentarioController {
@@ -35,39 +39,46 @@ public class ComentarioController {
 	@Autowired
 	private ComentarioService comentarioService;
 	
+	@ApiOperation(value = "Atualiza comentário", notes = "Sem retorno")
 	@PutMapping("v1/comentarios/{codComentario}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void atualizarComentario(@PathVariable String codComentario, @Valid @RequestBody ComentarioDTO dtoEntrada) {
 		comentarioService.atualizarComentario(codComentario, dtoEntrada);
 	}
 	
+	@ApiOperation(value = "Remove comentário", notes = "Sem retorno")
 	@DeleteMapping("v1/comentarios/{codComentario}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void removerComentario(@PathVariable String codComentario) {
 		comentarioService.removerComentario(codComentario);
 	}
 
+	@ApiOperation(value = "Busca comentário dado código", notes = "Retorna o comentário buscado")
 	@GetMapping("v1/comentarios/{codComentario}")
 	public ResponseEntity<ComentarioDTO> buscarComentarioDadoCodigo(@PathVariable String codComentario) {
 		ComentarioDTO dtoSaida = comentarioService.buscarComentarioDadoCodigo(codComentario);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
+	@ApiOperation(value = "Lista comentários dado usuário", notes = "Retorna uma lista de comentários")
 	@GetMapping(value = "v1/comentarios", params = { "usuario" })
 	public Page<ComentarioDTO> listarComentariosDadoUsuario(@RequestParam(name = "usuario", required = true) String usuComentario, Pageable pageable) {
 		return comentarioService.listarComentariosDadoUsuario(usuComentario, pageable);
 	}
 	
+	@ApiOperation(value = "Lista comentários com rating maior que valor passado como parâmetro", notes = "Retorna uma lista de comentários")
 	@GetMapping(value = "v1/comentarios/rating", params = { "gt" })
 	public Page<ComentarioDTO> listarComentariosComRatingMaiorQueParam(@RequestParam(name = "gt", required = true) Double rating, Pageable pageable) {
 		return comentarioService.listarComentariosComRatingMaiorQueParam(rating, pageable);
 	}
 		
+	@ApiOperation(value = "Lista avaliações dado código do comentário", notes = "Retorna uma lista de avaliações")
 	@GetMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoComentario(@PathVariable String codComentario, Pageable pageable) {
 		return comentarioService.listarAvaliacoesDadoCodigoComentario(codComentario, pageable);
 	}
 
+	@ApiOperation(value = "Avalia comentário", notes = "Retorna a avaliação criada")
 	@PostMapping("v1/comentarios/{codComentario}/avaliacoes")
 	public ResponseEntity<AvaliacaoDTO> avaliarComentario(@PathVariable String codComentario, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = comentarioService.avaliarComentario(codComentario, dtoEntrada);		

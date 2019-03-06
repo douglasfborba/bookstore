@@ -32,6 +32,10 @@ import com.matera.trainning.bookstore.controller.dto.HistoricoDePrecoDTO;
 import com.matera.trainning.bookstore.controller.dto.ProdutoDTO;
 import com.matera.trainning.bookstore.service.ProdutoService;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api(description = "Produto APIs", tags = "Produto")
 @RestController
 @RequestMapping
 public class ProdutoController {
@@ -39,11 +43,13 @@ public class ProdutoController {
 	@Autowired
 	private ProdutoService produtoService;
 	
+	@ApiOperation(value = "Lista todos os produtos", notes = "Retorna uma lista de produtos")
 	@GetMapping("v1/produtos")
 	public Page<ProdutoDTO> listarProdutos(Pageable pageable) {
 		return produtoService.listarProdutos(pageable);
 	}
 		
+	@ApiOperation(value = "Cria produto", notes = "Retorna o produto criado")
 	@PostMapping("v1/produtos")
 	public ResponseEntity<ProdutoDTO> inserirProduto(@Valid @RequestBody ProdutoDTO dtoEntrada) {
 		ProdutoDTO dtoSaida = produtoService.inserirProduto(dtoEntrada);
@@ -51,29 +57,34 @@ public class ProdutoController {
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);
 	}	
 	
+	@ApiOperation(value = "Atualiza produto", notes = "Retorna o produto criado")
 	@PutMapping("v1/produtos/{codProduto}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void atualizarProduto(@PathVariable String codProduto, @Valid @RequestBody ProdutoDTO dtoEntrada) {
 		produtoService.atualizarProduto(codProduto, dtoEntrada);
 	}
 	
+	@ApiOperation(value = "Remove produto", notes = "Sem retorno")
 	@DeleteMapping("v1/produtos/{codProduto}")
 	@ResponseStatus(code = NO_CONTENT)
 	public void removerProduto(@PathVariable String codProduto) {
 		produtoService.removerProduto(codProduto);
 	}
 	
+	@ApiOperation(value = "Buscs produto dado código", notes = "Retorna um produto")
 	@GetMapping("v1/produtos/{codProduto}")
 	public ResponseEntity<ProdutoDTO> buscarProdutoDadoCodigo(@PathVariable String codProduto) {
 		ProdutoDTO dtoSaida = produtoService.buscarProdutoDadoCodigo(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
+	@ApiOperation(value = "Busca produto dado descrição", notes = "Retorna uma lista de produtos")
 	@GetMapping(value = "v1/produtos", params = { "descricao" })
 	public Page<ProdutoDTO> buscarProdutoDadoDescricao(@RequestParam(name = "descricao", required = true) String descProduto, Pageable pageable) {
 		return produtoService.listarProdutosDadoDescricao(descProduto, pageable);
 	}
 	
+	@ApiOperation(value = "Lista produtos com rating maior que valor passado por parâmetro", notes = "Retorna uma lista de produtos")
 	@GetMapping(value = "v1/produtos/rating", params = { "gt" })
 	public Page<ProdutoDTO> listarProdutosComRatingMaiorQueParam(@RequestParam(name = "gt", required = true) Double rating, Pageable pageable) {
 		return produtoService.listarProdutosComRatingMaiorQueParam(rating, pageable);
@@ -84,6 +95,7 @@ public class ProdutoController {
 		return produtoService.listarComentariosDadoCodigoProduto(codProduto, pageable);
 	}
 	
+	@ApiOperation(value = "Comenta produto", notes = "Retorna um produto")
 	@PostMapping("v1/produtos/{codProduto}/comentarios")
 	public ResponseEntity<ComentarioDTO> comentarProduto(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
 		ComentarioDTO dtoSaida = produtoService.comentarProduto(codProduto, dtoEntrada);
@@ -91,11 +103,13 @@ public class ProdutoController {
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);		
 	}
 	
+	@ApiOperation(value = "Lista histórico de preços dado código produto", notes = "Retorna uma lista de precos")
 	@GetMapping("v1/produtos/{codProduto}/historico-precos")
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarHistoricoDePrecosDadoCodigoProduto(codProduto, pageable);
 	}
 	
+	@ApiOperation(value = "Lista histórico de preços dado código no período", notes = "Retorna uma lista de precos")
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "dtInicio", "dtFim" })
 	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoCodigoProduto(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
@@ -104,18 +118,21 @@ public class ProdutoController {
 		return produtoService.listarHistoricoDePrecosNoPeriodoDadoProduto(codProduto, dtInicio, dtFim, pageable);
 	}
 	
+	@ApiOperation(value = "Busca preço mínimo do produto", notes = "Retorna um preço")
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/min")
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoDadoCodigoProduto(@PathVariable String codProduto) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMinimoDadoCodigoProduto(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
+	@ApiOperation(value = "Busca preço máximo do produto", notes = "Retorna um preço")
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/max")
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoDadoCodigoProduto(@PathVariable String codProduto) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMaximoDadoCodigoProduto(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
+	@ApiOperation(value = "Busca preço mínimo do produto V1", notes = "Retorna um preço")
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/min", params = { "dtInicio", "dtFim" })
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
@@ -125,6 +142,7 @@ public class ProdutoController {
 		return ResponseEntity.ok(dtoSaida);
 	}
 	
+	@ApiOperation(value = "Busca preço máximo do produto no período V1", notes = "Retorna um preço")
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/max", params = { "dtInicio", "dtFim" })
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
@@ -134,6 +152,7 @@ public class ProdutoController {
 		return ResponseEntity.ok(dtoSaida);	
 	}	
 	
+	@ApiOperation(value = "Busca preço mínimo do produto no período V2", notes = "Retorna um preço")
 	@GetMapping(value = "v2/produtos/{codProduto}/historico-precos/min", params = { "dtInicio", "dtFim" })
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV2(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
@@ -143,6 +162,7 @@ public class ProdutoController {
 		return ResponseEntity.ok(dtoSaida);
 	}
 	
+	@ApiOperation(value = "Busca preço máximo do produto no período V2", notes = "Retorna um preço")
 	@GetMapping(value = "v2/produtos/{codProduto}/historico-precos/max", params = { "dtInicio", "dtFim" })
 	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV2(@PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
@@ -152,11 +172,13 @@ public class ProdutoController {
 		return ResponseEntity.ok(dtoSaida);	
 	}	
 
+	@ApiOperation(value = "Lista avaliações dado código produto", notes = "Retorna uma lista de avaliações")
 	@GetMapping("v1/produtos/{codProduto}/avaliacoes")
 	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(@PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarAvaliacoesDadoCodigoDoProduto(codProduto, pageable);
 	}
 	
+	@ApiOperation(value = "Avalia produto", notes = "Retorna um produto")
 	@PostMapping("v1/produtos/{codProduto}/avaliacoes")
 	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codProduto, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = produtoService.avaliarProduto(codProduto, dtoEntrada);		
