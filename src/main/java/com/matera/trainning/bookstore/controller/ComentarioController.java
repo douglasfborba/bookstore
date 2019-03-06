@@ -30,8 +30,16 @@ import com.matera.trainning.bookstore.service.ComentarioService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(description = "Comentário APIs", tags = "Comentário")
+@ApiResponses(value = {
+        @ApiResponse(code = 200, message = "Recurso encontrado com sucesso"),
+        @ApiResponse(code = 401, message = "Erro ao autenticar usuário"),
+        @ApiResponse(code = 403, message = "Permissão de acesso negada"),
+        @ApiResponse(code = 404, message = "Recurso não encontrado")
+})
 @RestController
 @RequestMapping
 public class ComentarioController {

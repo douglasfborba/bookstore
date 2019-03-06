@@ -15,6 +15,8 @@ import com.matera.trainning.bookstore.service.AvaliacaoService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @Api(description = "Avaliação APIs", tags = "Avaliação")
 @RestController
@@ -25,14 +27,20 @@ public class AvaliacaoController {
 	AvaliacaoService avaliacaoService;
 
 	@ApiOperation(value = "Exibe avaliação dado código", notes = "Retorna uma lista de avaliações")
-	@GetMapping("v1/avaliacoes/{codAvaliacao}")
+	@ApiResponses(value = {
+	        @ApiResponse(code = 200, message = "Recurso encontrado com sucesso"),
+	        @ApiResponse(code = 401, message = "Erro ao autenticar usuário"),
+	        @ApiResponse(code = 403, message = "Permissão de acesso negada"),
+	        @ApiResponse(code = 404, message = "Recurso não encontrado")
+	})
+	@GetMapping(value = "v1/avaliacoes/{codAvaliacao}", produces = "application/json")
 	public ResponseEntity<AvaliacaoDTO> buscaAvaliacaoDadoCodigo(@PathVariable String codAvaliacao) {
 		AvaliacaoDTO dtoSaida = avaliacaoService.buscarAvaliacaoDadoCodigo(codAvaliacao);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@ApiOperation(value = "Lista avaliações dado usuário", notes = "Retorna uma lista de avaliações")
-	@GetMapping(value = "v1/avaliacoes", params = { "usuario" })
+	@GetMapping(value = "v1/avaliacoes", params = { "usuario" }, produces = "application/json")
 	public Page<AvaliacaoDTO> listaAvaliacoesDadoUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
 		return avaliacaoService.listarAvaliacoesDadoUsuario(usuario, pageable);
 	}
