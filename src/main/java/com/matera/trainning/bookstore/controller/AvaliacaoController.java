@@ -14,11 +14,17 @@ import com.matera.trainning.bookstore.controller.dto.AvaliacaoDTO;
 import com.matera.trainning.bookstore.service.AvaliacaoService;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 @Api(description = "Avaliação APIs", tags = "Avaliação")
+@ApiResponses(value = {
+        @ApiResponse(code = 401, message = "Erro de autenticação")
+})
 @RestController
 @RequestMapping
 public class AvaliacaoController {
@@ -26,20 +32,28 @@ public class AvaliacaoController {
 	@Autowired
 	AvaliacaoService avaliacaoService;
 
-	@ApiOperation(value = "Exibe avaliação dado código", notes = "Retorna uma lista de avaliações")
+	@ApiOperation(value = "Exibe avaliação dado código", notes = "Retorna uma lista de avaliações", response = AvaliacaoDTO.class)
 	@ApiResponses(value = {
-	        @ApiResponse(code = 200, message = "Recurso encontrado com sucesso"),
-	        @ApiResponse(code = 401, message = "Erro ao autenticar usuário"),
-	        @ApiResponse(code = 403, message = "Permissão de acesso negada"),
-	        @ApiResponse(code = 404, message = "Recurso não encontrado")
+	        @ApiResponse(code = 200, message = "Recurso encontrado"),
+	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/avaliacoes/{codAvaliacao}", produces = "application/json")
-	public ResponseEntity<AvaliacaoDTO> buscaAvaliacaoDadoCodigo(@PathVariable String codAvaliacao) {
+	public ResponseEntity<AvaliacaoDTO> buscaAvaliacaoDadoCodigo(@ApiParam(value = "Código da avaliação") @PathVariable String codAvaliacao) {
 		AvaliacaoDTO dtoSaida = avaliacaoService.buscarAvaliacaoDadoCodigo(codAvaliacao);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@ApiOperation(value = "Lista avaliações dado usuário", notes = "Retorna uma lista de avaliações")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	    @ApiImplicitParam(name = "usuario", dataType = "string", paramType = "query", value = "Username do usuário")
+	})
 	@GetMapping(value = "v1/avaliacoes", params = { "usuario" }, produces = "application/json")
 	public Page<AvaliacaoDTO> listaAvaliacoesDadoUsuario(@RequestParam(name = "usuario", required = true) String usuario, Pageable pageable) {
 		return avaliacaoService.listarAvaliacoesDadoUsuario(usuario, pageable);

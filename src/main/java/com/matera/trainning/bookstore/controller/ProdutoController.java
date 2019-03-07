@@ -36,6 +36,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
@@ -51,10 +52,14 @@ public class ProdutoController {
 	private ProdutoService produtoService;
 	
 	@ApiOperation(value = "Lista todos os produtos", notes = "Retorna uma lista de produtos")
-	@ApiImplicitParams({	
-	    @ApiImplicitParam(name = "page", dataType = "integer", paramType = "query", value = "Retorna a página desejada (0..N)"),
-	    @ApiImplicitParam(name = "size", dataType = "integer", paramType = "query", value = "Quantidade máxima de registros."),
-	    @ApiImplicitParam(name = "sort", allowMultiple = true, dataType = "string", paramType = "query", value = "Critério de ordenação no formato: atributo(,asc|desc). Ordenação padrão: asc")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
 	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
@@ -71,7 +76,7 @@ public class ProdutoController {
 	})
 	@PostMapping(value = "v1/produtos", produces = "application/json")
 	@ResponseStatus(code = CREATED)
-	public ResponseEntity<ProdutoDTO> inserirProduto(@Valid @RequestBody ProdutoDTO dtoEntrada) {
+	public ResponseEntity<ProdutoDTO> inserirProduto(@ApiParam(value = "JSON com os dados do produto") @Valid @RequestBody ProdutoDTO dtoEntrada) {
 		ProdutoDTO dtoSaida = produtoService.inserirProduto(dtoEntrada);
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/produtos");		
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);
@@ -84,7 +89,8 @@ public class ProdutoController {
 	})
 	@PutMapping(value = "v1/produtos/{codProduto}", produces = "application/json")
 	@ResponseStatus(code = NO_CONTENT)
-	public void atualizarProduto(@PathVariable String codProduto, @Valid @RequestBody ProdutoDTO dtoEntrada) {
+	public void atualizarProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
+			@ApiParam(value = "JSON com os dados do produto") @Valid @RequestBody ProdutoDTO dtoEntrada) {
 		produtoService.atualizarProduto(codProduto, dtoEntrada);
 	}
 	
@@ -95,7 +101,7 @@ public class ProdutoController {
 	})
 	@DeleteMapping(value = "v1/produtos/{codProduto}", produces = "application/json")
 	@ResponseStatus(code = NO_CONTENT)
-	public void removerProduto(@PathVariable String codProduto) {
+	public void removerProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto) {
 		produtoService.removerProduto(codProduto);
 	}
 	
@@ -105,12 +111,22 @@ public class ProdutoController {
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}", produces = "application/json")
-	public ResponseEntity<ProdutoDTO> buscarProdutoDadoCodigo(@PathVariable String codProduto) {
+	public ResponseEntity<ProdutoDTO> buscarProdutoDadoCodigo(@ApiParam(value = "Código do produto") @PathVariable String codProduto) {
 		ProdutoDTO dtoSaida = produtoService.buscarProdutoDadoCodigo(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@ApiOperation(value = "Busca produto dado descrição", notes = "Retorna uma lista de produtos")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	    @ApiImplicitParam(name = "descricao", dataType = "string", paramType = "query", value = "Descrição do produto")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	})
@@ -119,7 +135,17 @@ public class ProdutoController {
 		return produtoService.listarProdutosDadoDescricao(descProduto, pageable);
 	}
 	
-	@ApiOperation(value = "Lista produtos com rating maior que valor passado por parâmetro", notes = "Retorna uma lista de produtos", response = Page.class)
+	@ApiOperation(value = "Lista produtos com rating maior que valor passado por parâmetro", notes = "Retorna uma lista de produtos")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	    @ApiImplicitParam(name = "gt", dataType = "integer", paramType = "query", value = "Rating do produto")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	})
@@ -128,12 +154,21 @@ public class ProdutoController {
 		return produtoService.listarProdutosComRatingMaiorQueParam(rating, pageable);
 	}
 	
-	@ApiOperation(value = "Lista comentários dados código do produto", notes = "Retorna uma lista de comentários", response = Page.class)
+	@ApiOperation(value = "Lista comentários dados código do produto", notes = "Retorna uma lista de comentários")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/comentarios", produces = "application/json")
-	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(@PathVariable String codProduto, Pageable pageable) {
+	public Page<ComentarioDTO> listarComentariosDadoCodigoProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarComentariosDadoCodigoProduto(codProduto, pageable);
 	}
 	
@@ -145,27 +180,48 @@ public class ProdutoController {
 	})
 	@PostMapping(value = "v1/produtos/{codProduto}/comentarios", produces = "application/json")
 	@ResponseStatus(code = CREATED)
-	public ResponseEntity<ComentarioDTO> comentarProduto(@PathVariable String codProduto, @Valid @RequestBody ComentarioDTO dtoEntrada) {
+	public ResponseEntity<ComentarioDTO> comentarProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
+			@ApiParam(value = "JSON com os dados do produto") @Valid @RequestBody ComentarioDTO dtoEntrada) {
 		ComentarioDTO dtoSaida = produtoService.comentarProduto(codProduto, dtoEntrada);
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/comentarios");		
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);		
 	}
 	
-	@ApiOperation(value = "Lista histórico de preços dado código produto", notes = "Retorna uma lista de precos", response = Page.class)
+	@ApiOperation(value = "Lista histórico de preços dado código produto", notes = "Retorna uma lista de precos")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", produces = "application/json")
-	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@PathVariable String codProduto, Pageable pageable) {
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecos(@ApiParam(value = "Código do produto") @PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarHistoricoDePrecosDadoCodigoProduto(codProduto, pageable);
 	}
 	
-	@ApiOperation(value = "Lista histórico de preços dado código no período", notes = "Retorna uma lista de precos", response = Page.class)
+	@ApiOperation(value = "Lista histórico de preços dado código no período", notes = "Retorna uma lista de precos")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	    @ApiImplicitParam(name = "dtInicio", dataType = "string", paramType = "query", value = "Data inicial do intervalo de pesquisa"),
+	    @ApiImplicitParam(name = "dtFim", dataType = "string", paramType = "query", value = "Data final do intervalo de pesquisa")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos", params = { "dtInicio", "dtFim" }, produces = "application/json")
-	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoCodigoProduto(@PathVariable String codProduto, 
+	public Page<HistoricoDePrecoDTO> listarHistoricoDePrecosNoPeriodoDadoCodigoProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
 			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
 			Pageable pageable) {
@@ -178,7 +234,7 @@ public class ProdutoController {
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/min", produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoDadoCodigoProduto(@PathVariable String codProduto) {
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoDadoCodigoProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMinimoDadoCodigoProduto(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
@@ -189,74 +245,95 @@ public class ProdutoController {
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/max", produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoDadoCodigoProduto(@PathVariable String codProduto) {
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoDadoCodigoProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMaximoDadoCodigoProduto(codProduto);
 		return ResponseEntity.ok(dtoSaida);	
 	}
 	
 	@ApiOperation(value = "Busca preço mínimo do produto V1", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "dtInicio", dataType = "string", paramType = "query", value = "Data inicial do intervalo de pesquisa"),
+	    @ApiImplicitParam(name = "dtFim", dataType = "string", paramType = "query", value = "Data final do intervalo de pesquisa")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/min", params = { "dtInicio", "dtFim" }, produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(@PathVariable String codProduto, 
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
-			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
-			Pageable pageable) {
+			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV1(codProduto, dtInicio, dtFim);
 		return ResponseEntity.ok(dtoSaida);
 	}
 	
-	@ApiOperation(value = "Busca preço máximo do produto no período V1", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiOperation(value = "Busca preço máximo do produto V1", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "dtInicio", dataType = "string", paramType = "query", value = "Data inicial do intervalo de pesquisa"),
+	    @ApiImplicitParam(name = "dtFim", dataType = "string", paramType = "query", value = "Data final do intervalo de pesquisa")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/historico-precos/max", params = { "dtInicio", "dtFim" }, produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(@PathVariable String codProduto, 
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
-			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
-			Pageable pageable) {
+			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV1(codProduto, dtInicio, dtFim);
 		return ResponseEntity.ok(dtoSaida);	
 	}	
 	
-	@ApiOperation(value = "Busca preço mínimo do produto no período V2", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiOperation(value = "Busca preço mínimo do produto V2", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "dtInicio", dataType = "string", paramType = "query", value = "Data inicial do intervalo de pesquisa"),
+	    @ApiImplicitParam(name = "dtFim", dataType = "string", paramType = "query", value = "Data final do intervalo de pesquisa")
+	})
 	@ApiResponses(value = {
-	        @ApiResponse(code = 200, message = "Recurso encontrado com sucesso"),
+	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v2/produtos/{codProduto}/historico-precos/min", params = { "dtInicio", "dtFim" }, produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV2(@PathVariable String codProduto, 
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV2(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
-			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
-			Pageable pageable) {
+			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMinimoNoIntervaloDadoCodigoProdutoV2(codProduto, dtInicio, dtFim);
 		return ResponseEntity.ok(dtoSaida);
 	}
 	
 	@ApiOperation(value = "Busca preço máximo do produto no período V2", notes = "Retorna um preço", response = HistoricoDePrecoDTO.class)
+	@ApiImplicitParams({
+	    @ApiImplicitParam(name = "dtInicio", dataType = "string", paramType = "query", value = "Data inicial do intervalo de pesquisa"),
+	    @ApiImplicitParam(name = "dtFim", dataType = "string", paramType = "query", value = "Data final do intervalo de pesquisa")
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v2/produtos/{codProduto}/historico-precos/max", params = { "dtInicio", "dtFim" }, produces = "application/json")
-	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV2(@PathVariable String codProduto, 
+	public ResponseEntity<HistoricoDePrecoDTO> buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV2(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
 			@RequestParam(name = "dtInicio", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtInicio, 
-			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim, 
-			Pageable pageable) {
+			@RequestParam(name = "dtFim", required = true) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dtFim) {
 		HistoricoDePrecoDTO dtoSaida = produtoService.buscarPrecoMaximoNoIntervaloDadoCodigoProdutoV2(codProduto, dtInicio, dtFim);
 		return ResponseEntity.ok(dtoSaida);	
 	}	
 
-	@ApiOperation(value = "Lista avaliações dado código produto", notes = "Retorna uma lista de avaliações", response = Page.class)
+	@ApiOperation(value = "Lista avaliações dado código produto", notes = "Retorna uma lista de avaliações")
+	@ApiImplicitParams({
+		@ApiImplicitParam(name = "offset", dataType = "integer", paramType = "query", value = "Deslocamento a ser obtido de acordo com a página e o tamanho das páginas subjacentes"),
+		@ApiImplicitParam(name = "pageNumber", dataType = "integer", paramType = "query", value = "Número da página retornada"),
+	    @ApiImplicitParam(name = "pageSize", dataType = "integer", paramType = "query", value = "Número máximo de itens por página"),
+	    @ApiImplicitParam(name = "paged", dataType = "boolean", paramType = "query", value = "Define se os registros serão paginados"),
+	    @ApiImplicitParam(name = "sort.sorted", dataType = "boolean", paramType = "query", value = "Define se os registros serão ordenados"),
+	    @ApiImplicitParam(name = "sort.unsorted", dataType = "boolean", paramType = "query", value = "Define se os registros não serão ordenados"),
+	    @ApiImplicitParam(name = "unpaged", dataType = "boolean", paramType = "query", value = "Define se os registros não serão paginados"),
+	})
 	@ApiResponses(value = {
 	        @ApiResponse(code = 200, message = "Recurso encontrado"),
 	        @ApiResponse(code = 404, message = "Recurso inexistente")
 	})
 	@GetMapping(value = "v1/produtos/{codProduto}/avaliacoes", produces = "application/json")
-	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(@PathVariable String codProduto, Pageable pageable) {
+	public Page<AvaliacaoDTO> listarAvaliacoesDadoProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, Pageable pageable) {
 		return produtoService.listarAvaliacoesDadoCodigoDoProduto(codProduto, pageable);
 	}
 	
@@ -268,7 +345,8 @@ public class ProdutoController {
 	})
 	@PostMapping(value = "v1/produtos/{codProduto}/avaliacoes", produces = "application/json")
 	@ResponseStatus(code = CREATED)
-	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@PathVariable String codProduto, @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
+	public ResponseEntity<AvaliacaoDTO> avaliarProduto(@ApiParam(value = "Código do produto") @PathVariable String codProduto, 
+			@ApiParam(value = "JSON com os dados do produto") @Valid @RequestBody AvaliacaoDTO dtoEntrada) {
 		AvaliacaoDTO dtoSaida = produtoService.avaliarProduto(codProduto, dtoEntrada);		
 		HttpHeaders headers = configuraHeaderLocation(dtoSaida.getCodigo(), "/v1/avaliacoes");
 		return new ResponseEntity<>(dtoSaida, headers, CREATED);	
